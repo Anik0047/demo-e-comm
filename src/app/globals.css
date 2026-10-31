@@ -1,26 +1,215 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   Kenakata design system
+   - Light theme only. No dark mode.
+   - Flat, solid colors only. NO GRADIENTS anywhere (backgrounds, buttons,
+     text, borders, overlays, skeletons, charts, SVG).
+   - Never hardcode hex values in components. Use the tokens below.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand (emerald) */
+  --brand: #059669;          /* primary actions, logo mark, links on hover */
+  --brand-strong: #047857;   /* hover/pressed, text on light, small white-on-green text */
+  --brand-tint: #ECFDF5;     /* soft backgrounds, hover rows, top strip */
+  --brand-soft: #D1FAE5;     /* mint banner/card backgrounds */
+  --brand-border: #A7F3D0;   /* borders on tinted surfaces */
+  --brand-mid: #10B981;      /* decoration only, never behind small white text */
+  --brand-light: #6EE7B7;    /* decoration only */
+  --brand-deep: #064E3B;     /* text on mint surfaces */
+
+  /* Neutrals */
+  --ink: #0F172A;            /* primary text */
+  --mute: #64748B;           /* secondary text, captions, placeholders */
+  --line: #E5E7EB;           /* borders and dividers */
+  --soft: #F3F4F6;           /* subtle fills, image placeholders, skeletons */
+  --canvas: #FFFFFF;         /* page and card background */
+
+  /* Accents and status */
+  --sale: #E11D48;           /* discounts, flash deals, wishlist count, danger */
+  --sale-strong: #BE123C;    /* hover for sale/danger */
+  --accent: #FBBF24;         /* highlight badges, promo accents */
+  --accent-strong: #F59E0B;  /* rating stars, warning text */
+  --info: #E0F2FE;           /* info surfaces */
+  --info-ink: #075985;       /* text on info surfaces */
+  --blush: #FFE4E6;          /* rose surfaces */
+  --blush-ink: #881337;      /* text on rose surfaces */
+
+  /* Shape and motion */
+  --radius-control: 0.5rem;  /* 8px: inputs, small buttons */
+  --radius-card: 1rem;       /* 16px: cards, banners, panels */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur: 180ms;
 }
 
+/* Expose tokens to Tailwind (bg-brand, text-ink, border-line, font-head ...) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-border: var(--brand-border);
+  --color-brand-mid: var(--brand-mid);
+  --color-brand-light: var(--brand-light);
+  --color-brand-deep: var(--brand-deep);
+
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-canvas: var(--canvas);
+
+  --color-sale: var(--sale);
+  --color-sale-strong: var(--sale-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-info: var(--info);
+  --color-info-ink: var(--info-ink);
+  --color-blush: var(--blush);
+  --color-blush-ink: var(--blush-ink);
+
+  --font-head: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-control: 0.5rem;
+  --radius-card: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-head);
+    color: var(--ink);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  h1 { @apply text-3xl font-extrabold sm:text-4xl lg:text-5xl; }
+  h2 { @apply text-2xl font-bold sm:text-3xl; }
+  h3 { @apply text-xl font-bold sm:text-2xl; }
+  h4 { @apply text-lg font-bold; }
+  h5 { @apply text-base font-bold; }
+  h6 { @apply text-sm font-bold; }
+
+  a { color: inherit; text-decoration: none; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--brand-border);
+    color: var(--ink);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--mute);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------- Components ---------- */
+@layer components {
+  /* Page container: use on every section's inner wrapper */
+  .container-page {
+    @apply mx-auto w-full max-w-[1280px] px-4;
+  }
+
+  /* Vertical rhythm between sections */
+  .section-y {
+    @apply py-6 md:py-10;
+  }
+
+  /* Buttons (use with a size: btn-sm, btn-md, btn-lg) */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-bold whitespace-nowrap select-none;
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .btn-sm { @apply h-9 px-4 text-sm; }
+  .btn-md { @apply h-11 px-5 text-sm; }
+  .btn-lg { @apply h-12 px-7 text-base; }
+  .btn-primary { @apply bg-brand text-white hover:bg-brand-strong; }
+  .btn-outline { @apply border border-brand bg-canvas text-brand-strong hover:bg-brand-tint; }
+  .btn-ghost { @apply bg-transparent text-ink hover:bg-soft; }
+  .btn-sale { @apply bg-sale text-white hover:bg-sale-strong; }
+  .btn-dark { @apply bg-ink text-white hover:bg-brand-strong; }
+  .btn:disabled { @apply bg-soft text-mute border-transparent; }
+
+  /* Form controls */
+  .input {
+    @apply h-11 w-full rounded-lg border border-line bg-canvas px-4 text-sm text-ink;
+    transition: border-color var(--dur) var(--ease);
+  }
+  .input:hover { @apply border-mute; }
+  .input:focus { @apply border-brand outline-none; }
+  .input-error { @apply border-sale; }
+
+  /* Cards */
+  .card {
+    @apply rounded-2xl border border-line bg-canvas;
+  }
+  .card-hover {
+    transition: border-color var(--dur) var(--ease);
+  }
+  .card-hover:hover { @apply border-brand; }
+
+  /* Badges and status chips */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold;
+  }
+  .badge-brand { @apply bg-brand-tint text-brand-strong; }
+  .badge-sale { @apply bg-sale text-white; }
+  .badge-warning { @apply bg-accent text-ink; }
+  .badge-info { @apply bg-info text-info-ink; }
+  .badge-danger { @apply bg-blush text-blush-ink; }
+  .badge-neutral { @apply bg-soft text-mute; }
+
+  /* Loading skeleton: flat block with opacity pulse (never a shimmer sweep) */
+  .skeleton {
+    @apply rounded-lg bg-soft;
+    animation: kk-pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Price helpers */
+  .price { @apply font-head font-extrabold text-ink; }
+  .price-old { @apply text-sm text-mute line-through; }
+
+  /* Floating surfaces (dropdowns, popovers, mini-cart) */
+  .popover {
+    @apply rounded-xl border border-line bg-canvas p-2 shadow-lg;
+  }
+}
+
+@keyframes kk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
