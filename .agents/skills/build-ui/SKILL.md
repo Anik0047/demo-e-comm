@@ -170,7 +170,7 @@ Fonts are loaded with `next/font/google` in `src/app/layout.tsx` and exposed as 
 - **Hierarchy:** one clear primary action per area. Price and discount are the most prominent info on a product card.
 - **Consistency:** reuse existing components before creating new ones. If a pattern appears twice, extract it into `src/components/shared`.
 - **Mobile:** bottom-friendly actions, a drawer for navigation, search always reachable, no hover-only features.
-- **Trust signals** (free delivery, cash on delivery, easy returns, secure payment) appear near the top of the home page and again at checkout.
+- **Trust signals** (free delivery, cash on delivery, easy returns, secure payment) appear above the footer on the home page and again at checkout; use the reusable `TrustStrip` component.
 
 ## 10. Code conventions
 
@@ -245,12 +245,34 @@ Use the existing implementation as the design baseline for new sections. New HTM
 - Header: “Trending products”, “Most loved by shoppers this week”, and “View all →”; centered “View all products” button below the grid.
 - Static data flows through `getTrendingProducts()`; the All tab preserves the curated ten-product order.
 
+**Promo banners**
+- Appears after Trending products and before Top vendors, with no section header.
+- Three server-rendered banners: Mega home sale (mint), Fresh and fast (amber), and Glow for less (blush), loaded through `getPromoBanners()`.
+- One column below 768px, three equal-height columns from 768px; pill tags, bold headings, and 44px CTA links with stretched hit areas make the entire banner clickable.
+- Solid circle artwork with Lucide icons; hidden from 768px to 1023px to preserve readability. Hover changes the CTA color without lift or shadow; keyboard focus outlines the banner shape.
+
 **Top vendors**
 - Appears after Promo banners when present, otherwise after Trending products, before Trust strip.
 - Header: “Top vendors”, “Trusted sellers with great ratings” (hidden below `sm`), and “View all →”.
 - Six reusable server-rendered `VendorCard` components from `src/components/shared/vendor-card.tsx`: solid covers cycle info, blush, mint, gray; overlapping 56px initials/logo avatars; linked truncated names, verification badge, compact review counts, truncated location/product metadata, and “Visit store” links with `data-slug`.
 - Mobile uses a snapping `data-scroll-row`: cards are 72% wide, 45% from 480px; 3 columns from 768px and 6 from 1280px. Links retain 44px hit areas, including expanded targets on the compact buttons.
 - `Vendor` extends `VendorSummary` (id, name, slug) with initials, avatarTone, logoUrl, bannerUrl, description, location, verified, ratingAverage, ratingCount, productCount, followerCount, joinedAt, and status. `getTopVendors(limit = 6)` filters approved vendors and ranks by rating descending, then review count descending.
+
+**Trust strip**
+- Last home section after Top vendors and above the footer. The home wrapper is a section labeled “Why shop with Kenakata” with `mx-auto max-w-[1280px] px-4 py-6 md:py-8 font-body`; the reusable server component `src/components/shared/trust-strip.tsx` has no outer page padding, ready for checkout reuse.
+- Typed `TrustPoint` data (id, icon, title, text) flows from `src/data/trust-points.ts` through `getTrustPoints(): Promise<TrustPoint[]>`, awaited by the home page and passed as `points`.
+- Ordered points: Free delivery / “On orders over ৳2,000” (Truck); Cash on delivery / “Pay when you receive” (Banknote); Easy returns / “7-day return policy” (RotateCcw); Secure payment / “bKash, Nagad, and cards” (ShieldCheck). Currency uses `formatPrice()`.
+- One calm tinted band: semantic `ul` with `grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-brand-border bg-brand-border`; each `li` uses `bg-brand-tint`. The 1px gap creates a cross divider below 1024px and vertical dividers from 1024px without double borders.
+- Items use `flex min-w-0 flex-col items-center gap-2 p-4 text-center sm:flex-row sm:gap-3 sm:p-5 sm:text-left`: centered stacked content on phones, icon-left/text-right from 640px, equal heights within each row.
+- Decorative Lucide icons are 20px with `aria-hidden="true"`, inside 44px nonshrinking `rounded-full bg-canvas text-brand-strong` circles. Text containers use `min-w-0`; titles use `font-head font-bold text-sm sm:text-base text-ink`, subtitles use `text-xs sm:text-sm text-mute`. Text wraps without clipping at 320px.
+- Informational only: no links, hover effects, gradients, or client state. Empty points render nothing.
+
+**Footer**
+- Storefront layout renders `<Navbar />`, `<main>{children}</main>`, and `<Footer />` as fragment siblings, preserving the sticky header. Footer is a server component with a soft gray surface, top border, and a centered 1280px wrapper.
+- Brand block contains the footer-only shared `Logo`, description, contact details, newsletter, and four social links. Four navigation groups follow, then wrapping payment chips/card logos and a copyright/legal/locale bottom bar.
+- Main grid: 2 columns on phones (brand spans both), 4 from 768px (brand spans all four), 12 from 1024px (brand spans 4 and each link group spans 2). Bottom bar stacks below 768px and uses a row above it.
+- All content is typed in `src/types/footer.ts`, stored in `src/data/footer.ts`, and loaded through `getFooterData()`. Placeholder links use `#`.
+- `NewsletterForm` is the only client component: local submit-time regex validation, retained invalid input, clear-on-success, inline polite live feedback, and no network calls. Input/button are 44px tall, stacked below 640px. Links have at least 44px hit heights and visible keyboard focus.
 
 ## 12. Category hierarchy (data model, keep in mind for all future work)
 

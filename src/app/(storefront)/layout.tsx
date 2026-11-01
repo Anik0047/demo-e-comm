@@ -1,3 +1,4 @@
+import { Footer } from "@/components/layout/footer/footer";
 import { Navbar } from "@/components/layout/navbar/navbar";
 import { getNavbarData } from "@/services/navbar";
 
@@ -12,6 +13,7 @@ export default async function StorefrontLayout({
     <>
       <Navbar data={navbarData} />
       <main>{children}</main>
+      <Footer />
     </>
   );
 }
