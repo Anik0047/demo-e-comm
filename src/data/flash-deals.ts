@@ -46,15 +46,15 @@ export const flashDeals: FlashDeal[] = [
     "startsAt": "2026-11-01T00:00:00.000Z",
     "endsAt": "2026-11-30T23:59:59.000Z"
   },
-  {
-    "id": "deal-6",
-    "productId": "prod-android-smartphone-128gb",
-    "dealPrice": 15990,
-    "stockLimit": 40,
-    "soldCount": 30,
-    "startsAt": "2026-11-01T00:00:00.000Z",
-    "endsAt": "2026-11-30T23:59:59.000Z"
-  }
+  // {
+  //   "id": "deal-6",
+  //   "productId": "prod-android-smartphone-128gb",
+  //   "dealPrice": 15990,
+  //   "stockLimit": 40,
+  //   "soldCount": 30,
+  //   "startsAt": "2026-11-01T00:00:00.000Z",
+  //   "endsAt": "2026-11-30T23:59:59.000Z"
+  // }
 ];
 
 export const flashDealPlaceholders: Record<string, NonNullable<ProductCardData["placeholder"]>> = {

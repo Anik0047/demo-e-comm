@@ -245,6 +245,13 @@ Use the existing implementation as the design baseline for new sections. New HTM
 - Header: “Trending products”, “Most loved by shoppers this week”, and “View all →”; centered “View all products” button below the grid.
 - Static data flows through `getTrendingProducts()`; the All tab preserves the curated ten-product order.
 
+**Top vendors**
+- Appears after Promo banners when present, otherwise after Trending products, before Trust strip.
+- Header: “Top vendors”, “Trusted sellers with great ratings” (hidden below `sm`), and “View all →”.
+- Six reusable server-rendered `VendorCard` components from `src/components/shared/vendor-card.tsx`: solid covers cycle info, blush, mint, gray; overlapping 56px initials/logo avatars; linked truncated names, verification badge, compact review counts, truncated location/product metadata, and “Visit store” links with `data-slug`.
+- Mobile uses a snapping `data-scroll-row`: cards are 72% wide, 45% from 480px; 3 columns from 768px and 6 from 1280px. Links retain 44px hit areas, including expanded targets on the compact buttons.
+- `Vendor` extends `VendorSummary` (id, name, slug) with initials, avatarTone, logoUrl, bannerUrl, description, location, verified, ratingAverage, ratingCount, productCount, followerCount, joinedAt, and status. `getTopVendors(limit = 6)` filters approved vendors and ranks by rating descending, then review count descending.
+
 ## 12. Category hierarchy (data model, keep in mind for all future work)
 
 - Three levels: Category (level 1) → Subcategory (level 2) → Child category (level 3). Every subcategory belongs to exactly one category, and every child category belongs to exactly one subcategory.
