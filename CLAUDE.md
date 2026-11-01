@@ -61,6 +61,8 @@ Always use the Tailwind token classes (`bg-brand`, `text-ink`, `border-line`). N
 | `sale` / `sale-strong` | #E11D48 / #BE123C | Discounts, flash deals, wishlist badge, errors, destructive actions |
 | `accent` / `accent-strong` | #FBBF24 / #F59E0B | Highlight badges, rating stars, warnings |
 | `info` / `info-ink` | #E0F2FE / #075985 | Info and coupon surfaces |
+| `info-strong` | #0C4A6E | Hover on info surfaces |
+| `sky` | #0EA5E9 | Avatar/decoration only |
 | `blush` / `blush-ink` | #FFE4E6 / #881337 | Rose promo surfaces, rejected states |
 
 **Usage rules**
@@ -84,7 +86,7 @@ Fonts are loaded with `next/font/google` in `src/app/layout.tsx` and exposed as 
 | h1 | `text-3xl sm:text-4xl lg:text-5xl font-extrabold` (set globally) |
 | h2 (section title) | `text-2xl sm:text-3xl font-bold` (set globally) |
 | h3 / card title | `text-xl sm:text-2xl font-bold` (set globally) |
-| Body | `text-base` (16px), line-height 1.6 |
+| Body | `text-base` (16px), line-height 1.5 |
 | Small / meta | `text-sm text-mute` |
 | Caption / badge | `text-xs` |
 

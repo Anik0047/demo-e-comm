@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kenakata – Home</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{head:['"Plus Jakarta Sans"','system-ui','sans-serif'],body:['"DM Sans"','system-ui','sans-serif']},colors:{brand:'#059669',brandd:'#047857',tint:'#ECFDF5',ink:'#0F172A',mute:'#64748B',line:'#E5E7EB',soft:'#F3F4F6',sale:'#E11D48'}}}}
+</script>
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:#fff;color:#0F172A;font-family:'DM Sans',system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#fff;z-index:40}
+.ml{display:block;padding:7px 10px;border-radius:8px;font-size:14px}
+.ml:hover,.ml:focus{background:#ECFDF5;color:#047857;outline:none}
+.bar{flex:1;max-width:56px;height:4px;border-radius:4px;background:rgba(0,0,0,.18);overflow:hidden;padding:0}
+.bar span{display:block;height:100%;width:0;background:currentColor;border-radius:4px}
+.bar.done span{width:100%}
+.bar.on span{animation:fill 6s linear forwards}
+.paused .bar.on span{animation-play-state:paused}
+@keyframes fill{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.bar.on span{animation:none;width:100%}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+<symbol id="i-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="i-r" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3 20 12 6 21Z"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+<symbol id="i-shirt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></symbol>
+<symbol id="i-bag-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+</defs></svg>
+
+<!-- ===== NAVBAR START ===== -->
+<div class="bg-tint text-brandd text-xs font-body">
+  <div class="max-w-[1280px] mx-auto px-4 h-9 flex items-center justify-between">
+    <p class="font-medium">Free delivery on orders over ৳2,000</p>
+    <ul class="hidden md:flex items-center gap-5">
+      <li><a href="#" class="hover:underline">Track order</a></li>
+      <li><a href="#" class="hover:underline">Help center</a></li>
+      <li><a href="#" class="hover:underline">EN</a> / <a href="#" class="hover:underline">বাং</a></li>
+      <li>৳ BDT</li>
+    </ul>
+  </div>
+</div>
+
+<header class="sticky z-30 bg-white border-b border-line font-body" style="top:env(safe-area-inset-top,0px)">
+  <div class="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8">
+    <button id="open-drawer" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-soft" aria-label="Open menu"><svg class="w-6 h-6"><use href="#i-menu"/></svg></button>
+
+    <a href="#" class="flex items-center gap-2 shrink-0" aria-label="Kenakata home">
+      <span class="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center"><svg class="w-5 h-5"><use href="#i-bag"/></svg></span>
+      <span class="font-head font-extrabold text-2xl tracking-tight">Kena<span class="text-brand">kata</span></span>
+    </a>
+
+    <form class="hidden md:flex flex-1 items-center h-12 rounded-full bg-soft border border-transparent focus-within:bg-white focus-within:border-brand pl-2 pr-1.5 transition-colors" onsubmit="return false">
+      <div class="relative shrink-0">
+        <select class="appearance-none bg-transparent text-sm font-medium pl-3 pr-7 py-2 outline-none cursor-pointer" aria-label="Search category">
+          <option>All</option><option>Electronics</option><option>Fashion</option><option>Home &amp; living</option><option>Beauty &amp; health</option><option>Groceries</option>
+        </select>
+        <svg class="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-mute"><use href="#i-down"/></svg>
+      </div>
+      <span class="w-px h-5 bg-line mx-2"></span>
+      <input type="search" placeholder="Search for products, brands, and vendors" class="flex-1 bg-transparent text-sm outline-none placeholder:text-mute min-w-0">
+      <button class="w-9 h-9 rounded-full bg-brand hover:bg-brandd text-white grid place-items-center" aria-label="Search"><svg class="w-5 h-5"><use href="#i-search"/></svg></button>
+    </form>
+
+    <div class="ml-auto md:ml-0 flex items-center gap-1 sm:gap-2">
+      <a href="#" class="relative p-2.5 rounded-full hover:bg-soft" aria-label="Wishlist">
+        <svg class="w-6 h-6"><use href="#i-heart"/></svg>
+        <span class="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-sale text-white text-[11px] font-bold grid place-items-center">2</span>
+      </a>
+
+      <div class="relative group hidden sm:block">
+        <a href="#" class="flex items-center gap-2 h-11 px-4 rounded-full border border-line hover:border-brand text-sm font-medium"><svg class="w-5 h-5"><use href="#i-user"/></svg>Sign in</a>
+        <div class="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-56">
+          <div class="bg-white border border-line rounded-xl p-2 shadow-lg">
+            <a href="#" class="block text-center bg-brand hover:bg-brandd text-white text-sm font-medium rounded-lg py-2 mb-2">Login</a>
+            <a href="#" class="block text-center border border-brand text-brandd text-sm font-medium rounded-lg py-2 mb-2">Create account</a>
+            <a href="#" class="ml">My orders</a><a href="#" class="ml">Wishlist</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative group">
+        <a href="#" class="flex items-center gap-2 h-11 pl-3 pr-4 rounded-full bg-brand hover:bg-brandd text-white text-sm font-bold" aria-label="Cart">
+          <span class="relative mr-1"><svg class="w-5 h-5"><use href="#i-cart"/></svg><span class="absolute -top-2 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-white text-brandd text-[11px] font-bold grid place-items-center">3</span></span>
+          <span class="hidden sm:inline">৳4,850</span>
+        </a>
+        <div class="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-80">
+          <div class="bg-white border border-line rounded-xl p-4 shadow-lg">
+            <ul class="divide-y divide-line">
+              <li class="flex gap-3 pb-3"><div class="w-12 h-12 rounded-lg bg-soft shrink-0"></div><div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">Wireless Earbuds Pro</p><p class="text-xs text-mute">Qty 1</p></div><p class="text-sm font-bold">৳2,450</p></li>
+              <li class="flex gap-3 pt-3"><div class="w-12 h-12 rounded-lg bg-soft shrink-0"></div><div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">Cotton Panjabi</p><p class="text-xs text-mute">Qty 2</p></div><p class="text-sm font-bold">৳2,400</p></li>
+            </ul>
+            <div class="flex justify-between text-sm font-bold border-t border-line mt-3 pt-3"><span>Subtotal</span><span>৳4,850</span></div>
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <a href="#" class="text-center border border-line hover:border-brand text-sm font-medium rounded-lg py-2">View cart</a>
+              <a href="#" class="text-center bg-brand hover:bg-brandd text-white text-sm font-medium rounded-lg py-2">Checkout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form class="md:hidden px-4 pb-3" onsubmit="return false">
+    <div class="flex items-center h-11 rounded-full bg-soft focus-within:bg-white border border-transparent focus-within:border-brand pl-4 pr-1.5">
+      <input type="search" placeholder="Search Kenakata" class="flex-1 bg-transparent text-sm outline-none placeholder:text-mute min-w-0">
+      <button class="w-8 h-8 rounded-full bg-brand text-white grid place-items-center" aria-label="Search"><svg class="w-4 h-4"><use href="#i-search"/></svg></button>
+    </div>
+  </form>
+</header>
+
+<nav class="hidden lg:block relative z-20 bg-white border-b border-line font-body">
+  <div class="max-w-[1280px] mx-auto px-4 h-12 flex items-center gap-7 text-sm font-medium">
+    <div class="relative group">
+      <button class="flex items-center gap-2 h-9 px-4 rounded-lg bg-tint text-brandd border border-[#A7F3D0]"><svg class="w-5 h-5"><use href="#i-menu"/></svg>All categories<svg class="w-4 h-4"><use href="#i-down"/></svg></button>
+      <div class="hidden group-hover:flex group-focus-within:flex absolute left-0 top-full w-[720px] pt-2">
+        <div class="flex w-full bg-white border border-line rounded-xl shadow-lg overflow-hidden font-normal">
+          <ul id="mega-cats" class="w-60 border-r border-line p-2"></ul>
+          <div id="mega-subs" class="flex-1 p-5 bg-soft"></div>
+        </div>
+      </div>
+    </div>
+    <a href="#" class="flex items-center gap-2 text-sale font-bold"><span class="w-1.5 h-1.5 rounded-full bg-sale"></span>Flash deals</a>
+    <a href="#" class="hover:text-brand">Vouchers</a>
+    <a href="#" class="hover:text-brand">New arrivals</a>
+    <a href="#" class="hover:text-brand">Best sellers</a>
+    <a href="#" class="hover:text-brand">Top vendors</a>
+    <a href="#" class="hover:text-brand">Gift cards</a>
+    <a href="#" class="ml-auto h-9 px-4 rounded-lg border border-brand text-brandd hover:bg-tint inline-flex items-center font-bold">Become a vendor</a>
+  </div>
+</nav>
+
+<div id="overlay" class="hidden fixed inset-0 z-50 bg-black/40"></div>
+<aside id="drawer" class="fixed top-0 left-0 bottom-0 z-50 w-80 max-w-[85%] bg-white -translate-x-full transition-transform duration-200 overflow-y-auto font-body" style="padding-top:env(safe-area-inset-top,0px)">
+  <div class="flex items-center justify-between p-4 border-b border-line">
+    <span class="font-head font-extrabold text-xl">Kena<span class="text-brand">kata</span></span>
+    <button id="close-drawer" class="p-1 rounded-lg hover:bg-soft" aria-label="Close menu"><svg class="w-6 h-6"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="p-4 grid grid-cols-2 gap-2 border-b border-line">
+    <a href="#" class="text-center bg-brand text-white text-sm font-medium rounded-lg py-2">Login</a>
+    <a href="#" class="text-center border border-brand text-brandd text-sm font-medium rounded-lg py-2">Register</a>
+  </div>
+  <ul id="drawer-cats" class="p-2"></ul>
+  <ul class="p-2 border-t border-line">
+    <li><a href="#" class="ml text-sale font-bold">Flash deals</a></li>
+    <li><a href="#" class="ml">Vouchers</a></li>
+    <li><a href="#" class="ml">Top vendors</a></li>
+    <li><a href="#" class="ml">Track order</a></li>
+    <li><a href="#" class="ml text-brandd font-bold">Become a vendor</a></li>
+  </ul>
+</aside>
+<!-- ===== NAVBAR END ===== -->
+
+<!-- ===== BANNER START ===== -->
+<section aria-label="Featured offers" class="max-w-[1280px] mx-auto px-4 py-4 md:py-6 font-body">
+  <div class="grid lg:grid-cols-12 gap-4">
+
+    <div class="lg:col-span-8 xl:col-span-9">
+      <div id="hero" class="relative overflow-hidden rounded-2xl h-[340px] sm:h-[400px]" role="region" aria-roledescription="carousel" aria-label="Featured offers" tabindex="0">
+        <div id="track" class="flex h-full transition-transform duration-500 ease-out">
+
+          <article class="min-w-full h-full bg-brandd text-white" data-fg="#fff" role="group" aria-roledescription="slide" aria-label="1 of 4">
+            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+              <div class="flex-1">
+                <span class="inline-block bg-white text-brandd text-xs font-bold px-3 py-1 rounded-full mb-4">Flash sale</span>
+                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Up to 60% off<br>electronics</h2>
+                <p class="mt-3 text-sm sm:text-base">Phones, earbuds, and smart watches from top vendors.</p>
+                <div class="mt-5 flex items-center gap-2 text-brandd font-head font-extrabold" aria-label="Time left">
+                  <span class="text-white text-sm font-body font-medium mr-1">Ends in</span>
+                  <span id="cd-h" class="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg">04</span><span class="text-white">:</span>
+                  <span id="cd-m" class="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg">32</span><span class="text-white">:</span>
+                  <span id="cd-s" class="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg">10</span>
+                </div>
+                <a href="#" class="inline-block mt-6 bg-white text-brandd font-bold text-sm px-6 py-3 rounded-full hover:bg-tint">Shop flash deals</a>
+              </div>
+              <div class="hidden sm:grid w-[36%] place-items-center">
+                <div class="relative w-60 h-60 rounded-full bg-[#10B981] grid place-items-center">
+                  <svg class="w-28 h-28 text-white"><use href="#i-zap"/></svg>
+                  <span class="absolute -top-1 right-0 w-20 h-20 rounded-full bg-[#FBBF24] text-ink font-head font-extrabold text-center text-sm leading-tight grid place-items-center rotate-12">60%<br>OFF</span>
+                  <span class="absolute bottom-2 -left-4 w-8 h-8 rounded-full bg-white"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="min-w-full h-full bg-[#FBBF24] text-ink" data-fg="#0F172A" role="group" aria-roledescription="slide" aria-label="2 of 4">
+            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+              <div class="flex-1">
+                <span class="inline-block bg-ink text-white text-xs font-bold px-3 py-1 rounded-full mb-4">New season</span>
+                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Winter collection<br>is here</h2>
+                <p class="mt-3 text-sm sm:text-base">Jackets, sweaters, and shawls for the whole family. Starting from ৳999.</p>
+                <a href="#" class="inline-block mt-6 bg-ink text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-brandd">Explore fashion</a>
+              </div>
+              <div class="hidden sm:grid w-[36%] place-items-center">
+                <div class="relative w-60 h-60 rounded-full bg-white grid place-items-center">
+                  <svg class="w-28 h-28 text-ink"><use href="#i-shirt"/></svg>
+                  <span class="absolute top-2 -left-2 bg-sale text-white font-head font-extrabold text-sm px-4 py-2 rounded-full -rotate-6">From ৳999</span>
+                  <span class="absolute bottom-0 right-2 w-10 h-10 rounded-full bg-brand"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="min-w-full h-full bg-[#D1FAE5] text-[#064E3B]" data-fg="#064E3B" role="group" aria-roledescription="slide" aria-label="3 of 4">
+            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+              <div class="flex-1">
+                <span class="inline-block bg-brandd text-white text-xs font-bold px-3 py-1 rounded-full mb-4">For sellers</span>
+                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Open your shop<br>on Kenakata</h2>
+                <p class="mt-3 text-sm sm:text-base">Zero setup fee. Reach customers across Bangladesh and get paid weekly.</p>
+                <a href="#" class="inline-block mt-6 bg-brandd text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-brand">Start selling</a>
+              </div>
+              <div class="hidden sm:grid w-[36%] place-items-center">
+                <div class="relative w-60 h-60 rounded-full bg-[#6EE7B7] grid place-items-center">
+                  <svg class="w-28 h-28 text-[#064E3B]"><use href="#i-bag-lg"/></svg>
+                  <span class="absolute top-0 right-0 bg-white text-brandd font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6">0% setup fee</span>
+                  <span class="absolute bottom-3 -left-3 w-9 h-9 rounded-full bg-[#FBBF24]"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="min-w-full h-full bg-[#FFE4E6] text-[#881337]" data-fg="#881337" role="group" aria-roledescription="slide" aria-label="4 of 4">
+            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+              <div class="flex-1">
+                <span class="inline-block bg-sale text-white text-xs font-bold px-3 py-1 rounded-full mb-4">Every order</span>
+                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Free delivery over<br>৳2,000</h2>
+                <p class="mt-3 text-sm sm:text-base">Cash on delivery available in all 64 districts.</p>
+                <a href="#" class="inline-block mt-6 bg-sale text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-[#BE123C]">Start shopping</a>
+              </div>
+              <div class="hidden sm:grid w-[36%] place-items-center">
+                <div class="relative w-60 h-60 rounded-full bg-white grid place-items-center">
+                  <svg class="w-28 h-28 text-sale"><use href="#i-truck"/></svg>
+                  <span class="absolute top-2 right-0 bg-[#FBBF24] text-ink font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6">Cash on delivery</span>
+                  <span class="absolute bottom-2 left-0 w-8 h-8 rounded-full bg-brand"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="absolute left-6 sm:left-12 bottom-5 right-6 sm:right-12 flex items-center gap-3">
+          <div id="bars" class="flex gap-2 flex-1"></div>
+          <button id="pp" class="w-9 h-9 rounded-full bg-white text-ink grid place-items-center hover:bg-tint" aria-label="Pause slideshow"><svg class="w-3.5 h-3.5"><use href="#i-pause"/></svg></button>
+          <button id="prev" class="hidden sm:grid w-9 h-9 rounded-full bg-white text-ink place-items-center hover:bg-tint" aria-label="Previous slide"><svg class="w-5 h-5"><use href="#i-l"/></svg></button>
+          <button id="next" class="hidden sm:grid w-9 h-9 rounded-full bg-white text-ink place-items-center hover:bg-tint" aria-label="Next slide"><svg class="w-5 h-5"><use href="#i-r"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-4 xl:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+      <div class="rounded-2xl bg-[#E0F2FE] text-[#075985] p-5 flex flex-col justify-between">
+        <div>
+          <p class="text-xs font-bold">New here?</p>
+          <p class="font-head font-extrabold text-xl leading-snug mt-1">Get ৳200 off your first order</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-2 bg-white rounded-xl border border-dashed border-[#075985] pl-4 pr-1.5 py-1.5">
+          <span id="code" class="font-head font-extrabold tracking-wider text-sm">WELCOME200</span>
+          <button id="copy" class="bg-[#075985] text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-[#0C4A6E]">Copy</button>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-soft p-5 flex flex-col justify-between">
+        <div>
+          <p class="text-xs font-bold text-brandd">This week</p>
+          <p class="font-head font-extrabold text-xl leading-snug mt-1">Top-rated vendors</p>
+        </div>
+        <div class="mt-4 flex items-center justify-between">
+          <div class="flex -space-x-2">
+            <span class="w-9 h-9 rounded-full bg-brand text-white text-xs font-bold grid place-items-center border-2 border-soft">TH</span>
+            <span class="w-9 h-9 rounded-full bg-[#FBBF24] text-ink text-xs font-bold grid place-items-center border-2 border-soft">UF</span>
+            <span class="w-9 h-9 rounded-full bg-sale text-white text-xs font-bold grid place-items-center border-2 border-soft">DB</span>
+            <span class="w-9 h-9 rounded-full bg-[#0EA5E9] text-white text-xs font-bold grid place-items-center border-2 border-soft">+9</span>
+          </div>
+          <a href="#" class="text-sm font-bold text-brandd hover:underline">View all →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- ===== BANNER END ===== -->
+
+<div class="max-w-[1280px] mx-auto px-4 pb-8"><div class="h-40 rounded-2xl bg-soft grid place-items-center text-mute text-sm font-body">Next section goes here</div></div>
+
+<script>
+const cats={"Electronics":["Mobile phones","Laptops","Cameras","Headphones","Smart watches","Accessories"],"Fashion":["Men’s clothing","Women’s clothing","Shoes","Bags","Watches","Jewelry"],"Home & living":["Furniture","Kitchen","Decor","Bedding","Lighting","Storage"],"Beauty & health":["Skincare","Makeup","Hair care","Fragrance","Supplements","Personal care"],"Groceries":["Rice & grains","Snacks","Beverages","Fresh produce","Spices","Cooking oil"],"Mother & baby":["Diapers","Baby food","Toys","Clothing","Strollers","Feeding"],"Sports & outdoor":["Fitness","Cricket","Football","Cycling","Camping","Sportswear"],"Books & stationery":["Textbooks","Novels","Notebooks","Art supplies","Office supplies","Gift cards"]};
+const names=Object.keys(cats),ul=document.getElementById('mega-cats'),subs=document.getElementById('mega-subs');
+const arrow='<svg class="w-4 h-4 text-mute"><use href="#i-right"/></svg>';
+function showSubs(n){[...ul.children].forEach(li=>li.firstChild.style.background=li.dataset.n===n?'#ECFDF5':'');subs.innerHTML='<p class="font-head font-bold mb-3">'+n+'</p><div class="grid grid-cols-2 gap-x-6">'+cats[n].map(s=>'<a href="#" class="ml">'+s+'</a>').join('')+'</div>'}
+names.forEach(n=>{const li=document.createElement('li');li.dataset.n=n;li.innerHTML='<a href="#" class="ml flex items-center justify-between">'+n+arrow+'</a>';li.onmouseenter=()=>showSubs(n);li.firstChild.onfocus=()=>showSubs(n);ul.appendChild(li)});
+showSubs(names[0]);
+document.getElementById('drawer-cats').innerHTML=names.map(n=>'<li><a href="#" class="ml flex items-center justify-between">'+n+arrow+'</a></li>').join('');
+const d=document.getElementById('drawer'),o=document.getElementById('overlay');
+function drawer(open){d.classList.toggle('-translate-x-full',!open);o.classList.toggle('hidden',!open)}
+document.getElementById('open-drawer').onclick=()=>drawer(true);
+document.getElementById('close-drawer').onclick=()=>drawer(false);
+o.onclick=()=>drawer(false);
+</script>
+<script>
+(function(){
+const hero=document.getElementById('hero'),track=document.getElementById('track'),slides=[...track.children],n=slides.length,bars=document.getElementById('bars');
+let i=0,paused=false;
+slides.forEach((_,k)=>{const b=document.createElement('button');b.className='bar';b.setAttribute('aria-label','Go to slide '+(k+1));b.innerHTML='<span></span>';b.onclick=()=>go(k);bars.appendChild(b)});
+function go(k){i=(k+n)%n;track.style.transform='translateX(-'+i*100+'%)';hero.style.color=slides[i].dataset.fg;
+[...bars.children].forEach((b,j)=>{b.classList.remove('on','done');void b.offsetWidth;if(j<i)b.classList.add('done');if(j===i)b.classList.add('on')})}
+bars.addEventListener('animationend',()=>go(i+1));
+function setPaused(p){paused=p;hero.classList.toggle('paused',p);const pp=document.getElementById('pp');pp.setAttribute('aria-label',p?'Play slideshow':'Pause slideshow');pp.firstElementChild.innerHTML='<use href="#'+(p?'i-play':'i-pause')+'"/>'}
+document.getElementById('pp').onclick=()=>setPaused(!paused);
+document.getElementById('prev').onclick=()=>go(i-1);
+document.getElementById('next').onclick=()=>go(i+1);
+hero.addEventListener('mouseenter',()=>hero.classList.add('paused'));
+hero.addEventListener('mouseleave',()=>{if(!paused)hero.classList.remove('paused')});
+hero.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')go(i-1);if(e.key==='ArrowRight')go(i+1)});
+let sx=0;hero.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+hero.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)go(i+(dx<0?1:-1))});
+go(0);
+const end=Date.now()+(4*3600+32*60+10)*1000,p2=v=>String(v).padStart(2,'0');
+setInterval(()=>{let s=Math.max(0,Math.floor((end-Date.now())/1000));document.getElementById('cd-h').textContent=p2(Math.floor(s/3600));document.getElementById('cd-m').textContent=p2(Math.floor(s%3600/60));document.getElementById('cd-s').textContent=p2(s%60)},1000);
+document.getElementById('copy').onclick=function(){try{navigator.clipboard.writeText('WELCOME200')}catch(e){}this.textContent='Copied';setTimeout(()=>this.textContent='Copy',1800)};
+})();
+</script>
+</body>
+</html>

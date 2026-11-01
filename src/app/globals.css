@@ -35,6 +35,8 @@
   --info-ink: #075985;       /* text on info surfaces */
   --blush: #FFE4E6;          /* rose surfaces */
   --blush-ink: #881337;      /* text on rose surfaces */
+  --info-strong: #0C4A6E;
+  --sky: #0EA5E9;
 
   /* Shape and motion */
   --radius-control: 0.5rem;  /* 8px: inputs, small buttons */
@@ -68,6 +70,8 @@
   --color-info-ink: var(--info-ink);
   --color-blush: var(--blush);
   --color-blush-ink: var(--blush-ink);
+  --color-info-strong: var(--info-strong);
+  --color-sky: var(--sky);
 
   --font-head: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
@@ -90,16 +94,12 @@
     color: var(--ink);
     font-family: var(--font-body);
     font-size: 1rem;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-head);
-    color: var(--ink);
     line-height: 1.2;
-    letter-spacing: -0.01em;
   }
   h1 { @apply text-3xl font-extrabold sm:text-4xl lg:text-5xl; }
   h2 { @apply text-2xl font-bold sm:text-3xl; }
@@ -213,3 +213,50 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* ---- Parity with the HTML prototype ---- */
+
+/* Tailwind v4 defaults border color to currentColor; v3 used #E5E7EB, which equals --line */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: var(--line);
+  }
+}
+
+/* Safe-area handling for notched phones (zero on desktop) */
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--canvas);
+  z-index: 40;
+}
+
+/* Menu link used in dropdowns, mega menu, and the mobile drawer */
+@layer components {
+  .menu-link { display: block; padding: 7px 10px; border-radius: 8px; font-size: 14px; }
+}
+.menu-link:hover, .menu-link:focus {
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  outline: none;
+}
+
+/* Banner story-style progress bars */
+.bar { flex: 1; max-width: 56px; height: 4px; border-radius: 4px; background: rgba(0,0,0,.18); overflow: hidden; padding: 0; }
+.bar span { display: block; height: 100%; width: 0; background: currentColor; border-radius: 4px; }
+.bar.done span { width: 100%; }
+.bar.on span { animation: kk-fill 6s linear forwards; }
+.paused .bar.on span { animation-play-state: paused; }
+@keyframes kk-fill { to { width: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .bar.on span { animation: none; width: 100%; }
+}
+
