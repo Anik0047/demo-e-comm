@@ -1,3 +1,4 @@
+import { TrendingSection } from "@/components/home/trending/trending-section";
 import { FlashDealsSection } from "@/components/home/flash-deals/flash-deals-section";
 import { getFlashDeals } from "@/services/flash-deals";
 import { Banner } from "@/components/home/banner/banner";
@@ -17,6 +18,7 @@ export default async function HomePage() {
       <Banner slides={slides} />
       <CategoriesSection categories={categories} />
       <FlashDealsSection items={flashDeals.items} endsInSeconds={flashDeals.endsInSeconds} />
+      <TrendingSection />
     </>
   );
 }

@@ -48,7 +48,7 @@ export interface FlashDeal {
   stockLimit: number;
   soldCount: number;
 }
-export type PlaceholderIcon = "headphones" | "watch" | "shirt" | "utensils" | "speaker" | "smartphone";
+export type PlaceholderIcon = "headphones" | "watch" | "shirt" | "utensils" | "speaker" | "smartphone" | "footprints" | "backpack" | "mouse" | "battery-charging" | "coffee" | "lamp" | "sparkles" | "wheat" | "puzzle" | "dumbbell";
 
 // What a product card needs. `placeholder` is temporary: it is used while `mainImage.url` is empty.
 export interface ProductCardData

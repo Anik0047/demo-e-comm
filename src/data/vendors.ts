@@ -25,5 +25,8 @@ export const vendors: VendorSummary[] = [
     "id": "vendor-dhaka-bazaar",
     "name": "Dhaka Bazaar",
     "slug": "dhaka-bazaar"
-  }
+  },
+  {"id": "vendor-glowbd", "name": "GlowBD", "slug": "glowbd"},
+  {"id": "vendor-little-nest", "name": "LittleNest", "slug": "little-nest"},
+  {"id": "vendor-fitzone", "name": "FitZone", "slug": "fitzone"}
 ];

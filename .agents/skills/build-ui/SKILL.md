@@ -234,9 +234,16 @@ Use the existing implementation as the design baseline for new sections. New HTM
 
 **Flash deals**
 - Red bolt icon + "Flash deals" title + red countdown boxes + "View all →"; 6 product cards.
-- Below 768px: swipeable row (card width 44%, 30% from 560px), scroll snap, no visible scrollbar. From 768px: 3 columns by 2 rows. From 1024px: 6 columns in one row.
-- Mobile compactness override: below `md`, product placeholders use a 4:3 aspect ratio, 8px body padding, and 8px spacing above the sold area and cart button. Placeholder icons are 48px below `sm`, 56px from `sm`, and 64px from `md`. Desktop cards retain the reference proportions.
+- Uses the same grid as Trending products: 2 columns below 768px, 4 from 768px, and 5 from 1280px, with 12px gaps below `md` and 16px from `md`. All six deals remain visible; the sixth wraps to a second row on desktop.
+- Cards share Trending products styling: 4:3 placeholders below `md`, square from `md`, 8px body padding below `md` and 12px from `md`, and 56px placeholder icons below `sm` / 64px from `sm`. Both use 12px spacing above the bottom area and expanded wishlist/cart hit areas. Flash deals retains its sold bar and text, with 12px spacing before the cart button.
 - Card parts: image placeholder, red discount badge, wishlist heart, vendor, two-line title (minimum height of 2 lines), rating, price and struck-through old price, red sold bar with text, add-to-cart button (icon only below `sm`).
+
+**Trending products**
+- Appears after Flash deals; reuses `ProductCard` without the sold bar or sold text.
+- Tabs: All, New arrivals, Best sellers, Top rated; instant switching, roving focus, ArrowLeft/ArrowRight/Home/End keyboard support.
+- Grid: 2 columns below 768px, 4 from 768px, 5 from 1280px; 8 cards below 1280px and 10 from 1280px. Tabs scroll within their own row on phones.
+- Header: “Trending products”, “Most loved by shoppers this week”, and “View all →”; centered “View all products” button below the grid.
+- Static data flows through `getTrendingProducts()`; the All tab preserves the curated ten-product order.
 
 ## 12. Category hierarchy (data model, keep in mind for all future work)
 

@@ -22,6 +22,7 @@ Before creating or changing UI, read and follow [the build-ui skill](.agents/ski
 - Leave approved sections untouched unless the user explicitly requests changes.
 - Build one section at a time, then stop for review before starting another.
 - Keep detailed UI rules in the skill rather than duplicating them here.
+- Trending products follows Flash deals on the home page. Its tabs, responsive grid, and shared-card pattern are recorded in the build-ui skill’s existing section patterns.
 
 ## Project-wide constraints
 
