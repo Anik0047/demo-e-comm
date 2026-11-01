@@ -14,8 +14,8 @@ export const heroSlides: HeroSlide[] = [
     bgClass: "bg-brand-strong",
     textClass: "text-white",
     artClasses: {
-      circle: "relative w-60 h-60 rounded-full bg-brand-mid grid place-items-center",
-      icon: "w-28 h-28 text-white",
+      circle: "relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-brand-mid grid place-items-center",
+      icon: "w-20 h-20 xl:w-28 xl:h-28 text-white",
       badge: "absolute -top-1 right-0 w-20 h-20 rounded-full bg-accent text-ink font-head font-extrabold text-center text-sm leading-tight grid place-items-center rotate-12",
       badgeLines: ["60%", "OFF"],
       dot: "absolute bottom-2 -left-4 w-8 h-8 rounded-full bg-white",
@@ -34,8 +34,8 @@ export const heroSlides: HeroSlide[] = [
     bgClass: "bg-accent",
     textClass: "text-ink",
     artClasses: {
-      circle: "relative w-60 h-60 rounded-full bg-white grid place-items-center",
-      icon: "w-28 h-28 text-ink",
+      circle: "relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-white grid place-items-center",
+      icon: "w-20 h-20 xl:w-28 xl:h-28 text-ink",
       badge: "absolute top-2 -left-2 bg-sale text-white font-head font-extrabold text-sm px-4 py-2 rounded-full -rotate-6",
       badgeLines: ["From ৳999"],
       dot: "absolute bottom-0 right-2 w-10 h-10 rounded-full bg-brand",
@@ -54,8 +54,8 @@ export const heroSlides: HeroSlide[] = [
     bgClass: "bg-brand-soft",
     textClass: "text-brand-deep",
     artClasses: {
-      circle: "relative w-60 h-60 rounded-full bg-brand-light grid place-items-center",
-      icon: "w-28 h-28 text-brand-deep",
+      circle: "relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-brand-light grid place-items-center",
+      icon: "w-20 h-20 xl:w-28 xl:h-28 text-brand-deep",
       badge: "absolute top-0 right-0 bg-white text-brand-strong font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6",
       badgeLines: ["0% setup fee"],
       dot: "absolute bottom-3 -left-3 w-9 h-9 rounded-full bg-accent",
@@ -74,8 +74,8 @@ export const heroSlides: HeroSlide[] = [
     bgClass: "bg-blush",
     textClass: "text-blush-ink",
     artClasses: {
-      circle: "relative w-60 h-60 rounded-full bg-white grid place-items-center",
-      icon: "w-28 h-28 text-sale",
+      circle: "relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-white grid place-items-center",
+      icon: "w-20 h-20 xl:w-28 xl:h-28 text-sale",
       badge: "absolute top-2 right-0 bg-accent text-ink font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6",
       badgeLines: ["Cash on delivery"],
       dot: "absolute bottom-2 left-0 w-8 h-8 rounded-full bg-brand",

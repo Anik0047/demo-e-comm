@@ -103,6 +103,18 @@ Fonts are loaded with `next/font/google` in `src/app/layout.tsx` and exposed as 
 - **Z-index scale:** category row dropdowns 20, sticky header 30, overlays and drawers 50, modals 60, toasts 70.
 - **Header behavior:** only the main header row is sticky. The top strip and category row scroll away.
 
+## 7b. Responsive requirements (mandatory for every section)
+
+- Support every width from 320px to 1920px and landscape phones. The page must never scroll horizontally.
+- Mobile first. Every grid has an explicit base template (`grid-cols-1` or `grid-cols-2`). Never use a bare `grid` that only defines columns at larger breakpoints.
+- Add `min-w-0` to grid and flex children that contain text, carousels, search fields, or tables so they can shrink.
+- No fixed widths wider than the container. Fixed pixel widths are only for small things (icons, avatars, dropdown panels that have a mobile fallback).
+- Re-check type sizes at EVERY breakpoint. When a layout adds a sidebar or splits into columns (for example at `lg`), the content area can become narrower than on the breakpoint below it.
+- Reserve space for absolutely positioned overlays (controls, badges). Content must clear them by at least 12px.
+- Hover-only UI (dropdowns, mini-cart) must have a touch alternative or be hidden below `md`.
+- Never hide horizontal overflow with `overflow-x-hidden` on `html`, `body`, or ancestors of sticky elements. Fix the cause.
+- Test at 320, 360, 390, 414, 480, 640, 768, 820, 1024, 1100, 1280, 1440, 1920 and landscape 667x375.
+
 ## 8. Icons
 
 - **Lucide React is the default** (`import { ShoppingCart } from "lucide-react"`). Import icons individually. Default stroke width 2. Sizes: 16, 20, or 24px (`size-4`, `size-5`, `size-6`).
@@ -200,14 +212,14 @@ These were designed and approved in a plain HTML prototype. Port them faithfully
 
 **Navbar**
 - Top strip (`bg-brand-tint`, `text-brand-strong`, 36px): "Free delivery on orders over ৳2,000" on the left; Track order, Help center, EN / বাং, ৳ BDT on the right (hidden on mobile except the message).
-- Sticky main row (white, bottom border): hamburger (mobile only), logo, pill search with category select inside and a round green search button (desktop), wishlist heart with red count badge, "Sign in" outlined pill with hover dropdown (Login, Create account, My orders, Wishlist), filled green cart pill showing item count badge and total (৳4,850) with a hover mini-cart (items, subtotal, View cart, Checkout).
+- Sticky main row (white, bottom border): hamburger (mobile only), logo, pill search with category select inside and a round green search button (desktop), wishlist heart with red count badge, "Sign in" outlined pill with hover dropdown (Login, Create account, My orders, Wishlist; "Sign in" label shows from `lg`), filled green cart pill showing item count badge and total (৳4,850, shows from `lg`) with a hover mini-cart (items, subtotal, View cart, Checkout; dropdown opens only from `md`).
 - Separate search row under the main row on mobile.
 - Category row (desktop, scrolls away): "All categories" button (`bg-brand-tint`, `border-brand-border`) with a two-panel mega menu (categories left, subcategories right, keyboard accessible); links Flash deals (red, with dot), Vouchers, New arrivals, Best sellers, Top vendors, Gift cards; outlined "Become a vendor" button on the right.
 - Mobile drawer from the left with Login/Register, categories, and quick links.
 
 **Banner**
 - 12-column grid: slider (8/9 columns) + two stacked promo tiles (4/3 columns). On mobile the tiles sit below the slider.
-- Slider: 4 solid-color slides, 340px tall on mobile and 400px on `sm` and up, each with a pill tag, large heading, short text, CTA, and on the right a solid circle with a Lucide icon and a rotated badge:
+- Slider: 4 solid-color slides, height is 420px at every width, each with a pill tag, heading (30px, 36px from `sm`, and 48px from `xl`), short text, CTA, and on the right a solid circle with a Lucide icon and a rotated badge (slide art is hidden below `md`):
   1. Flash sale (`bg-brand-strong`, white text, live countdown, "Up to 60% off electronics")
   2. Winter collection (`bg-accent`, ink text, "From ৳999")
   3. Sell on Kenakata (`bg-brand-soft`, `text-brand-deep`, "0% setup fee")
@@ -220,6 +232,7 @@ These were designed and approved in a plain HTML prototype. Port them faithfully
 - [ ] Matches the tokens, fonts, spacing, and component patterns above
 - [ ] No gradients, no dark mode, no hardcoded hex colors
 - [ ] Responsive at 360, 768, and 1280px
+- [ ] No horizontal overflow and no clipped or overlapping content from 320px to 1920px
 - [ ] Keyboard accessible, with visible focus and proper labels
 - [ ] Loading, empty, and error states handled where data is shown
 - [ ] Uses mock data through `src/services`, typed with `src/types`

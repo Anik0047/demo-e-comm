@@ -8,7 +8,7 @@ interface PromoTilesProps {
 
 export function PromoTiles({ vendors }: PromoTilesProps) {
   return (
-    <div className="lg:col-span-4 xl:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+    <div className="min-w-0 lg:col-span-4 xl:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
       <CouponTile />
       <div className="rounded-2xl bg-soft p-5 flex flex-col justify-between">
         <div>

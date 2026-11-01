@@ -121,7 +121,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   return (
     <div
       id="hero"
-      className={`relative overflow-hidden rounded-2xl h-[340px] sm:h-[400px] ${
+      className={`relative overflow-hidden rounded-2xl h-[420px] ${
         currentSlide?.textClass ?? ""
       } ${paused ? "paused" : ""}`.trim()}
       role="region"
@@ -147,10 +147,10 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             aria-roledescription="slide"
             aria-label={`${slideIndex + 1} of ${slides.length}`}
           >
-            <div className="h-full flex items-center px-6 sm:px-12 gap-6">
+            <div className="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div className="flex-1">
                 <span className={slide.tagClasses}>{slide.tag}</span>
-                <h2 className="font-head font-extrabold text-3xl sm:text-5xl leading-tight">
+                <h2 className="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">
                   {slide.headingLines.map((line, i) =>
                     i === 0 ? line : [<br key={i} />, line]
                   )}
@@ -161,7 +161,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                   {slide.ctaLabel}
                 </Link>
               </div>
-              <div className="hidden sm:grid w-[36%] place-items-center">
+              <div className="hidden md:grid w-[36%] place-items-center">
                 <div className={slide.artClasses.circle}>
                   <SlideArtIcon
                     icon={slide.icon}
@@ -180,7 +180,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         ))}
       </div>
 
-      <div className="absolute left-6 sm:left-12 bottom-5 right-6 sm:right-12 flex items-center gap-3">
+      <div className="absolute left-6 right-6 sm:left-12 sm:right-12 lg:left-8 lg:right-8 xl:left-12 xl:right-12 bottom-5 flex items-center gap-3">
         <div
           id="bars"
           className="flex gap-2 flex-1"

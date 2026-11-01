@@ -21,7 +21,7 @@ export function MainHeader({
       className="sticky z-30 bg-white border-b border-line font-body"
       style={{ top: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8">
+      <div className="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8 max-[359px]:gap-2">
         <button
           id="open-drawer"
           onClick={onOpenDrawer}
@@ -33,13 +33,13 @@ export function MainHeader({
 
         <Link
           href="#"
-          className="flex items-center gap-2 shrink-0"
+          className="flex items-center gap-2 max-[359px]:gap-1.5 shrink-0"
           aria-label="Kenakata home"
         >
-          <span className="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center">
+          <span className="w-10 h-10 max-[359px]:w-9 max-[359px]:h-9 rounded-xl bg-brand text-white grid place-items-center">
             <ShoppingBag className="w-5 h-5" />
           </span>
-          <span className="font-head font-extrabold text-2xl tracking-tight">
+          <span className="font-head font-extrabold text-2xl max-[359px]:text-xl tracking-tight">
             Kena<span className="text-brand">kata</span>
           </span>
         </Link>

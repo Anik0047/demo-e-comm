@@ -6,10 +6,11 @@ export function AccountMenu() {
     <div className="relative group hidden sm:block">
       <Link
         href="#"
-        className="flex items-center gap-2 h-11 px-4 rounded-full border border-line hover:border-brand text-sm font-medium"
+        className="flex items-center gap-2 h-11 px-3 lg:px-4 rounded-full border border-line hover:border-brand text-sm font-medium"
+        aria-label="Sign in"
       >
         <User className="w-5 h-5" />
-        Sign in
+        <span className="hidden lg:inline">Sign in</span>
       </Link>
       <div className="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-56">
         <div className="bg-white border border-line rounded-xl p-2 shadow-lg">

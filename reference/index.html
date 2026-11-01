@@ -60,17 +60,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 </div>
 
 <header class="sticky z-30 bg-white border-b border-line font-body" style="top:env(safe-area-inset-top,0px)">
-  <div class="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8">
+  <div class="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8 max-[359px]:gap-2">
     <button id="open-drawer" class="lg:hidden p-2 -ml-2 rounded-lg hover:bg-soft" aria-label="Open menu"><svg class="w-6 h-6"><use href="#i-menu"/></svg></button>
 
-    <a href="#" class="flex items-center gap-2 shrink-0" aria-label="Kenakata home">
-      <span class="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center"><svg class="w-5 h-5"><use href="#i-bag"/></svg></span>
-      <span class="font-head font-extrabold text-2xl tracking-tight">Kena<span class="text-brand">kata</span></span>
+    <a href="#" class="flex items-center gap-2 max-[359px]:gap-1.5 shrink-0" aria-label="Kenakata home">
+      <span class="w-10 h-10 max-[359px]:w-9 max-[359px]:h-9 rounded-xl bg-brand text-white grid place-items-center"><svg class="w-5 h-5"><use href="#i-bag"/></svg></span>
+      <span class="font-head font-extrabold text-2xl max-[359px]:text-xl tracking-tight">Kena<span class="text-brand">kata</span></span>
     </a>
 
-    <form class="hidden md:flex flex-1 items-center h-12 rounded-full bg-soft border border-transparent focus-within:bg-white focus-within:border-brand pl-2 pr-1.5 transition-colors" onsubmit="return false">
+    <form class="hidden md:flex flex-1 min-w-0 items-center h-12 rounded-full bg-soft border border-transparent focus-within:bg-white focus-within:border-brand pl-2 pr-1.5 transition-colors" onsubmit="return false">
       <div class="relative shrink-0">
-        <select class="appearance-none bg-transparent text-sm font-medium pl-3 pr-7 py-2 outline-none cursor-pointer" aria-label="Search category">
+        <select class="appearance-none bg-transparent text-sm font-medium w-[84px] lg:w-auto pl-3 pr-7 py-2 outline-none cursor-pointer" aria-label="Search category">
           <option>All</option><option>Electronics</option><option>Fashion</option><option>Home &amp; living</option><option>Beauty &amp; health</option><option>Groceries</option>
         </select>
         <svg class="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-mute"><use href="#i-down"/></svg>
@@ -87,7 +87,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       </a>
 
       <div class="relative group hidden sm:block">
-        <a href="#" class="flex items-center gap-2 h-11 px-4 rounded-full border border-line hover:border-brand text-sm font-medium"><svg class="w-5 h-5"><use href="#i-user"/></svg>Sign in</a>
+        <a href="#" class="flex items-center gap-2 h-11 px-3 lg:px-4 rounded-full border border-line hover:border-brand text-sm font-medium" aria-label="Sign in"><svg class="w-5 h-5"><use href="#i-user"/></svg><span class="hidden lg:inline">Sign in</span></a>
         <div class="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-56">
           <div class="bg-white border border-line rounded-xl p-2 shadow-lg">
             <a href="#" class="block text-center bg-brand hover:bg-brandd text-white text-sm font-medium rounded-lg py-2 mb-2">Login</a>
@@ -98,11 +98,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       </div>
 
       <div class="relative group">
-        <a href="#" class="flex items-center gap-2 h-11 pl-3 pr-4 rounded-full bg-brand hover:bg-brandd text-white text-sm font-bold" aria-label="Cart">
+        <a href="#" class="flex items-center gap-2 h-11 pl-3 pr-4 max-[359px]:pl-2.5 max-[359px]:pr-3 rounded-full bg-brand hover:bg-brandd text-white text-sm font-bold" aria-label="Cart">
           <span class="relative mr-1"><svg class="w-5 h-5"><use href="#i-cart"/></svg><span class="absolute -top-2 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-white text-brandd text-[11px] font-bold grid place-items-center">3</span></span>
-          <span class="hidden sm:inline">৳4,850</span>
+          <span class="hidden lg:inline">৳4,850</span>
         </a>
-        <div class="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-80">
+        <div class="hidden md:group-hover:block md:group-focus-within:block absolute right-0 top-full pt-2 w-80">
           <div class="bg-white border border-line rounded-xl p-4 shadow-lg">
             <ul class="divide-y divide-line">
               <li class="flex gap-3 pb-3"><div class="w-12 h-12 rounded-lg bg-soft shrink-0"></div><div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">Wireless Earbuds Pro</p><p class="text-xs text-mute">Qty 1</p></div><p class="text-sm font-bold">৳2,450</p></li>
@@ -171,17 +171,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 <!-- ===== BANNER START ===== -->
 <section aria-label="Featured offers" class="max-w-[1280px] mx-auto px-4 py-4 md:py-6 font-body">
-  <div class="grid lg:grid-cols-12 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-    <div class="lg:col-span-8 xl:col-span-9">
-      <div id="hero" class="relative overflow-hidden rounded-2xl h-[340px] sm:h-[400px]" role="region" aria-roledescription="carousel" aria-label="Featured offers" tabindex="0">
+    <div class="min-w-0 lg:col-span-8 xl:col-span-9">
+      <div id="hero" class="relative overflow-hidden rounded-2xl h-[420px]" role="region" aria-roledescription="carousel" aria-label="Featured offers" tabindex="0">
         <div id="track" class="flex h-full transition-transform duration-500 ease-out">
 
           <article class="min-w-full h-full bg-brandd text-white" data-fg="#fff" role="group" aria-roledescription="slide" aria-label="1 of 4">
-            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+            <div class="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div class="flex-1">
                 <span class="inline-block bg-white text-brandd text-xs font-bold px-3 py-1 rounded-full mb-4">Flash sale</span>
-                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Up to 60% off<br>electronics</h2>
+                <h2 class="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">Up to 60% off<br>electronics</h2>
                 <p class="mt-3 text-sm sm:text-base">Phones, earbuds, and smart watches from top vendors.</p>
                 <div class="mt-5 flex items-center gap-2 text-brandd font-head font-extrabold" aria-label="Time left">
                   <span class="text-white text-sm font-body font-medium mr-1">Ends in</span>
@@ -191,9 +191,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
                 </div>
                 <a href="#" class="inline-block mt-6 bg-white text-brandd font-bold text-sm px-6 py-3 rounded-full hover:bg-tint">Shop flash deals</a>
               </div>
-              <div class="hidden sm:grid w-[36%] place-items-center">
-                <div class="relative w-60 h-60 rounded-full bg-[#10B981] grid place-items-center">
-                  <svg class="w-28 h-28 text-white"><use href="#i-zap"/></svg>
+              <div class="hidden md:grid w-[36%] place-items-center">
+                <div class="relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-[#10B981] grid place-items-center">
+                  <svg class="w-20 h-20 xl:w-28 xl:h-28 text-white"><use href="#i-zap"/></svg>
                   <span class="absolute -top-1 right-0 w-20 h-20 rounded-full bg-[#FBBF24] text-ink font-head font-extrabold text-center text-sm leading-tight grid place-items-center rotate-12">60%<br>OFF</span>
                   <span class="absolute bottom-2 -left-4 w-8 h-8 rounded-full bg-white"></span>
                 </div>
@@ -202,16 +202,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           </article>
 
           <article class="min-w-full h-full bg-[#FBBF24] text-ink" data-fg="#0F172A" role="group" aria-roledescription="slide" aria-label="2 of 4">
-            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+            <div class="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div class="flex-1">
                 <span class="inline-block bg-ink text-white text-xs font-bold px-3 py-1 rounded-full mb-4">New season</span>
-                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Winter collection<br>is here</h2>
+                <h2 class="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">Winter collection<br>is here</h2>
                 <p class="mt-3 text-sm sm:text-base">Jackets, sweaters, and shawls for the whole family. Starting from ৳999.</p>
                 <a href="#" class="inline-block mt-6 bg-ink text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-brandd">Explore fashion</a>
               </div>
-              <div class="hidden sm:grid w-[36%] place-items-center">
-                <div class="relative w-60 h-60 rounded-full bg-white grid place-items-center">
-                  <svg class="w-28 h-28 text-ink"><use href="#i-shirt"/></svg>
+              <div class="hidden md:grid w-[36%] place-items-center">
+                <div class="relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-white grid place-items-center">
+                  <svg class="w-20 h-20 xl:w-28 xl:h-28 text-ink"><use href="#i-shirt"/></svg>
                   <span class="absolute top-2 -left-2 bg-sale text-white font-head font-extrabold text-sm px-4 py-2 rounded-full -rotate-6">From ৳999</span>
                   <span class="absolute bottom-0 right-2 w-10 h-10 rounded-full bg-brand"></span>
                 </div>
@@ -220,16 +220,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           </article>
 
           <article class="min-w-full h-full bg-[#D1FAE5] text-[#064E3B]" data-fg="#064E3B" role="group" aria-roledescription="slide" aria-label="3 of 4">
-            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+            <div class="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div class="flex-1">
                 <span class="inline-block bg-brandd text-white text-xs font-bold px-3 py-1 rounded-full mb-4">For sellers</span>
-                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Open your shop<br>on Kenakata</h2>
+                <h2 class="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">Open your shop<br>on Kenakata</h2>
                 <p class="mt-3 text-sm sm:text-base">Zero setup fee. Reach customers across Bangladesh and get paid weekly.</p>
                 <a href="#" class="inline-block mt-6 bg-brandd text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-brand">Start selling</a>
               </div>
-              <div class="hidden sm:grid w-[36%] place-items-center">
-                <div class="relative w-60 h-60 rounded-full bg-[#6EE7B7] grid place-items-center">
-                  <svg class="w-28 h-28 text-[#064E3B]"><use href="#i-bag-lg"/></svg>
+              <div class="hidden md:grid w-[36%] place-items-center">
+                <div class="relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-[#6EE7B7] grid place-items-center">
+                  <svg class="w-20 h-20 xl:w-28 xl:h-28 text-[#064E3B]"><use href="#i-bag-lg"/></svg>
                   <span class="absolute top-0 right-0 bg-white text-brandd font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6">0% setup fee</span>
                   <span class="absolute bottom-3 -left-3 w-9 h-9 rounded-full bg-[#FBBF24]"></span>
                 </div>
@@ -238,16 +238,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           </article>
 
           <article class="min-w-full h-full bg-[#FFE4E6] text-[#881337]" data-fg="#881337" role="group" aria-roledescription="slide" aria-label="4 of 4">
-            <div class="h-full flex items-center px-6 sm:px-12 gap-6">
+            <div class="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div class="flex-1">
                 <span class="inline-block bg-sale text-white text-xs font-bold px-3 py-1 rounded-full mb-4">Every order</span>
-                <h2 class="font-head font-extrabold text-3xl sm:text-5xl leading-tight">Free delivery over<br>৳2,000</h2>
+                <h2 class="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">Free delivery over<br>৳2,000</h2>
                 <p class="mt-3 text-sm sm:text-base">Cash on delivery available in all 64 districts.</p>
                 <a href="#" class="inline-block mt-6 bg-sale text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-[#BE123C]">Start shopping</a>
               </div>
-              <div class="hidden sm:grid w-[36%] place-items-center">
-                <div class="relative w-60 h-60 rounded-full bg-white grid place-items-center">
-                  <svg class="w-28 h-28 text-sale"><use href="#i-truck"/></svg>
+              <div class="hidden md:grid w-[36%] place-items-center">
+                <div class="relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-white grid place-items-center">
+                  <svg class="w-20 h-20 xl:w-28 xl:h-28 text-sale"><use href="#i-truck"/></svg>
                   <span class="absolute top-2 right-0 bg-[#FBBF24] text-ink font-head font-extrabold text-sm px-4 py-2 rounded-full rotate-6">Cash on delivery</span>
                   <span class="absolute bottom-2 left-0 w-8 h-8 rounded-full bg-brand"></span>
                 </div>
@@ -256,7 +256,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           </article>
         </div>
 
-        <div class="absolute left-6 sm:left-12 bottom-5 right-6 sm:right-12 flex items-center gap-3">
+        <div class="absolute left-6 right-6 sm:left-12 sm:right-12 lg:left-8 lg:right-8 xl:left-12 xl:right-12 bottom-5 flex items-center gap-3">
           <div id="bars" class="flex gap-2 flex-1"></div>
           <button id="pp" class="w-9 h-9 rounded-full bg-white text-ink grid place-items-center hover:bg-tint" aria-label="Pause slideshow"><svg class="w-3.5 h-3.5"><use href="#i-pause"/></svg></button>
           <button id="prev" class="hidden sm:grid w-9 h-9 rounded-full bg-white text-ink place-items-center hover:bg-tint" aria-label="Previous slide"><svg class="w-5 h-5"><use href="#i-l"/></svg></button>
@@ -265,7 +265,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       </div>
     </div>
 
-    <div class="lg:col-span-4 xl:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+    <div class="min-w-0 lg:col-span-4 xl:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
       <div class="rounded-2xl bg-[#E0F2FE] text-[#075985] p-5 flex flex-col justify-between">
         <div>
           <p class="text-xs font-bold">New here?</p>

@@ -27,12 +27,12 @@ export function SearchForm({ mobile = false }: SearchFormProps) {
 
   return (
     <form
-      className="hidden md:flex flex-1 items-center h-12 rounded-full bg-soft border border-transparent focus-within:bg-white focus-within:border-brand pl-2 pr-1.5 transition-colors"
+      className="hidden md:flex flex-1 min-w-0 items-center h-12 rounded-full bg-soft border border-transparent focus-within:bg-white focus-within:border-brand pl-2 pr-1.5 transition-colors"
       onSubmit={(e) => e.preventDefault()}
     >
       <div className="relative shrink-0">
         <select
-          className="appearance-none bg-transparent text-sm font-medium pl-3 pr-7 py-2 outline-hidden cursor-pointer"
+          className="appearance-none bg-transparent text-sm font-medium w-[84px] lg:w-auto pl-3 pr-7 py-2 outline-hidden cursor-pointer"
           aria-label="Search category"
           defaultValue="All"
         >

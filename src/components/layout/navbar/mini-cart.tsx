@@ -15,7 +15,7 @@ export function MiniCart({ items }: MiniCartProps) {
     <div className="relative group">
       <Link
         href="#"
-        className="flex items-center gap-2 h-11 pl-3 pr-4 rounded-full bg-brand hover:bg-brand-strong text-white text-sm font-bold"
+        className="flex items-center gap-2 h-11 pl-3 pr-4 max-[359px]:pl-2.5 max-[359px]:pr-3 rounded-full bg-brand hover:bg-brand-strong text-white text-sm font-bold"
         aria-label="Cart"
       >
         <span className="relative mr-1">
@@ -24,9 +24,9 @@ export function MiniCart({ items }: MiniCartProps) {
             {totalCount}
           </span>
         </span>
-        <span className="hidden sm:inline">{formatPrice(subtotal)}</span>
+        <span className="hidden lg:inline">{formatPrice(subtotal)}</span>
       </Link>
-      <div className="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-2 w-80">
+      <div className="hidden md:group-hover:block md:group-focus-within:block absolute right-0 top-full pt-2 w-80">
         <div className="bg-white border border-line rounded-xl p-4 shadow-lg">
           <ul className="divide-y divide-line">
             {items.map((item, index) => (
