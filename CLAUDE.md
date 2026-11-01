@@ -137,7 +137,8 @@ Fonts are loaded with `next/font/google` in `src/app/layout.tsx` and exposed as 
 
 **Product card pattern (dense marketplace):**
 - Square image area on `bg-soft` with `rounded-xl`, wishlist heart button at top right, discount `badge-sale` at top left
-- Title: `text-sm font-medium line-clamp-2`
+- Title: `text-sm font-medium line-clamp-2`; title has a minimum height of two lines so cards in a row have equal height
+- Never use text smaller than 12px (`text-xs`)
 - Price row: `price` (current), `price-old` (original), discount percent in `text-sale`
 - Rating: amber star + number + review count in `text-xs text-mute`
 - Vendor name in `text-xs text-mute`, links to the vendor store
@@ -227,6 +228,35 @@ These were designed and approved in a plain HTML prototype. Port them faithfully
 - Story-style progress bars (one per slide, 6 seconds each, click to jump), pause/play button, previous/next buttons (hidden on mobile), swipe, arrow keys, pause on hover.
 - Tiles: first-order coupon card (`bg-info`, code WELCOME200 with a Copy button) and a top-rated vendors card (`bg-soft`, overlapping avatars, "View all →").
 
+**Categories**
+- Heading row with "Shop by category", subtitle (hidden below `sm`), and "View all →"; 8 round tiles (flat pastel circles, Lucide icons, labels).
+- 4×2 grid below 768px, one row of 8 from 768px; circles 56px, 64px from `md`, 80px from `lg`.
+- Hover turns the circle `brand` with a white icon and the label `brand-strong`.
+
+**Flash deals**
+- Red bolt icon + "Flash deals" title + red countdown boxes + "View all →"; 6 product cards.
+- Below 768px: swipeable row (card width 44%, 30% from 560px), scroll snap, no visible scrollbar. From 768px: 3 columns by 2 rows. From 1024px: 6 columns in one row.
+- Mobile compactness override: below `md`, product placeholders use a 4:3 aspect ratio, 8px body padding, and 8px spacing above the sold area and cart button. Placeholder icons are 48px below `sm`, 56px from `sm`, and 64px from `md`. Desktop cards retain the reference proportions.
+- Card parts: image placeholder, red discount badge, wishlist heart, vendor, two-line title (minimum height of 2 lines), rating, price and struck-through old price, red sold bar with text, add-to-cart button (icon only below `sm`).
+
+## 12b. Category hierarchy (data model, keep in mind for all future work)
+
+- Three levels: Category (level 1) → Subcategory (level 2) → Child category (level 3). Every subcategory belongs to exactly one category, and every child category belongs to exactly one subcategory.
+- Model it as ONE flat list with `parentId` and `level` (see `src/types/category.ts`), not as three separate types or deeply nested objects. Main categories have `parentId: null`.
+- `slug` is unique and URL-safe. Planned URLs: `/category/[category]`, `/category/[category]/[subcategory]`, `/category/[category]/[subcategory]/[child]`.
+- Products will later reference the deepest category they belong to; parents are found through `parentId`.
+- Current UI scope: only the 8 main categories are displayed (home page tiles). The Navbar mega menu still uses its own two-level data and will be connected to this hierarchy later. Do not build subcategory or child category UI until asked.
+
+## 12c. Product data model
+
+- Full `Product` type lives in `src/types/product.ts` (identity, relationships, media, pricing, variants, inventory, shipping, social proof, badges, moderation status, SEO, timestamps). Create products with `createProduct()` in `src/data/products.ts` so mock data stays short.
+- `categoryId` points to the DEEPEST category the product belongs to (category, subcategory, or child category). Parents are found through `parentId`.
+- Prices are whole taka (BDT). `price` is the regular selling price. The discount percentage is NEVER stored: calculate it with `calcDiscountPercent()`.
+- A flash deal is a separate record (`FlashDeal`: productId, dealPrice, startsAt, endsAt, stockLimit, soldCount), not a field on the product. The service merges deal and product into a `FlashDealItem` where `price` is the deal price and `compareAtPrice` is the regular price.
+- Lists use the small `ProductCardData` shape, not the full `Product`.
+- Only products with `status: "active"` appear in the storefront.
+- Countdown values come from the service as a number of seconds (`endsInSeconds`) so server and client render the same first frame.
+
 ## 13. Definition of done (every section)
 
 - [ ] Matches the tokens, fonts, spacing, and component patterns above
@@ -237,3 +267,5 @@ These were designed and approved in a plain HTML prototype. Port them faithfully
 - [ ] Loading, empty, and error states handled where data is shown
 - [ ] Uses mock data through `src/services`, typed with `src/types`
 - [ ] `pnpm lint` and `pnpm build` pass
+
+- [ ] Horizontal scroll rows use data-scroll-row, scrollbars hidden, and the page itself never scrolls sideways
