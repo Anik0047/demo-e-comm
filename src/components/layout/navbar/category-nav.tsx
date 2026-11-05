@@ -20,7 +20,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
           <MegaMenu categories={categories} />
         </div>
         <Link
-          href="#"
+          href="/products?promotion=flash-deals"
           className="flex items-center gap-2 text-sale font-bold"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-sale" />
@@ -29,10 +29,10 @@ export function CategoryNav({ categories }: CategoryNavProps) {
         <Link href="#" className="hover:text-brand">
           Vouchers
         </Link>
-        <Link href="#" className="hover:text-brand">
+        <Link href="/products?sort=newest" className="hover:text-brand">
           New arrivals
         </Link>
-        <Link href="#" className="hover:text-brand">
+        <Link href="/products?sort=best-selling" className="hover:text-brand">
           Best sellers
         </Link>
         <Link href="#" className="hover:text-brand">
