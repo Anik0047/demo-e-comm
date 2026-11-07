@@ -37,7 +37,7 @@ export function FlashDealsSection({
           </h2>
         </div>
         <Link
-          href="#"
+          href="/products?promotion=flash-deals"
           className="order-2 sm:order-3 sm:ml-auto shrink-0 text-sm font-bold text-brand-strong hover:underline"
         >
           View all →

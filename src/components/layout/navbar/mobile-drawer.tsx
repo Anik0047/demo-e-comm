@@ -56,7 +56,7 @@ export function MobileDrawer({ isOpen, onClose, categories }: MobileDrawerProps)
       </ul>
       <ul className="p-2 border-t border-line">
         <li>
-          <Link href="#" className="menu-link text-sale font-bold">
+          <Link href="/products?promotion=flash-deals" onClick={onClose} className="menu-link text-sale font-bold">
             Flash deals
           </Link>
         </li>

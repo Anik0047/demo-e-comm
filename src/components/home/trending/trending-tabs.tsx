@@ -21,6 +21,7 @@ interface TrendingTabsProps {
 
 export function TrendingTabs({ products }: TrendingTabsProps) {
   const [active, setActive] = useState<TrendingTab>("all");
+  const href = active === "all" ? "/products" : `/products?sort=${active === "new" ? "newest" : active === "best-sellers" ? "best-selling" : "top-rated"}`;
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
   function handleKeyDown(
@@ -56,6 +57,25 @@ export function TrendingTabs({ products }: TrendingTabsProps) {
 
   return (
     <>
+      <div className="mb-5 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h2
+            id="trending-title"
+            className="font-head font-bold text-xl sm:text-2xl"
+          >
+            Trending products
+          </h2>
+          <p className="hidden sm:block text-sm text-mute mt-1">
+            Most loved by shoppers this week
+          </p>
+        </div>
+        <Link
+          href={href}
+          className="inline-flex min-h-11 items-end shrink-0 text-sm font-bold text-brand-strong hover:underline"
+        >
+          View all →
+        </Link>
+      </div>
       <div
         role="tablist"
         aria-label="Sort trending products"
@@ -109,7 +129,7 @@ export function TrendingTabs({ products }: TrendingTabsProps) {
         )}
       </div>
       <div className="mt-8 flex justify-center">
-        <Link href="#" className="btn btn-outline btn-md">
+        <Link href={href} className="btn btn-outline btn-md">
           View all products
         </Link>
       </div>

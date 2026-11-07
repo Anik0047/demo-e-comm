@@ -1,5 +1,6 @@
 import { products, trendingPlaceholders, trendingProductIds } from "@/data/products";
 import { vendors } from "@/data/vendors";
+import { projectProductCard } from "@/services/product-card";
 import type { Product, ProductCardData } from "@/types/product";
 
 export type TrendingTab = "all" | "new" | "best-sellers" | "top-rated";
@@ -7,14 +8,7 @@ export type TrendingTab = "all" | "new" | "best-sellers" | "top-rated";
 function toCard(product: Product): ProductCardData {
   const vendor = vendors.find((vendor) => vendor.id === product.vendorId);
   if (!vendor) throw new Error(`Missing vendor for ${product.id}`);
-  return {
-    id: product.id, slug: product.slug, name: product.name, mainImage: product.mainImage,
-    price: product.price, compareAtPrice: product.compareAtPrice,
-    ratingAverage: product.ratingAverage, ratingCount: product.ratingCount,
-    freeShipping: product.freeShipping, vendor: { name: vendor.name, slug: vendor.slug },
-    inStock: !product.trackInventory || product.stock > 0,
-    placeholder: trendingPlaceholders[product.id],
-  };
+  return projectProductCard(product, vendor, { placeholder: trendingPlaceholders[product.id] });
 }
 
 export async function getTrendingProducts(): Promise<Record<TrendingTab, ProductCardData[]>> {
