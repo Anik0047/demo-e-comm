@@ -21,18 +21,31 @@ const lucideIcons = { smartphone: Smartphone, shirt: Shirt, basket: ShoppingBask
 
 interface CategoryTileProps {
   category: MainCategory;
+  subcategoryNames?: string[];
 }
 
-export function CategoryTile({ category }: CategoryTileProps) {
+export function CategoryTile({ category, subcategoryNames }: CategoryTileProps) {
   const icon = category.icon;
   const Icon = icon in lucideIcons ? lucideIcons[icon as keyof typeof lucideIcons] : null;
   return (
     <li className="min-w-0">
-      <Link href="#" data-slug={category.slug} className="group flex flex-col items-center gap-2 text-center">
+      <Link
+        href={`/category/${category.slug}`}
+        data-slug={category.slug}
+        className={subcategoryNames
+          ? "group card card-hover flex h-full min-w-0 flex-col items-center gap-3 p-4 text-center transition-colors sm:p-5"
+          : "group flex flex-col items-center gap-2 text-center"}
+      >
         <span className={cn("w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-full", toneClasses[category.tone], "group-hover:bg-brand group-hover:text-white grid place-items-center transition-colors")}>
           {Icon ? <Icon className="w-7 h-7 lg:w-8 lg:h-8" /> : referenceIcons[icon as keyof typeof referenceIcons]}
         </span>
         <span className="text-xs lg:text-sm font-medium leading-tight break-words group-hover:text-brand-strong">{category.name}</span>
+        {subcategoryNames && (
+          <span className="text-xs leading-5 text-mute">
+            {subcategoryNames.slice(0, 3).join(" · ")}
+            {subcategoryNames.length > 3 && ` · +${subcategoryNames.length - 3} more`}
+          </span>
+        )}
       </Link>
     </li>
   );

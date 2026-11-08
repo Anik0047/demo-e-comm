@@ -1,4 +1,4 @@
-import type { MainCategory } from "@/types/category";
+import type { Category, MainCategory } from "@/types/category";
 
 export const mainCategories: MainCategory[] = [
   {
@@ -73,4 +73,99 @@ export const mainCategories: MainCategory[] = [
     "icon": "book",
     "tone": "gray"
   }
+];
+
+export const categories: Category[] = [
+  ...mainCategories,
+  { id: "sub-electronics-mobile-phones", name: "Mobile Phones", slug: "mobile-phones", parentId: "cat-electronics", level: 2 },
+  { id: "sub-electronics-computers", name: "Computers & laptops", slug: "computers-laptops", parentId: "cat-electronics", level: 2 },
+  { id: "sub-electronics-audio", name: "Audio & headphones", slug: "audio-headphones", parentId: "cat-electronics", level: 2 },
+  { id: "sub-electronics-home-appliances", name: "Home appliances", slug: "home-appliances", parentId: "cat-electronics", level: 2 },
+  { id: "child-mobile-samsung", name: "Samsung", slug: "samsung", parentId: "sub-electronics-mobile-phones", level: 3 },
+  { id: "child-mobile-apple", name: "Apple", slug: "apple", parentId: "sub-electronics-mobile-phones", level: 3 },
+  { id: "child-mobile-xiaomi", name: "Xiaomi", slug: "xiaomi", parentId: "sub-electronics-mobile-phones", level: 3 },
+  { id: "child-mobile-oppo", name: "OPPO", slug: "oppo", parentId: "sub-electronics-mobile-phones", level: 3 },
+  { id: "child-computers-gaming", name: "Gaming laptops", slug: "gaming-laptops", parentId: "sub-electronics-computers", level: 3 },
+  { id: "child-computers-ultrabooks", name: "Ultrabooks", slug: "ultrabooks", parentId: "sub-electronics-computers", level: 3 },
+  { id: "child-audio-earbuds", name: "Wireless earbuds", slug: "wireless-earbuds", parentId: "sub-electronics-audio", level: 3 },
+  { id: "child-audio-headphones", name: "Over-ear headphones", slug: "over-ear-headphones", parentId: "sub-electronics-audio", level: 3 },
+  { id: "child-appliances-refrigerators", name: "Refrigerators", slug: "refrigerators", parentId: "sub-electronics-home-appliances", level: 3 },
+
+  { id: "child-fashion-men-panjabi", name: "Panjabi", slug: "mens-panjabi", parentId: "sub-fashion-mens-clothing", level: 3 },
+  { id: "child-fashion-men-shirts", name: "Shirts", slug: "mens-shirts", parentId: "sub-fashion-mens-clothing", level: 3 },
+  { id: "child-fashion-women-sarees", name: "Sarees", slug: "womens-sarees", parentId: "sub-fashion-womens-clothing", level: 3 },
+  { id: "child-fashion-women-dresses", name: "Dresses", slug: "womens-dresses", parentId: "sub-fashion-womens-clothing", level: 3 },
+  { id: "child-fashion-shoes-sneakers", name: "Sneakers", slug: "fashion-sneakers", parentId: "sub-fashion-shoes", level: 3 },
+  { id: "child-fashion-bags-backpacks", name: "Backpacks", slug: "fashion-backpacks", parentId: "sub-fashion-bags", level: 3 },
+
+  { id: "sub-fashion-womens-clothing", name: "Women’s clothing", slug: "womens-clothing", parentId: "cat-fashion", level: 2 },
+  { id: "sub-fashion-mens-clothing", name: "Men’s clothing", slug: "mens-clothing", parentId: "cat-fashion", level: 2 },
+  { id: "sub-fashion-shoes", name: "Shoes", slug: "shoes", parentId: "cat-fashion", level: 2 },
+  { id: "sub-fashion-bags", name: "Bags & accessories", slug: "bags-accessories", parentId: "cat-fashion", level: 2 },
+
+  { id: "sub-home-furniture", name: "Furniture", slug: "furniture", parentId: "cat-home-living", level: 2 },
+  { id: "sub-home-kitchen", name: "Kitchen & dining", slug: "kitchen-dining", parentId: "cat-home-living", level: 2 },
+  { id: "sub-home-bedding", name: "Bedding & bath", slug: "bedding-bath", parentId: "cat-home-living", level: 2 },
+  { id: "sub-home-decor", name: "Home décor", slug: "home-decor", parentId: "cat-home-living", level: 2 },
+  { id: "child-home-furniture-sofas", name: "Sofas", slug: "living-room-sofas", parentId: "sub-home-furniture", level: 3 },
+  { id: "child-home-furniture-tables", name: "Dining tables", slug: "dining-tables", parentId: "sub-home-furniture", level: 3 },
+  { id: "child-home-kitchen-cookware", name: "Cookware", slug: "kitchen-cookware", parentId: "sub-home-kitchen", level: 3 },
+  { id: "child-home-kitchen-storage", name: "Food storage", slug: "food-storage", parentId: "sub-home-kitchen", level: 3 },
+  { id: "child-home-bedding-sheets", name: "Bed sheets", slug: "bed-sheets", parentId: "sub-home-bedding", level: 3 },
+  { id: "child-home-decor-lighting", name: "Lighting", slug: "home-lighting", parentId: "sub-home-decor", level: 3 },
+
+  { id: "sub-beauty-skincare", name: "Skincare", slug: "skincare", parentId: "cat-beauty-health", level: 2 },
+  { id: "sub-beauty-makeup", name: "Makeup", slug: "makeup", parentId: "cat-beauty-health", level: 2 },
+  { id: "sub-beauty-haircare", name: "Hair care", slug: "hair-care", parentId: "cat-beauty-health", level: 2 },
+  { id: "sub-beauty-personal-care", name: "Personal care", slug: "personal-care", parentId: "cat-beauty-health", level: 2 },
+  { id: "child-beauty-skincare-serums", name: "Serums", slug: "skincare-serums", parentId: "sub-beauty-skincare", level: 3 },
+  { id: "child-beauty-skincare-moisturizers", name: "Moisturizers", slug: "skincare-moisturizers", parentId: "sub-beauty-skincare", level: 3 },
+  { id: "child-beauty-makeup-lips", name: "Lip makeup", slug: "lip-makeup", parentId: "sub-beauty-makeup", level: 3 },
+  { id: "child-beauty-makeup-face", name: "Face makeup", slug: "face-makeup", parentId: "sub-beauty-makeup", level: 3 },
+  { id: "child-beauty-hair-shampoo", name: "Shampoo", slug: "hair-shampoo", parentId: "sub-beauty-haircare", level: 3 },
+  { id: "child-beauty-personal-oral", name: "Oral care", slug: "oral-care", parentId: "sub-beauty-personal-care", level: 3 },
+
+  { id: "sub-grocery-rice-grains", name: "Rice & grains", slug: "rice-grains", parentId: "cat-groceries", level: 2 },
+  { id: "sub-grocery-oil-spices", name: "Oil & spices", slug: "oil-spices", parentId: "cat-groceries", level: 2 },
+  { id: "sub-grocery-snacks", name: "Snacks & beverages", slug: "snacks-beverages", parentId: "cat-groceries", level: 2 },
+  { id: "sub-grocery-household", name: "Household essentials", slug: "household-essentials", parentId: "cat-groceries", level: 2 },
+  { id: "child-grocery-rice-basmati", name: "Basmati rice", slug: "basmati-rice", parentId: "sub-grocery-rice-grains", level: 3 },
+  { id: "child-grocery-rice-miniket", name: "Miniket rice", slug: "miniket-rice", parentId: "sub-grocery-rice-grains", level: 3 },
+  { id: "child-grocery-spices-whole", name: "Whole spices", slug: "whole-spices", parentId: "sub-grocery-oil-spices", level: 3 },
+  { id: "child-grocery-spices-ground", name: "Ground spices", slug: "ground-spices", parentId: "sub-grocery-oil-spices", level: 3 },
+  { id: "child-grocery-snacks-biscuits", name: "Biscuits & cookies", slug: "biscuits-cookies", parentId: "sub-grocery-snacks", level: 3 },
+  { id: "child-grocery-household-cleaning", name: "Cleaning supplies", slug: "household-cleaning", parentId: "sub-grocery-household", level: 3 },
+
+  { id: "sub-baby-diapering", name: "Diapering", slug: "diapering", parentId: "cat-mother-baby", level: 2 },
+  { id: "sub-baby-feeding", name: "Feeding & nursing", slug: "feeding-nursing", parentId: "cat-mother-baby", level: 2 },
+  { id: "sub-baby-clothing", name: "Baby clothing", slug: "baby-clothing", parentId: "cat-mother-baby", level: 2 },
+  { id: "sub-baby-toys", name: "Toys & learning", slug: "toys-learning", parentId: "cat-mother-baby", level: 2 },
+  { id: "child-baby-diapering-tape", name: "Tape diapers", slug: "tape-diapers", parentId: "sub-baby-diapering", level: 3 },
+  { id: "child-baby-diapering-pants", name: "Pants diapers", slug: "pants-diapers", parentId: "sub-baby-diapering", level: 3 },
+  { id: "child-baby-feeding-bottles", name: "Baby bottles", slug: "baby-bottles", parentId: "sub-baby-feeding", level: 3 },
+  { id: "child-baby-feeding-sterilizers", name: "Bottle sterilizers", slug: "bottle-sterilizers", parentId: "sub-baby-feeding", level: 3 },
+  { id: "child-baby-clothing-sets", name: "Baby clothing sets", slug: "baby-clothing-sets", parentId: "sub-baby-clothing", level: 3 },
+  { id: "child-baby-toys-building", name: "Building toys", slug: "baby-building-toys", parentId: "sub-baby-toys", level: 3 },
+
+  { id: "sub-sports-fitness", name: "Fitness equipment", slug: "fitness-equipment", parentId: "cat-sports-outdoor", level: 2 },
+  { id: "sub-sports-cycling", name: "Cycling", slug: "cycling", parentId: "cat-sports-outdoor", level: 2 },
+  { id: "sub-sports-outdoor-gear", name: "Outdoor & camping", slug: "outdoor-camping", parentId: "cat-sports-outdoor", level: 2 },
+  { id: "sub-sports-team", name: "Team sports", slug: "team-sports", parentId: "cat-sports-outdoor", level: 2 },
+  { id: "child-sports-fitness-dumbbells", name: "Dumbbells", slug: "fitness-dumbbells", parentId: "sub-sports-fitness", level: 3 },
+  { id: "child-sports-fitness-yoga", name: "Yoga mats", slug: "yoga-mats", parentId: "sub-sports-fitness", level: 3 },
+  { id: "child-sports-cycling-helmets", name: "Cycling helmets", slug: "cycling-helmets", parentId: "sub-sports-cycling", level: 3 },
+  { id: "child-sports-cycling-accessories", name: "Bike accessories", slug: "bike-accessories", parentId: "sub-sports-cycling", level: 3 },
+  { id: "child-sports-camping-tents", name: "Tents", slug: "camping-tents", parentId: "sub-sports-outdoor-gear", level: 3 },
+  { id: "child-sports-team-football", name: "Football", slug: "team-football", parentId: "sub-sports-team", level: 3 },
+
+  { id: "sub-books-fiction", name: "Fiction & literature", slug: "fiction-literature", parentId: "cat-books-stationery", level: 2 },
+  { id: "sub-books-educational", name: "Educational books", slug: "educational-books", parentId: "cat-books-stationery", level: 2 },
+  { id: "sub-books-office", name: "Office supplies", slug: "office-supplies", parentId: "cat-books-stationery", level: 2 },
+  { id: "sub-books-art", name: "Art & craft supplies", slug: "art-craft-supplies", parentId: "cat-books-stationery", level: 2 },
+  { id: "child-books-fiction-novels", name: "Novels", slug: "fiction-novels", parentId: "sub-books-fiction", level: 3 },
+  { id: "child-books-fiction-poetry", name: "Poetry", slug: "fiction-poetry", parentId: "sub-books-fiction", level: 3 },
+  { id: "child-books-educational-school", name: "School textbooks", slug: "school-textbooks", parentId: "sub-books-educational", level: 3 },
+  { id: "child-books-educational-test-prep", name: "Test preparation", slug: "test-preparation-books", parentId: "sub-books-educational", level: 3 },
+  { id: "child-books-office-notebooks", name: "Notebooks", slug: "office-notebooks", parentId: "sub-books-office", level: 3 },
+  { id: "child-books-art-painting", name: "Painting supplies", slug: "painting-supplies", parentId: "sub-books-art", level: 3 },
 ];

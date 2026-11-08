@@ -1,7 +1,7 @@
 import { navbarData } from "@/data/navbar";
 import type { NavbarData } from "@/types/navigation";
 
-export async function getNavbarData(): Promise<NavbarData> {
+export async function getNavbarData(): Promise<Omit<NavbarData, "categories">> {
   return navbarData;
 }
 

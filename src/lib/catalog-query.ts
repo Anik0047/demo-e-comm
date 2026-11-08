@@ -1,7 +1,7 @@
 import { CATALOG_SORTS } from "@/types/catalog";
 import type { ListingState, ListingCommittedAction, ListingTransition, ListingNotice, ParsedListingQuery, RawListingQuery } from "@/types/catalog";
 
-const keys = ["category", "vendor", "search", "minPrice", "maxPrice", "availability", "promotion", "freeShipping", "sort", "page"] as const;
+const keys = ["category", "subcategory", "child", "vendor", "search", "minPrice", "maxPrice", "availability", "promotion", "freeShipping", "sort", "page"] as const;
 const messages: Record<ListingNotice["reason"], string> = {
   "unavailable-filter": "An unavailable filter was removed.",
   "invalid-price": "Enter a valid whole-taka price range.",
@@ -25,7 +25,7 @@ export function parseListingQuery(raw: RawListingQuery): ParsedListingQuery {
     const value = raw instanceof URLSearchParams ? raw.get(key) : raw[key];
     return Array.isArray(value) ? value[0] : value ?? undefined;
   };
-  for (const key of ["category", "vendor"] as const) {
+  for (const key of ["category", "subcategory", "child", "vendor"] as const) {
     const value = first(key);
     if (!value) continue;
     if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) state[key] = value;
@@ -80,15 +80,20 @@ export function serializeListingState(state: ListingState): string {
   }
   return query.toString();
 }
-export function buildProductsHref(state: ListingState = { sort: "catalog", page: 1 }): string {
+export function buildProductsHref(state: ListingState = { sort: "catalog", page: 1 }, basePath = "/products"): string {
   const query = serializeListingState(state);
-  return `/products${query ? `?${query}` : ""}`;
+  return `${basePath}${query ? `?${query}` : ""}`;
 }
-export function transitionListingState(applied: ListingState, action: ListingCommittedAction): ListingTransition {
+export function transitionListingState(applied: ListingState, action: ListingCommittedAction, basePath = "/products"): ListingTransition {
   let candidate = { ...applied };
   let priceText: { minPrice: string; maxPrice: string } | undefined;
   switch (action.type) {
-    case "filters": candidate = { ...candidate, ...action.values }; break;
+    case "filters": {
+      const previousSubcategory = candidate.subcategory;
+      candidate = { ...candidate, ...action.values };
+      if (candidate.subcategory !== previousSubcategory) delete candidate.child;
+      break;
+    }
     case "search": candidate.search = action.value; break;
     case "price": priceText = action; break;
     case "sort": candidate.sort = action.value; break;
@@ -105,5 +110,5 @@ export function transitionListingState(applied: ListingState, action: ListingCom
   let changed = serializeListingState(parsed.state) !== serializeListingState(applied);
   if (action.type === "clear" && applied.page !== 1) changed = true;
   if (changed && action.type !== "page") parsed.state.page = 1;
-  return { ...parsed, changed, href: buildProductsHref(parsed.state) };
+  return { ...parsed, changed, href: buildProductsHref(parsed.state, basePath) };
 }

@@ -14,9 +14,10 @@ const subscribeToHydration = () => () => {};
 
 interface ListingControlsProps {
   state: ListingState; options: ListingOptions; href: string; rawQuery: string;
-  notices: ListingNotice[]; count: string; children: ReactNode;
+  notices: ListingNotice[]; count: string; children: ReactNode; basePath?: string; categoryLabel?: string;
+  subcategoryScope?: string;
 }
-export function ListingControls({ state, options, href, rawQuery, notices, count, children }: ListingControlsProps) {
+export function ListingControls({ state, options, href, rawQuery, notices, count, children, basePath = "/products", categoryLabel, subcategoryScope }: ListingControlsProps) {
   const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const router = useRouter();
   const params = useSearchParams();
@@ -42,11 +43,11 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
     const current = params.toString();
     const expected = href.split("?")[1] ?? "";
     // Only normalize the exact query that produced these server props.
-    if (!pending && window.location.pathname === "/products" && new URLSearchParams(window.location.search).toString() === current && current === rawQuery && current !== expected) router.replace(href, { scroll: false });
-  }, [href, rawQuery, params, pending, router]);
+    if (!pending && window.location.pathname === basePath && new URLSearchParams(window.location.search).toString() === current && current === rawQuery && current !== expected) router.replace(href, { scroll: false });
+  }, [href, rawQuery, params, pending, router, basePath]);
   function commit(action: ListingCommittedAction) {
     if (pending) return;
-    const next = transitionListingState(state, action);
+    const next = transitionListingState(state, action, basePath);
     if (action.type === "price" && next.notices.length) { setPriceError("Enter a valid whole-taka price range."); return; }
     setPriceError("");
     setMessages([]);
@@ -61,7 +62,7 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
     <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[224px_minmax(0,1fr)]">
       <aside aria-label="Product filters" className="hidden min-w-0 self-start rounded-2xl border border-line bg-canvas p-4 lg:block">
         <h2 className="mb-5 text-lg font-bold">Filters</h2>
-        <fieldset disabled={!hydrated || pending} className="min-w-0"><FilterFields values={selection} options={options} {...prices} onChange={(values) => commit({ type: "filters", values })} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} onApplyPrice={() => commit({ type: "price", ...prices })} /></fieldset>
+        <fieldset disabled={!hydrated || pending} className="min-w-0"><FilterFields values={selection} options={options} {...prices} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope} onChange={(values) => commit({ type: "filters", values })} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} onApplyPrice={() => commit({ type: "price", ...prices })} /></fieldset>
         {priceError && <p role="alert" className="mt-3 text-sm text-sale">{priceError}</p>}
       </aside>
       <div className="min-w-0">
@@ -76,6 +77,6 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
         <div aria-busy={pending} inert={pending}>{children}</div>
       </div>
     </div>
-    {open && <MobileFilterDialog state={state} options={options} onClose={close} onApply={(values) => { close(); commit({ type: "filters", values }); }} />}
+    {open && <MobileFilterDialog state={state} options={options} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope} onClose={close} onApply={(values) => { close(); commit({ type: "filters", values }); }} />}
   </>;
 }

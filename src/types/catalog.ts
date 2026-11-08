@@ -7,6 +7,8 @@ export type CatalogSort = (typeof CATALOG_SORTS)[number];
 export const CATALOG_PAGE_SIZE = 12;
 export interface ListingState {
   category?: string;
+  subcategory?: string;
+  child?: string;
   vendor?: string;
   search?: string;
   minPrice?: number;
@@ -19,8 +21,8 @@ export interface ListingState {
 }
 export type ListingFilterKey = Exclude<keyof ListingState, "sort" | "page">;
 export type ListingFilters = Pick<ListingState, ListingFilterKey>;
-export interface ListingOption { slug: string; name: string }
-export interface ListingOptions { categories: ListingOption[]; vendors: ListingOption[] }
+export interface ListingOption { slug: string; name: string; parentSlug?: string }
+export interface ListingOptions { categories: ListingOption[]; subcategories?: ListingOption[]; children?: ListingOption[]; vendors: ListingOption[] }
 export interface ListingNotice {
   reason: "unavailable-filter" | "invalid-price" | "truncated-search" | "invalid-sort" | "invalid-page";
   message: string;

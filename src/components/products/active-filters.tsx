@@ -5,6 +5,8 @@ interface ActiveFiltersProps { state: ListingState; options: ListingOptions; onR
 export function ActiveFilters({ state, options, onRemove, onClear }: ActiveFiltersProps) {
   const labels: Partial<Record<ListingFilterKey, string>> = {
     category: options.categories.find((option) => option.slug === state.category)?.name ?? state.category,
+    subcategory: options.subcategories?.find((option) => option.slug === state.subcategory)?.name ?? state.subcategory,
+    child: options.children?.find((option) => option.slug === state.child)?.name ?? state.child,
     vendor: options.vendors.find((option) => option.slug === state.vendor)?.name ?? state.vendor,
     search: state.search ? `Search: ${state.search}` : undefined,
     minPrice: state.minPrice === undefined ? undefined : `From ${formatPrice(state.minPrice)}`,

@@ -32,7 +32,7 @@ export function MainHeader({
         </button>
 
         <Link
-          href="#"
+          href="/"
           className="flex items-center gap-2 max-[359px]:gap-1.5 shrink-0"
           aria-label="Kenakata home"
         >
@@ -68,4 +68,3 @@ export function MainHeader({
     </header>
   );
 }
-

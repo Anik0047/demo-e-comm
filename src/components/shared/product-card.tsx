@@ -15,7 +15,6 @@ interface ProductCardProps {
   deal?: { soldCount: number; stockLimit: number };
 }
 export function ProductCard({ product, deal }: ProductCardProps) {
-  const pct = deal ? Math.round((deal.soldCount / deal.stockLimit) * 100) : 0;
   return (
     <article className="flex flex-col h-full rounded-2xl border border-line bg-white overflow-hidden hover:border-brand transition-colors">
       <div className="relative">

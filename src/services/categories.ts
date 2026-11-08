@@ -1,15 +1,15 @@
-import { mainCategories } from "@/data/categories";
+import { categories, mainCategories } from "@/data/categories";
 import type { Category, MainCategory } from "@/types/category";
 
 export async function getMainCategories(): Promise<MainCategory[]> {
   return mainCategories;
 }
 
-// Canonical lookup only: navbar subcategory labels are not category records.
+// Canonical flat hierarchy used by catalog lookups.
 export async function getCatalogCategories(): Promise<Category[]> {
-  return mainCategories;
+  return categories;
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | undefined> {
-  return mainCategories.find((category) => category.slug === slug);
+  return categories.find((category) => category.slug === slug);
 }

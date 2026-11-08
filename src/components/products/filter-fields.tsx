@@ -9,19 +9,33 @@ interface FilterFieldsProps {
   onChange: (values: ListingFilters) => void;
   onPriceChange: (key: "minPrice" | "maxPrice", value: string) => void;
   onApplyPrice?: () => void;
+  categoryLabel?: string;
+  subcategoryScope?: string;
 }
 
-export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice }: FilterFieldsProps) {
+export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice, categoryLabel = "Category", subcategoryScope }: FilterFieldsProps) {
   const id = useId();
+  const categories = options.subcategories ?? [];
+  const children = options.children ?? [];
+  const selectedSubcategory = values.subcategory ?? subcategoryScope;
+  const hasHierarchy = options.subcategories !== undefined;
+  const showMainCategory = hasHierarchy && !subcategoryScope && categoryLabel !== "Subcategory" && options.categories.length > 0;
+  const showSubcategory = hasHierarchy && (categoryLabel === "Subcategory" || (!subcategoryScope && !!values.category));
+  const filterKeys = [
+    ...(showMainCategory || (!hasHierarchy && options.categories.length > 0) ? (["category"] as const) : []),
+    ...(showSubcategory ? (["subcategory"] as const) : []),
+    ...(children.some((option) => option.parentSlug === selectedSubcategory) ? (["child"] as const) : []),
+    "vendor" as const,
+  ];
   return (
     <fieldset className="min-w-0 space-y-5">
       <legend className="sr-only">Filter products</legend>
-      {(["category", "vendor"] as const).map((key) => (
+      {filterKeys.map((key) => (
         <label key={key} className="block text-sm font-bold">
-          {key === "category" ? "Category" : "Vendor"}
-          <select className="input mt-2 w-full min-w-0 font-normal" value={values[key] ?? ""} onChange={(event) => onChange({ [key]: event.target.value || undefined })}>
-            <option value="">{key === "category" ? "All categories" : "All vendors"}</option>
-            {options[key === "category" ? "categories" : "vendors"].map((option) => <option key={option.slug} value={option.slug}>{option.name}</option>)}
+          {key === "subcategory" ? "Subcategory" : key === "child" ? "Child category" : key === "category" ? categoryLabel : "Vendor"}
+          <select className="input mt-2 w-full min-w-0 font-normal" value={key === "subcategory" ? selectedSubcategory ?? "" : values[key] ?? ""} onChange={(event) => onChange(key === "subcategory" ? { subcategory: event.target.value || undefined, child: undefined } : key === "child" ? { subcategory: selectedSubcategory, child: event.target.value || undefined } : key === "category" ? { category: event.target.value || undefined, subcategory: undefined, child: undefined } : { [key]: event.target.value || undefined })}>
+            <option value="">{key === "subcategory" ? "All subcategories" : key === "child" ? "All child categories" : key === "category" ? categoryLabel === "Subcategory" ? "All subcategories" : "All categories" : "All vendors"}</option>
+            {(key === "subcategory" ? categories.filter((option) => !values.category || option.parentSlug === values.category) : key === "child" ? children.filter((option) => !!selectedSubcategory && option.parentSlug === selectedSubcategory) : key === "category" ? options.categories : options.vendors).map((option) => <option key={option.slug} value={option.slug}>{option.name}</option>)}
           </select>
         </label>
       ))}

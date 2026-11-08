@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { ChevronDown, Menu } from "lucide-react";
-import type { CategoryGroup } from "@/types/navigation";
+import type { Category } from "@/types/category";
 import { MegaMenu } from "./mega-menu";
 
 interface CategoryNavProps {
-  categories: CategoryGroup[];
+  categories: Category[];
 }
 
 export function CategoryNav({ categories }: CategoryNavProps) {
@@ -26,7 +26,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
           <span className="w-1.5 h-1.5 rounded-full bg-sale" />
           Flash deals
         </Link>
-        <Link href="#" className="hover:text-brand">
+        <Link href="/" className="hover:text-brand">
           Vouchers
         </Link>
         <Link href="/products?sort=newest" className="hover:text-brand">
@@ -51,4 +51,3 @@ export function CategoryNav({ categories }: CategoryNavProps) {
     </nav>
   );
 }
-
