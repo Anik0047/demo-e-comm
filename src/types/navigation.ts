@@ -1,7 +1,4 @@
-export interface CategoryGroup {
-  name: string;
-  subcategories: string[];
-}
+import type { Category } from "@/types/category";
 
 export interface CartItem {
   id: string;
@@ -12,7 +9,7 @@ export interface CartItem {
 
 export interface NavbarData {
   topStripMessage: string;
-  categories: CategoryGroup[];
+  categories: Category[];
   cartItems: CartItem[];
   wishlistCount: number;
 }

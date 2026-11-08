@@ -41,6 +41,8 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
   const vendors = new Map(data.vendors.map((vendor) => [vendor.id, vendor]));
   const deals = new Map(data.deals.map((deal) => [deal.productId, deal]));
   const categories = applied.category ? categoryClosure(data, applied.category) : undefined;
+  const subcategories = applied.subcategory ? categoryClosure(data, applied.subcategory) : undefined;
+  const children = applied.child ? categoryClosure(data, applied.child) : undefined;
   const scopedCategories = categoryScope ? categoryClosure(data, categoryScope) : undefined;
   const tokens = applied.search?.toLowerCase().split(/\s+/u).filter(Boolean) ?? [];
   const rows: CatalogRow[] = [];
@@ -53,6 +55,8 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
     const price = deal?.dealPrice ?? product.price;
     const inStock = (!product.trackInventory || product.stock > 0) && (!deal || deal.soldCount < deal.stockLimit);
     if (categories && !categories.has(product.categoryId)) continue;
+    if (subcategories && !subcategories.has(product.categoryId)) continue;
+    if (children && !children.has(product.categoryId)) continue;
     if (scopedCategories && !scopedCategories.has(product.categoryId)) continue;
     if (applied.vendor && vendor.slug !== applied.vendor) continue;
     if (applied.minPrice !== undefined && price < applied.minPrice) continue;

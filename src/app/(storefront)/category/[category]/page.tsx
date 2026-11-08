@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ListingSkeleton } from "@/components/products/listing-states";
 import { ProductListing } from "@/components/products/product-listing";
-import { getCatalogCategories, getCategoryBySlug } from "@/services/categories";
+import { getCategoryBySlug } from "@/services/categories";
 import type { RawListingQuery } from "@/types/catalog";
 
 interface CategoryPageProps {
@@ -25,16 +25,10 @@ export async function generateMetadata({ params }: Pick<CategoryPageProps, "para
 
 async function MainCategoryContent({ params, searchParams }: CategoryPageProps) {
   const { category: slug } = await params;
-  const [category, catalogCategories] = await Promise.all([
-    getCategoryBySlug(slug),
-    getCatalogCategories(),
-  ]);
+  const category = await getCategoryBySlug(slug);
 
   if (!category || category.level !== 1) notFound();
 
-  const subcategories = catalogCategories.filter(
-    (item) => item.level === 2 && item.parentId === category.id,
-  );
   const basePath = `/category/${category.slug}`;
 
   return (
@@ -55,24 +49,6 @@ async function MainCategoryContent({ params, searchParams }: CategoryPageProps) 
           Browse products from trusted sellers across {category.name.toLowerCase()}.
         </p>
       </header>
-
-      {subcategories.length > 0 && (
-        <nav aria-label={`Filter ${category.name} by subcategory`} className="mb-6 md:mb-8">
-          <h2 className="mb-3 text-sm font-bold text-ink">Shop by subcategory</h2>
-          <ul className="flex flex-wrap gap-2">
-            {subcategories.map((subcategory) => (
-              <li key={subcategory.id}>
-                <Link
-                  href={`${basePath}?category=${subcategory.slug}`}
-                  className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-sm font-medium hover:border-brand-border hover:bg-brand-tint hover:text-brand-strong"
-                >
-                  {subcategory.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
 
       <Suspense fallback={<ListingSkeleton />}>
         <ProductListing

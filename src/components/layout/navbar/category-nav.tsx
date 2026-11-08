@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { ChevronDown, Menu } from "lucide-react";
-import type { CategoryGroup } from "@/types/navigation";
+import type { Category } from "@/types/category";
 import { MegaMenu } from "./mega-menu";
 
 interface CategoryNavProps {
-  categories: CategoryGroup[];
+  categories: Category[];
 }
 
 export function CategoryNav({ categories }: CategoryNavProps) {

@@ -1,7 +1,7 @@
 import { CATALOG_SORTS } from "@/types/catalog";
 import type { ListingState, ListingCommittedAction, ListingTransition, ListingNotice, ParsedListingQuery, RawListingQuery } from "@/types/catalog";
 
-const keys = ["category", "vendor", "search", "minPrice", "maxPrice", "availability", "promotion", "freeShipping", "sort", "page"] as const;
+const keys = ["category", "subcategory", "child", "vendor", "search", "minPrice", "maxPrice", "availability", "promotion", "freeShipping", "sort", "page"] as const;
 const messages: Record<ListingNotice["reason"], string> = {
   "unavailable-filter": "An unavailable filter was removed.",
   "invalid-price": "Enter a valid whole-taka price range.",
@@ -25,7 +25,7 @@ export function parseListingQuery(raw: RawListingQuery): ParsedListingQuery {
     const value = raw instanceof URLSearchParams ? raw.get(key) : raw[key];
     return Array.isArray(value) ? value[0] : value ?? undefined;
   };
-  for (const key of ["category", "vendor"] as const) {
+  for (const key of ["category", "subcategory", "child", "vendor"] as const) {
     const value = first(key);
     if (!value) continue;
     if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) state[key] = value;
@@ -88,7 +88,12 @@ export function transitionListingState(applied: ListingState, action: ListingCom
   let candidate = { ...applied };
   let priceText: { minPrice: string; maxPrice: string } | undefined;
   switch (action.type) {
-    case "filters": candidate = { ...candidate, ...action.values }; break;
+    case "filters": {
+      const previousSubcategory = candidate.subcategory;
+      candidate = { ...candidate, ...action.values };
+      if (candidate.subcategory !== previousSubcategory) delete candidate.child;
+      break;
+    }
     case "search": candidate.search = action.value; break;
     case "price": priceText = action; break;
     case "sort": candidate.sort = action.value; break;
