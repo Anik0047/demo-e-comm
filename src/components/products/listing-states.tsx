@@ -31,14 +31,14 @@ export function ListingSkeleton() {
   );
 }
 
-export function ListingEmpty({ state }: { state: ListingState }) {
+export function ListingEmpty({ state, basePath = "/products" }: { state: ListingState; basePath?: string }) {
   const retained = new URLSearchParams(serializeListingState({ ...state, search: undefined, page: 1 }));
   return (
     <div className="rounded-2xl border border-line bg-canvas p-6 sm:p-8">
       <SearchX className="mb-4 size-6 text-mute" aria-hidden="true" />
       <h2 className="text-xl font-bold">No products found</h2>
       <p className="mt-2 text-sm text-mute">Try another search or clear your filters to browse more products.</p>
-      <form action="/products" method="get" className="mt-6 max-w-lg">
+      <form action={basePath} method="get" className="mt-6 max-w-lg">
         {Array.from(retained.entries()).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
         <label htmlFor="empty-search" className="mb-2 block text-sm font-bold">Edit search</label>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -46,7 +46,7 @@ export function ListingEmpty({ state }: { state: ListingState }) {
           <button type="submit" className={actionClass}>Search</button>
         </div>
       </form>
-      <Link href={buildProductsHref({ sort: state.sort, page: 1 })} className={`${actionClass} mt-4`}>Clear filters</Link>
+      <Link href={buildProductsHref({ sort: state.sort, page: 1 }, basePath)} className={`${actionClass} mt-4`}>Clear filters</Link>
     </div>
   );
 }

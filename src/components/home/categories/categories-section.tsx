@@ -14,7 +14,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
       <h2 id="cat-title" className="font-head font-bold text-xl sm:text-2xl">Shop by category</h2>
       <p className="hidden sm:block text-sm text-mute mt-1">Find what you need from thousands of vendors</p>
     </div>
-    <Link href="#" className="shrink-0 text-sm font-bold text-brand-strong hover:underline">View all →</Link>
+    <Link href="/categories" className="shrink-0 text-sm font-bold text-brand-strong hover:underline">View all →</Link>
   </div>
   <ul className="grid grid-cols-4 md:grid-cols-8 gap-x-2 gap-y-5 sm:gap-x-3 md:gap-4 lg:gap-6">
         {categories.map((category) => <CategoryTile key={category.id} category={category} />)}

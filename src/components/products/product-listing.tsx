@@ -22,9 +22,17 @@ function headingFor({ state, options }: ListingResult) {
   return context ? `${title} · ${context}` : title;
 }
 
-export async function ProductListing({ searchParams }: { searchParams: Promise<RawListingQuery> }) {
+interface ProductListingProps {
+  searchParams: Promise<RawListingQuery>;
+  categoryScope?: string;
+  basePath?: string;
+  showHeading?: boolean;
+  categoryLabel?: string;
+}
+
+export async function ProductListing({ searchParams, categoryScope, basePath = "/products", showHeading = true, categoryLabel }: ProductListingProps) {
   const raw = await searchParams;
-  const result = await getProductListing(raw);
+  const result = await getProductListing(raw, undefined, categoryScope, basePath);
   const query = new URLSearchParams();
   if (raw instanceof URLSearchParams) raw.forEach((value, key) => query.append(key, value));
   else for (const [key, value] of Object.entries(raw)) {
@@ -34,15 +42,15 @@ export async function ProductListing({ searchParams }: { searchParams: Promise<R
   const count = result.status === "unavailable" ? "Products are unavailable" : result.totalResults === 0 ? "0 products" : `Showing ${(result.state.page - 1) * result.pageSize + 1}–${(result.state.page - 1) * result.pageSize + result.items.length} of ${result.totalResults} products`;
   return (
     <>
-      <header className="mb-6 min-w-0">
+      {showHeading && <header className="mb-6 min-w-0">
         <h1 className="font-head text-3xl font-extrabold break-words sm:text-4xl">{headingFor(result)}</h1>
         {result.state.promotion && <p className="mt-3 text-sm text-mute">Flash deal prices are shown below, alongside regular prices.</p>}
         {result.state.promotion && result.state.search && <p className="mt-2 text-sm text-mute break-words">Search results for “{result.state.search}”</p>}
-      </header>
-      <ListingControls state={result.state} options={result.options} href={result.href} rawQuery={query.toString()} notices={result.notices} count={count}>
+      </header>}
+      <ListingControls state={result.state} options={result.options} href={result.href} rawQuery={query.toString()} notices={result.notices} count={count} basePath={basePath} categoryLabel={categoryLabel}>
         {result.status === "unavailable" ? <ListingUnavailableState result={result} /> : <>
-          {result.items.length > 0 ? <ProductGrid items={result.items} /> : <ListingEmpty state={result.state} />}
-          <Pagination state={result.state} totalPages={result.totalPages} />
+          {result.items.length > 0 ? <ProductGrid items={result.items} /> : <ListingEmpty state={result.state} basePath={basePath} />}
+          <Pagination state={result.state} totalPages={result.totalPages} basePath={basePath} />
         </>}
       </ListingControls>
     </>

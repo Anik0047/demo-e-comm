@@ -9,18 +9,19 @@ interface FilterFieldsProps {
   onChange: (values: ListingFilters) => void;
   onPriceChange: (key: "minPrice" | "maxPrice", value: string) => void;
   onApplyPrice?: () => void;
+  categoryLabel?: string;
 }
 
-export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice }: FilterFieldsProps) {
+export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice, categoryLabel = "Category" }: FilterFieldsProps) {
   const id = useId();
   return (
     <fieldset className="min-w-0 space-y-5">
       <legend className="sr-only">Filter products</legend>
       {(["category", "vendor"] as const).map((key) => (
         <label key={key} className="block text-sm font-bold">
-          {key === "category" ? "Category" : "Vendor"}
+          {key === "category" ? categoryLabel : "Vendor"}
           <select className="input mt-2 w-full min-w-0 font-normal" value={values[key] ?? ""} onChange={(event) => onChange({ [key]: event.target.value || undefined })}>
-            <option value="">{key === "category" ? "All categories" : "All vendors"}</option>
+            <option value="">{key === "category" ? categoryLabel === "Subcategory" ? "All subcategories" : "All categories" : "All vendors"}</option>
             {options[key === "category" ? "categories" : "vendors"].map((option) => <option key={option.slug} value={option.slug}>{option.name}</option>)}
           </select>
         </label>

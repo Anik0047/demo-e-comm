@@ -46,6 +46,24 @@ export const flashDeals: FlashDeal[] = [
     "startsAt": "2026-11-01T00:00:00.000Z",
     "endsAt": "2026-11-30T23:59:59.000Z"
   },
+  {
+    "id": "deal-6",
+    "productId": "prod-over-ear-headphones",
+    "dealPrice": 2790,
+    "stockLimit": 80,
+    "soldCount": 26,
+    "startsAt": "2026-11-01T00:00:00.000Z",
+    "endsAt": "2026-11-30T23:59:59.000Z"
+  },
+  {
+    "id": "deal-7",
+    "productId": "prod-womens-cotton-kurti",
+    "dealPrice": 1190,
+    "stockLimit": 70,
+    "soldCount": 18,
+    "startsAt": "2026-11-01T00:00:00.000Z",
+    "endsAt": "2026-11-30T23:59:59.000Z"
+  },
   // {
   //   "id": "deal-6",
   //   "productId": "prod-android-smartphone-128gb",
@@ -81,5 +99,13 @@ export const flashDealPlaceholders: Record<string, NonNullable<ProductCardData["
   "prod-android-smartphone-128gb": {
     "icon": "smartphone",
     "tone": "mint"
+  },
+  "prod-over-ear-headphones": {
+    "icon": "headphones",
+    "tone": "info"
+  },
+  "prod-womens-cotton-kurti": {
+    "icon": "shirt",
+    "tone": "blush"
   }
 };

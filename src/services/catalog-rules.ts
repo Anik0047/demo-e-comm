@@ -37,10 +37,11 @@ function compareRows(a: CatalogRow, b: CatalogRow, sort: ListingState["sort"]): 
 }
 
 // Input has passed catalog validation and slug resolution at the service boundary.
-export function queryCatalog(data: CatalogDataset, applied: ListingState): CatalogQueryResult {
+export function queryCatalog(data: CatalogDataset, applied: ListingState, categoryScope?: string): CatalogQueryResult {
   const vendors = new Map(data.vendors.map((vendor) => [vendor.id, vendor]));
   const deals = new Map(data.deals.map((deal) => [deal.productId, deal]));
   const categories = applied.category ? categoryClosure(data, applied.category) : undefined;
+  const scopedCategories = categoryScope ? categoryClosure(data, categoryScope) : undefined;
   const tokens = applied.search?.toLowerCase().split(/\s+/u).filter(Boolean) ?? [];
   const rows: CatalogRow[] = [];
   for (const product of data.products) {
@@ -52,6 +53,7 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState): Catal
     const price = deal?.dealPrice ?? product.price;
     const inStock = (!product.trackInventory || product.stock > 0) && (!deal || deal.soldCount < deal.stockLimit);
     if (categories && !categories.has(product.categoryId)) continue;
+    if (scopedCategories && !scopedCategories.has(product.categoryId)) continue;
     if (applied.vendor && vendor.slug !== applied.vendor) continue;
     if (applied.minPrice !== undefined && price < applied.minPrice) continue;
     if (applied.maxPrice !== undefined && price > applied.maxPrice) continue;

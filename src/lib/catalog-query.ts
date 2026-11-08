@@ -80,11 +80,11 @@ export function serializeListingState(state: ListingState): string {
   }
   return query.toString();
 }
-export function buildProductsHref(state: ListingState = { sort: "catalog", page: 1 }): string {
+export function buildProductsHref(state: ListingState = { sort: "catalog", page: 1 }, basePath = "/products"): string {
   const query = serializeListingState(state);
-  return `/products${query ? `?${query}` : ""}`;
+  return `${basePath}${query ? `?${query}` : ""}`;
 }
-export function transitionListingState(applied: ListingState, action: ListingCommittedAction): ListingTransition {
+export function transitionListingState(applied: ListingState, action: ListingCommittedAction, basePath = "/products"): ListingTransition {
   let candidate = { ...applied };
   let priceText: { minPrice: string; maxPrice: string } | undefined;
   switch (action.type) {
@@ -105,5 +105,5 @@ export function transitionListingState(applied: ListingState, action: ListingCom
   let changed = serializeListingState(parsed.state) !== serializeListingState(applied);
   if (action.type === "clear" && applied.page !== 1) changed = true;
   if (changed && action.type !== "page") parsed.state.page = 1;
-  return { ...parsed, changed, href: buildProductsHref(parsed.state) };
+  return { ...parsed, changed, href: buildProductsHref(parsed.state, basePath) };
 }

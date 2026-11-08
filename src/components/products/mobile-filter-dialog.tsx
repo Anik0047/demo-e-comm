@@ -6,8 +6,8 @@ import { FilterFields } from "@/components/products/filter-fields";
 import { transitionListingState } from "@/lib/catalog-query";
 import type { ListingFilters, ListingOptions, ListingState } from "@/types/catalog";
 
-interface MobileFilterDialogProps { state: ListingState; options: ListingOptions; onClose: () => void; onApply: (values: ListingFilters) => void }
-export function MobileFilterDialog({ state, options, onClose, onApply }: MobileFilterDialogProps) {
+interface MobileFilterDialogProps { state: ListingState; options: ListingOptions; onClose: () => void; onApply: (values: ListingFilters) => void; categoryLabel?: string }
+export function MobileFilterDialog({ state, options, onClose, onApply, categoryLabel }: MobileFilterDialogProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [filters, setFilters] = useState<ListingFilters>(state);
   const [prices, setPrices] = useState({ minPrice: String(state.minPrice ?? ""), maxPrice: String(state.maxPrice ?? "") });
@@ -36,7 +36,7 @@ export function MobileFilterDialog({ state, options, onClose, onApply }: MobileF
       onApply({ category: filters.category, vendor: filters.vendor, availability: filters.availability, promotion: filters.promotion, freeShipping: filters.freeShipping, minPrice: parsed.state.minPrice, maxPrice: parsed.state.maxPrice });
     }}>
       <div className="mb-5 flex items-center justify-between gap-3"><h2 id="filter-dialog-title" className="text-xl font-bold">Filters</h2><button type="button" aria-label="Close filters" className="grid size-11 place-items-center rounded-full hover:bg-soft" onClick={onClose}><X aria-hidden="true" className="size-5" /></button></div>
-      <FilterFields values={filters} options={options} {...prices} onChange={(values) => setFilters((current) => ({ ...current, ...values }))} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} />
+      <FilterFields values={filters} options={options} {...prices} categoryLabel={categoryLabel} onChange={(values) => setFilters((current) => ({ ...current, ...values }))} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} />
       {error && <p role="alert" className="mt-3 text-sm text-sale">{error}</p>}
       <div className="mt-6 flex gap-3"><button type="button" className="btn btn-outline btn-md flex-1" onClick={onClose}>Cancel</button><button type="submit" className="btn btn-primary btn-md flex-1">Apply filters</button></div>
     </form>
