@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Heart, Menu, ShoppingBag } from "lucide-react";
-import type { CartItem } from "@/types/navigation";
+import type { CartItem, SearchProduct } from "@/types/navigation";
 import { SearchForm } from "./search-form";
 import { AccountMenu } from "./account-menu";
 import { MiniCart } from "./mini-cart";
@@ -9,12 +9,18 @@ interface MainHeaderProps {
   onOpenDrawer: () => void;
   wishlistCount: number;
   cartItems: CartItem[];
+  categories: import("@/types/category").Category[];
+  searchProducts: SearchProduct[];
+  popularSearches: string[];
 }
 
 export function MainHeader({
   onOpenDrawer,
   wishlistCount,
   cartItems,
+  categories,
+  searchProducts,
+  popularSearches,
 }: MainHeaderProps) {
   return (
     <header
@@ -44,7 +50,7 @@ export function MainHeader({
           </span>
         </Link>
 
-        <SearchForm />
+        <SearchForm categories={categories} searchProducts={searchProducts} popularSearches={popularSearches} />
 
         <div className="ml-auto md:ml-0 flex items-center gap-1 sm:gap-2">
           <Link
@@ -64,7 +70,7 @@ export function MainHeader({
         </div>
       </div>
 
-      <SearchForm mobile />
+      <SearchForm mobile categories={categories} searchProducts={searchProducts} popularSearches={popularSearches} />
     </header>
   );
 }

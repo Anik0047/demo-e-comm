@@ -12,5 +12,15 @@ export interface NavbarData {
   categories: Category[];
   cartItems: CartItem[];
   wishlistCount: number;
+  searchProducts: SearchProduct[];
+  popularSearches: string[];
+}
+
+export interface SearchProduct {
+  id: string;
+  name: string;
+  categoryName: string;
+  categorySlug: string;
+  searchFields: string[];
 }
 

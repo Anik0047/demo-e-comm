@@ -25,6 +25,35 @@ export function getCatalogOptions(data: CatalogDataset = catalog): ListingOption
   return optionsFrom(data, validateCatalog(data));
 }
 
+export function getGlobalSearchData(data: CatalogDataset = catalog) {
+  const categoryById = new Map(data.categories.map((category) => [category.id, category]));
+  const mainCategoryFor = (categoryId: string) => {
+    let category = categoryById.get(categoryId);
+    while (category?.parentId) category = categoryById.get(category.parentId);
+    return category;
+  };
+  const activeProducts = data.products.filter((product) => product.status === "active");
+  const vendorsById = new Map(data.vendors.map((vendor) => [vendor.id, vendor]));
+  return {
+    searchProducts: activeProducts.flatMap((product) => {
+      const category = categoryById.get(product.categoryId);
+      const mainCategory = mainCategoryFor(product.categoryId);
+      const vendor = vendorsById.get(product.vendorId);
+      return category && mainCategory && vendor ? [{
+        id: product.id,
+        name: product.name,
+        categoryName: category.name,
+        categorySlug: mainCategory.slug,
+        searchFields: [product.name, product.brand ?? "", ...product.tags, vendor.name],
+      }] : [];
+    }),
+    popularSearches: [...activeProducts]
+      .sort((a, b) => b.soldCount - a.soldCount)
+      .slice(0, 5)
+      .map((product) => product.name),
+  };
+}
+
 export async function getProductListing(raw: RawListingQuery, data: CatalogDataset = catalog, categoryScope?: string, basePath = "/products", filterCategoryScope = categoryScope): Promise<ListingResult> {
   const { state, notices } = parseListingQuery(raw);
   const validation = validateCatalog(data);
