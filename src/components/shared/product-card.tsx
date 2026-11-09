@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductPlaceholderIcon } from "@/components/shared/product-placeholder-icon";
+import { ProductCardImage } from "@/components/shared/product-card-image";
 import { calcDiscountPercent, cn, formatPrice } from "@/lib/utils";
 import type { CategoryTone } from "@/types/category";
 import type { ProductCardData } from "@/types/product";
@@ -15,23 +15,25 @@ interface ProductCardProps {
   deal?: { soldCount: number; stockLimit: number };
 }
 export function ProductCard({ product, deal }: ProductCardProps) {
+  const productHref = `/products/${product.slug}`;
   return (
     <article className="flex flex-col h-full rounded-2xl border border-line bg-white overflow-hidden hover:border-brand transition-colors">
       <div className="relative">
-        {!product.mainImage.url && (
-          <Link
-            href="#"
-            className={cn(
-              "grid place-items-center aspect-[4/3] md:aspect-square",
-              product.placeholder && toneClasses[product.placeholder.tone],
-            )}
-            aria-label={`View ${product.name}`}
-          >
-            {product.placeholder && (
-              <ProductPlaceholderIcon icon={product.placeholder.icon} />
-            )}
-          </Link>
-        )}
+        <Link
+          href={productHref}
+          className={cn(
+            "relative grid place-items-center aspect-[4/3] md:aspect-square",
+            toneClasses[product.placeholder?.tone ?? "gray"],
+          )}
+          aria-label={`View ${product.name}`}
+        >
+          <ProductCardImage
+            key={product.mainImage.url}
+            image={product.mainImage}
+            name={product.name}
+            placeholder={product.placeholder}
+          />
+        </Link>
         {product.compareAtPrice !== null && (
           <span className="absolute top-2 left-2 rounded-full bg-sale text-white text-xs font-bold px-2 py-0.5">
             -{calcDiscountPercent(product.price, product.compareAtPrice)}%
@@ -64,7 +66,7 @@ export function ProductCard({ product, deal }: ProductCardProps) {
           {product.vendor.name}
         </Link>
         <h3 className="mt-1 text-sm font-medium line-clamp-2 min-h-[2.5rem]">
-          <Link href="#" className="hover:text-brand-strong">
+          <Link href={productHref} className="hover:text-brand-strong">
             {product.name}
           </Link>
         </h3>

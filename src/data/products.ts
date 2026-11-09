@@ -22,7 +22,44 @@ export const products: Product[] = [
   createProduct({"id": "prod-smart-watch-series-5", "slug": "smart-watch-series-5", "sku": "SKU-SMART-WATCH-SERIES-5", "name": "Smart Watch Series 5", "vendorId": "vendor-tech-haven", "categoryId": "sub-electronics-mobile-phones", "price": 6650, "ratingAverage": 4.4, "ratingCount": 86, "stock": 44, "soldCount": 510, "publishedAt": "2026-08-18T00:00:00.000Z"}),
   createProduct({"id": "prod-cotton-panjabi", "slug": "cotton-panjabi", "sku": "SKU-COTTON-PANJABI", "name": "Cotton Panjabi", "vendorId": "vendor-urban-fit", "categoryId": "child-fashion-men-panjabi", "price": 1600, "ratingAverage": 4.7, "ratingCount": 212, "stock": 88, "soldCount": 940, "publishedAt": "2026-09-05T00:00:00.000Z"}),
   createProduct({"id": "prod-nonstick-cookware-set", "slug": "nonstick-cookware-set", "sku": "SKU-NONSTICK-COOKWARE-SET", "name": "Non-stick Cookware Set", "vendorId": "vendor-home-nest", "categoryId": "child-home-kitchen-cookware", "price": 4750, "ratingAverage": 4.5, "ratingCount": 64, "stock": 31, "soldCount": 290, "publishedAt": "2026-08-28T00:00:00.000Z"}),
-  createProduct({"id": "prod-bluetooth-speaker", "slug": "bluetooth-speaker", "sku": "SKU-BLUETOOTH-SPEAKER", "name": "Bluetooth Speaker", "vendorId": "vendor-sound-wave", "categoryId": "sub-electronics-audio", "price": 2999, "ratingAverage": 4.3, "ratingCount": 97, "stock": 59, "soldCount": 460, "publishedAt": "2026-09-21T00:00:00.000Z"}),
+  createProduct({
+    "id": "prod-bluetooth-speaker",
+    "slug": "bluetooth-speaker",
+    "sku": "SKU-BLUETOOTH-SPEAKER",
+    "name": "Bluetooth Speaker",
+    "vendorId": "vendor-sound-wave",
+    "categoryId": "sub-electronics-audio",
+    "price": 2999,
+    "ratingAverage": 4.3,
+    "ratingCount": 97,
+    "stock": 59,
+    "soldCount": 460,
+    "publishedAt": "2026-09-21T00:00:00.000Z",
+    // Photos: Pittigrilli; CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+    // Unmodified Wikimedia thumbnails; retain credit, source, and license when displaying.
+    // Source: https://commons.wikimedia.org/wiki/File:JBL_GO2_Bluetooth_speaker,_waterproof,_with_opened_lid_hiding_connectors.jpg
+    mainImage: {
+      url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_with_opened_lid_hiding_connectors.jpg/960px-JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_with_opened_lid_hiding_connectors.jpg",
+      alt: "Blue JBL GO2 Bluetooth speaker, angled front view with the charging and audio port cover open",
+    },
+    gallery: [
+      // Source: https://commons.wikimedia.org/wiki/File:JBL_GO2_Bluetooth_speaker,_waterproof,_size_of_cigarette_pack.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_size_of_cigarette_pack.jpg/960px-JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_size_of_cigarette_pack.jpg",
+        alt: "Blue JBL GO2 Bluetooth speaker, rear view with the embossed JBL logo",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:JBL_GO2_Bluetooth_speaker,_waterproof,_side_with_operating_knobs.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_side_with_operating_knobs.jpg/960px-JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_side_with_operating_knobs.jpg",
+        alt: "Blue JBL GO2 Bluetooth speaker, top view showing power, Bluetooth, volume, and play buttons",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:JBL_GO2_Bluetooth_speaker,_waterproof,_underside_with_type_label_and_rubber_feet.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_underside_with_type_label_and_rubber_feet.jpg/960px-JBL_GO2_Bluetooth_speaker%2C_waterproof%2C_underside_with_type_label_and_rubber_feet.jpg",
+        alt: "Blue JBL GO2 Bluetooth speaker, underside showing the model label and four rubber feet",
+      },
+    ],
+  }),
   createProduct({"id": "prod-android-smartphone-128gb", "slug": "android-smartphone-128gb", "sku": "SKU-ANDROID-SMARTPHONE-128GB", "name": "Android Smartphone 128GB", "vendorId": "vendor-dhaka-bazaar", "categoryId": "child-mobile-xiaomi", "price": 18990, "ratingAverage": 4.5, "ratingCount": 342, "stock": 24, "soldCount": 690, "publishedAt": "2026-10-01T00:00:00.000Z"}),
   createProduct({
     "id": "prod-running-shoes",
@@ -70,8 +107,32 @@ export const products: Product[] = [
     "soldCount": 530,
     "createdAt": "2026-10-20T00:00:00.000Z",
     "publishedAt": "2026-10-20T00:00:00.000Z",
-    "freeShipping": false
-}),
+    "freeShipping": false,
+    // Photos: Kenming Wang; CC BY-SA 2.0: https://creativecommons.org/licenses/by-sa/2.0/
+    // Unmodified Wikimedia thumbnails; retain credit, source, and license when displaying.
+    // Source: https://commons.wikimedia.org/wiki/File:Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_(16253193476).jpg
+    mainImage: {
+      url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2816253193476%29.jpg/960px-Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2816253193476%29.jpg",
+      alt: "Black and gray Logitech G700s wireless gaming mouse, angled left-side view showing the thumb buttons",
+    },
+    gallery: [
+      // Source: https://commons.wikimedia.org/wiki/File:Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_(15656708344).jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2815656708344%29.jpg/500px-Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2815656708344%29.jpg",
+        alt: "Black and gray Logitech G700s wireless gaming mouse, top view showing the scroll wheel and programmable buttons",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_(15659255463).jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2815659255463%29.jpg/960px-Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2815659255463%29.jpg",
+        alt: "Black and gray Logitech G700s wireless gaming mouse with USB cables on its opened packaging",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_(16253192996).jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2816253192996%29.jpg/960px-Logitech_G700s_%E7%84%A1%E7%B7%9A%E9%81%8A%E6%88%B2%E6%BB%91%E9%BC%A0_%2816253192996%29.jpg",
+        alt: "Black Logitech G700s wireless gaming mouse, underside with the battery compartment open and AA battery visible",
+      },
+    ],
+  }),
   createProduct({
     "id": "prod-power-bank-10000",
     "slug": "power-bank-10000",
@@ -86,8 +147,32 @@ export const products: Product[] = [
     "soldCount": 2100,
     "createdAt": "2026-08-30T00:00:00.000Z",
     "publishedAt": "2026-08-30T00:00:00.000Z",
-    "freeShipping": true
-}),
+    "freeShipping": true,
+    // Photos: © Raimond Spekking / CC BY-SA 4.0 (via Wikimedia Commons); CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+    // Unmodified Wikimedia thumbnails; retain credit, source, and license when displaying.
+    // Source: https://commons.wikimedia.org/wiki/File:JETech_Powerbank_10000mAh-5076.jpg
+    mainImage: {
+      url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/JETech_Powerbank_10000mAh-5076.jpg/960px-JETech_Powerbank_10000mAh-5076.jpg",
+      alt: "Silver JETech 10000mAh power bank, angled view showing the aluminum case and USB ports",
+    },
+    gallery: [
+      // Source: https://commons.wikimedia.org/wiki/File:JETech_Powerbank_10000mAh-5077.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/JETech_Powerbank_10000mAh-5077.jpg/960px-JETech_Powerbank_10000mAh-5077.jpg",
+        alt: "Silver JETech 10000mAh power bank, top view showing the JETech logo",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:JETech_Powerbank_10000mAh-5078.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/JETech_Powerbank_10000mAh-5078.jpg/960px-JETech_Powerbank_10000mAh-5078.jpg",
+        alt: "Silver JETech 10000mAh power bank, close-up of the power button, micro-USB input, light, and two USB outputs",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:JETech_Powerbank_10000mAh-5079.jpg
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/JETech_Powerbank_10000mAh-5079.jpg/960px-JETech_Powerbank_10000mAh-5079.jpg",
+        alt: "Silver JETech 10000mAh power bank, opposite end showing the capacity and electrical ratings",
+      },
+    ],
+  }),
   createProduct({
     "id": "prod-ceramic-coffee-mug-set",
     "slug": "ceramic-coffee-mug-set",
@@ -184,7 +269,47 @@ export const products: Product[] = [
     "publishedAt": "2026-10-10T00:00:00.000Z",
     "freeShipping": false
 }),
-  createProduct({"id":"prod-over-ear-headphones","slug":"over-ear-headphones","sku":"SKU-OVER-EAR-HEADPHONES","name":"Noise-isolating Over-ear Headphones","vendorId":"vendor-sound-wave","categoryId":"child-audio-headphones","price":3250,"compareAtPrice":3990,"ratingAverage":4.6,"ratingCount":174,"stock":63,"soldCount":620,"createdAt":"2026-11-02T00:00:00.000Z","publishedAt":"2026-11-02T00:00:00.000Z","freeShipping":true}),
+  createProduct({
+    "id": "prod-over-ear-headphones",
+    "slug": "over-ear-headphones",
+    "sku": "SKU-OVER-EAR-HEADPHONES",
+    "name": "Noise-isolating Over-ear Headphones",
+    "vendorId": "vendor-sound-wave",
+    "categoryId": "child-audio-headphones",
+    "price": 3250,
+    "compareAtPrice": 3990,
+    "ratingAverage": 4.6,
+    "ratingCount": 174,
+    "stock": 63,
+    "soldCount": 620,
+    "createdAt": "2026-11-02T00:00:00.000Z",
+    "publishedAt": "2026-11-02T00:00:00.000Z",
+    "freeShipping": true,
+    // Photos: en:User:MMuzammils; CC BY-SA 3.0: https://creativecommons.org/licenses/by-sa/3.0/
+    // Unmodified Wikimedia thumbnails; retain credit, source, and license when displaying.
+    // Source: https://commons.wikimedia.org/wiki/File:Beyerdynamic_DT_770_PRO_80_Ohm_-01.JPG
+    mainImage: {
+      url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Beyerdynamic_DT_770_PRO_80_Ohm_-01.JPG/960px-Beyerdynamic_DT_770_PRO_80_Ohm_-01.JPG",
+      alt: "Black Beyerdynamic DT 770 PRO 80-ohm headphones with gray ear pads, close-up of the ear cup and headband",
+    },
+    gallery: [
+      // Source: https://commons.wikimedia.org/wiki/File:Beyerdynamic_DT_770_PRO_80_Ohm_-02.JPG
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Beyerdynamic_DT_770_PRO_80_Ohm_-02.JPG/960px-Beyerdynamic_DT_770_PRO_80_Ohm_-02.JPG",
+        alt: "Black Beyerdynamic DT 770 PRO 80-ohm headphones, side view resting against a black carrying bag",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:Beyerdynamic_DT_770_PRO_80_Ohm_-04.JPG
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Beyerdynamic_DT_770_PRO_80_Ohm_-04.JPG/960px-Beyerdynamic_DT_770_PRO_80_Ohm_-04.JPG",
+        alt: "Black Beyerdynamic DT 770 PRO 80-ohm headphones, overhead view in an open carrying bag with the audio cable beside it",
+      },
+      // Source: https://commons.wikimedia.org/wiki/File:Beyerdynamic_DT_770_PRO_80_Ohm_-05.JPG
+      {
+        url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/38/Beyerdynamic_DT_770_PRO_80_Ohm_-05.JPG/960px-Beyerdynamic_DT_770_PRO_80_Ohm_-05.JPG",
+        alt: "Black Beyerdynamic DT 770 PRO 80-ohm headphones, overhead view showing the padded headband inside an open carrying bag",
+      },
+    ],
+  }),
   createProduct({"id":"prod-gaming-laptop-15","slug":"gaming-laptop-15","sku":"SKU-GAMING-LAPTOP-15","name":"15-inch Core i5 Gaming Laptop","vendorId":"vendor-tech-haven","categoryId":"child-computers-gaming","price":82900,"compareAtPrice":89900,"ratingAverage":4.7,"ratingCount":48,"stock":12,"soldCount":95,"createdAt":"2026-10-28T00:00:00.000Z","publishedAt":"2026-10-28T00:00:00.000Z","freeShipping":true}),
   createProduct({"id":"prod-double-door-refrigerator","slug":"double-door-refrigerator","sku":"SKU-DOUBLE-DOOR-REFRIGERATOR","name":"255L Frost-free Double-door Refrigerator","vendorId":"vendor-dhaka-bazaar","categoryId":"child-appliances-refrigerators","price":48900,"compareAtPrice":52900,"ratingAverage":4.5,"ratingCount":36,"stock":9,"soldCount":42,"createdAt":"2026-10-26T00:00:00.000Z","publishedAt":"2026-10-26T00:00:00.000Z"}),
   createProduct({"id":"prod-jamdani-cotton-saree","slug":"jamdani-cotton-saree","sku":"SKU-JAMDANI-COTTON-SAREE","name":"Handloom Jamdani Cotton Saree","vendorId":"vendor-urban-fit","categoryId":"child-fashion-women-sarees","price":3850,"compareAtPrice":4500,"ratingAverage":4.8,"ratingCount":91,"stock":28,"soldCount":230,"createdAt":"2026-10-31T00:00:00.000Z","publishedAt":"2026-10-31T00:00:00.000Z","freeShipping":true}),
