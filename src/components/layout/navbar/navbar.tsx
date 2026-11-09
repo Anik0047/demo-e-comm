@@ -21,6 +21,9 @@ export function Navbar({ data }: NavbarProps) {
         onOpenDrawer={() => setIsDrawerOpen(true)}
         wishlistCount={data.wishlistCount}
         cartItems={data.cartItems}
+        categories={data.categories}
+        searchProducts={data.searchProducts}
+        popularSearches={data.popularSearches}
       />
       <CategoryNav categories={data.categories} />
       <div

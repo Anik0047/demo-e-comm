@@ -14,6 +14,11 @@ function categoryClosure(data: CatalogDataset, slug: string): Set<string> {
   }
   return selected;
 }
+
+export function matchesCatalogSearchFields(fields: readonly string[], search?: string): boolean {
+  const tokens = search?.trim().toLowerCase().split(/\s+/u).filter(Boolean) ?? [];
+  return tokens.every((token) => fields.some((field) => field.toLowerCase().includes(token)));
+}
 function compareRows(a: CatalogRow, b: CatalogRow, sort: ListingState["sort"]): number {
   const left = a.product;
   const right = b.product;
@@ -44,7 +49,6 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
   const subcategories = applied.subcategory ? categoryClosure(data, applied.subcategory) : undefined;
   const children = applied.child ? categoryClosure(data, applied.child) : undefined;
   const scopedCategories = categoryScope ? categoryClosure(data, categoryScope) : undefined;
-  const tokens = applied.search?.toLowerCase().split(/\s+/u).filter(Boolean) ?? [];
   const rows: CatalogRow[] = [];
   for (const product of data.products) {
     if (product.status !== "active") continue;
@@ -63,8 +67,8 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
     if (applied.maxPrice !== undefined && price > applied.maxPrice) continue;
     if (applied.freeShipping && !product.freeShipping) continue;
     if (applied.availability && inStock !== (applied.availability === "in-stock")) continue;
-    const fields = [product.name, product.brand ?? "", ...product.tags, vendor.name].map((value) => value.toLowerCase());
-    if (!tokens.every((token) => fields.some((field) => field.includes(token)))) continue;
+    const fields = [product.name, product.brand ?? "", ...product.tags, vendor.name];
+    if (!matchesCatalogSearchFields(fields, applied.search)) continue;
     rows.push({ product, vendor, deal, price, compareAtPrice: deal ? product.price : product.compareAtPrice, inStock });
   }
   rows.sort((a, b) => compareRows(a, b, applied.sort));
