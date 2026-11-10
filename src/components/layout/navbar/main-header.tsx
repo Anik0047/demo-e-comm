@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Heart, Menu, ShoppingBag } from "lucide-react";
-import type { CartItem, SearchProduct } from "@/types/navigation";
+import type { SearchProduct } from "@/types/navigation";
 import { SearchForm } from "./search-form";
 import { AccountMenu } from "./account-menu";
 import { MiniCart } from "./mini-cart";
 
 interface MainHeaderProps {
   onOpenDrawer: () => void;
-  wishlistCount: number;
-  cartItems: CartItem[];
+  wishlistCount: number | null;
   categories: import("@/types/category").Category[];
   searchProducts: SearchProduct[];
   popularSearches: string[];
@@ -17,7 +16,6 @@ interface MainHeaderProps {
 export function MainHeader({
   onOpenDrawer,
   wishlistCount,
-  cartItems,
   categories,
   searchProducts,
   popularSearches,
@@ -54,19 +52,19 @@ export function MainHeader({
 
         <div className="ml-auto md:ml-0 flex items-center gap-1 sm:gap-2">
           <Link
-            href="#"
+            href="/wishlist"
             className="relative p-2.5 rounded-full hover:bg-soft"
-            aria-label="Wishlist"
+            aria-label={wishlistCount === null ? "Wishlist" : `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`}
           >
             <Heart className="w-6 h-6" />
-            <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-sale text-white text-[11px] font-bold grid place-items-center">
+            {wishlistCount !== null && <span aria-hidden="true" className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-sale text-white text-[11px] font-bold grid place-items-center">
               {wishlistCount}
-            </span>
+            </span>}
           </Link>
 
           <AccountMenu />
 
-          <MiniCart items={cartItems} />
+          <MiniCart />
         </div>
       </div>
 

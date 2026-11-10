@@ -1,4 +1,5 @@
-import { BadgeCheck, Star } from "lucide-react";
+import { BadgeCheck, ShoppingCart, Star } from "lucide-react";
+import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
 import { calcDiscountPercent, formatPrice } from "@/lib/utils";
 import { getAvailableVariantOptionValues } from "@/services/product-variant-selection";
 import type { Product, ProductVariant } from "@/types/product";
@@ -17,6 +18,12 @@ interface ProductInformationProps {
   quantity: number;
   maximumQuantity: number;
   canSetQuantity: boolean;
+  canAddToCart: boolean;
+  isCustomerAccount: boolean;
+  isAccountReady: boolean;
+  isAddingToCart: boolean;
+  cartFeedback: { kind: "success" | "error"; message: string } | null;
+  onAddToCart: () => void;
   onOptionChange: (name: string, value: string) => void;
   onQuantityChange: (quantity: number) => void;
 }
@@ -24,6 +31,7 @@ interface ProductInformationProps {
 export function ProductInformation({
   product, vendor, selectedVariant, selectedOptions, variants, minimumPrice, maximumPrice,
   minimumCompareAtPrice, maximumCompareAtPrice, quantity, maximumQuantity, canSetQuantity,
+  canAddToCart, isCustomerAccount, isAccountReady, isAddingToCart, cartFeedback, onAddToCart,
   onOptionChange, onQuantityChange,
 }: ProductInformationProps) {
   const currentPrice = selectedVariant?.price ?? (product.hasVariants ? null : product.price);
@@ -93,6 +101,7 @@ export function ProductInformation({
           return <div key={option.name} className="space-y-2">
             <label htmlFor={`product-option-${option.name}`} className="block text-sm font-medium text-ink">{option.name}</label>
             <select id={`product-option-${option.name}`} className="input w-full" value={selectedOptions[option.name] ?? ""}
+              disabled={!isAccountReady}
               onChange={(event) => onOptionChange(option.name, event.target.value)}>
               <option value="">Choose {option.name.toLowerCase()}</option>
               {option.values.map((value) => <option key={value} value={value} disabled={!availableValues.has(value)}>{value}{!availableValues.has(value) ? " (unavailable)" : ""}</option>)}
@@ -117,6 +126,26 @@ export function ProductInformation({
         {product.hasVariants && variants.length === 0 && <p role="status" className="text-sm font-medium text-sale-strong">No orderable variants are available.</p>}
         {product.trackInventory && selectedVariant && selectedVariant.stock < product.minOrderQty && <p role="status" className="text-sm font-medium text-sale-strong">This option has less stock than the minimum order quantity.</p>}
         {!product.hasVariants && product.trackInventory && product.stock === 0 && <p role="status" className="text-sm font-medium text-sale-strong">This item is currently out of stock.</p>}
+      </div>
+      <div className="space-y-2">
+        <ProductWishlistButton productId={product.id} productName={product.name} showText showAccountGuidance />
+        <button
+          type="button"
+          className="btn btn-primary btn-lg w-full"
+          disabled={!canAddToCart}
+          onClick={onAddToCart}
+          aria-describedby={!isAccountReady || !isCustomerAccount ? "cart-account-guidance" : undefined}
+        >
+          <ShoppingCart aria-hidden="true" className="size-5" />
+          {isAddingToCart ? "Adding to cart…" : "Add to cart"}
+        </button>
+        {isAccountReady && !isCustomerAccount && <p id="cart-account-guidance" className="text-sm text-mute">
+          Switch to a customer demo account before adding items to your cart.
+        </p>}
+        {!isAccountReady && <p id="cart-account-guidance" className="text-sm text-mute">Loading your demo account…</p>}
+        {cartFeedback && <p role={cartFeedback.kind === "error" ? "alert" : "status"} className={`text-sm font-medium ${cartFeedback.kind === "success" ? "text-brand-strong" : "text-sale-strong"}`}>
+          {cartFeedback.message}
+        </p>}
       </div>
       <p className="text-xs text-mute">SKU: {selectedVariant?.sku ?? product.sku}</p>
 

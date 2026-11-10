@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
+import { ProductCardCartButton } from "@/components/shared/product-card-cart-button";
 import { ProductCardImage } from "@/components/shared/product-card-image";
 import { calcDiscountPercent, cn, formatPrice } from "@/lib/utils";
 import type { CategoryTone } from "@/types/category";
@@ -39,24 +41,12 @@ export function ProductCard({ product, deal }: ProductCardProps) {
             -{calcDiscountPercent(product.price, product.compareAtPrice)}%
           </span>
         )}
-        <button
-          type="button"
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-ink hover:text-sale grid place-items-center after:absolute after:-inset-1.5 after:rounded-full"
-          aria-label={`Add ${product.name} to wishlist`}
-        >
-          <svg
-            className="w-4 h-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-          </svg>
-        </button>
+        <ProductWishlistButton
+          productId={product.id}
+          productName={product.name}
+          className="absolute right-2 top-2 z-10"
+          compact
+        />
       </div>
       <div className="flex flex-col flex-1 p-2 md:p-3">
         <Link
@@ -113,30 +103,15 @@ export function ProductCard({ product, deal }: ProductCardProps) {
               </p>
             </>
           )} */}
-          <button
-            type="button"
+          <ProductCardCartButton
+            productId={product.id}
+            productName={product.name}
+            productSlug={product.slug}
             className={cn(
               deal && "mt-3",
               "relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:rounded-full w-full h-9 rounded-full border border-brand text-brand-strong hover:bg-brand-tint inline-flex items-center justify-center gap-2 text-sm font-bold transition-colors",
             )}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="8" cy="21" r="1" />
-              <circle cx="19" cy="21" r="1" />
-              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-            </svg>
-            <span className="hidden sm:inline">Add to cart</span>
-          </button>
+          />
         </div>
       </div>
     </article>
