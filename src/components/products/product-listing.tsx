@@ -1,8 +1,10 @@
 import { ListingEmpty, ListingUnavailableState } from "@/components/products/listing-states";
+import { io } from "next/cache";
 import { ListingControls } from "@/components/products/listing-controls";
 import { Pagination } from "@/components/products/pagination";
 import { ProductGrid } from "@/components/products/product-grid";
 import { getProductListing } from "@/services/catalog";
+import { getPricingTime } from "@/services/effective-price";
 import type { CatalogSort, ListingResult, RawListingQuery } from "@/types/catalog";
 
 const sortHeadings: Record<CatalogSort, string> = {
@@ -34,7 +36,14 @@ interface ProductListingProps {
 
 export async function ProductListing({ searchParams, categoryScope, filterCategoryScope = categoryScope, subcategoryScope, basePath = "/products", showHeading = true, categoryLabel }: ProductListingProps) {
   const raw = await searchParams;
-  const result = await getProductListing(raw, undefined, categoryScope, basePath, filterCategoryScope);
+  await io();
+  const pricingTime = getPricingTime();
+  const result = await getProductListing(raw, {
+    now: pricingTime,
+    categoryScope,
+    basePath,
+    filterCategoryScope,
+  });
   const query = new URLSearchParams();
   if (raw instanceof URLSearchParams) raw.forEach((value, key) => query.append(key, value));
   else for (const [key, value] of Object.entries(raw)) {

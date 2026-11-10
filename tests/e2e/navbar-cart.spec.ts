@@ -42,7 +42,7 @@ async function addPanjabi(page: Page, size = "M", quantity = 1) {
 test("navbar cart count updates after PDP additions and mini-cart shows current item details", async ({ page }) => {
   await addPanjabi(page, "M", 2);
 
-  const cart = page.getByRole("link", { name: "Cart, 2 items, subtotal ৳3,200" });
+  const cart = page.getByRole("link", { name: "Cart, 2 items, subtotal ৳2,400" });
   await expect(cart).toBeVisible();
   const preview = await showMiniCartOnDesktop(page);
   if (await page.evaluate(() => window.matchMedia("(min-width: 768px)").matches)) {
@@ -50,7 +50,7 @@ test("navbar cart count updates after PDP additions and mini-cart shows current 
     await expect(line.getByText("Cotton Panjabi", { exact: true })).toBeVisible();
     await expect(line.getByText("Size: M", { exact: true })).toBeVisible();
     await expect(line.getByText("Qty 2", { exact: true })).toBeVisible();
-    await expect(line.getByText("৳3,200", { exact: true })).toBeVisible();
+    await expect(line.getByText("৳2,400", { exact: true })).toBeVisible();
     await expect(preview.getByText("Subtotal")).toBeVisible();
   }
 });
@@ -72,7 +72,7 @@ test("navbar cart keeps its count and mini-cart contents after refresh", async (
   await addPanjabi(page, "XL", 3);
   await page.reload();
   await waitForCustomer(page);
-  await expect(page.getByRole("link", { name: "Cart, 3 items, subtotal ৳4,800" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cart, 3 items, subtotal ৳3,600" })).toBeVisible();
   const preview = await showMiniCartOnDesktop(page);
   if (await page.evaluate(() => window.matchMedia("(min-width: 768px)").matches)) {
     await expect(preview.getByText("Size: XL", { exact: true })).toBeVisible();
@@ -111,7 +111,7 @@ test("navbar cart is isolated when switching away from the customer account", as
   await expect(page).toHaveURL("/");
   await page.goto("/");
   await waitForCustomer(page);
-  await expect(page.getByRole("link", { name: "Cart, 2 items, subtotal ৳3,200" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cart, 2 items, subtotal ৳2,400" })).toBeVisible();
 });
 
 test("empty customer cart has clear feedback and a products link", async ({ page }) => {

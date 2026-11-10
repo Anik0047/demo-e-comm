@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { connection } from "next/server";
 import { TopVendorsSection } from "@/components/home/top-vendors/top-vendors-section";
 import { PromoBannersSection } from "@/components/home/promo/promo-banners-section";
 import { getTopVendors } from "@/services/vendors";
@@ -11,10 +13,10 @@ import { CategoriesSection } from "@/components/home/categories/categories-secti
 import { getMainCategories } from "@/services/categories";
 import { TrustStrip } from "@/components/shared/trust-strip";
 import { getTrustPoints } from "@/services/trust-points";
+import { getPricingTime } from "@/services/effective-price";
 
 export default async function HomePage() {
   const vendors = await getTopVendors();
-  const flashDeals = await getFlashDeals();
   const slides = await getHeroSlides();
 
   const categories = await getMainCategories();
@@ -24,8 +26,8 @@ export default async function HomePage() {
     <>
       <Banner slides={slides} />
       <CategoriesSection categories={categories} />
-      <FlashDealsSection items={flashDeals.items} endsInSeconds={flashDeals.endsInSeconds} />
-      <TrendingSection />
+      <Suspense fallback={null}><RuntimeFlashDeals /></Suspense>
+      <Suspense fallback={null}><TrendingSection /></Suspense>
       <PromoBannersSection />
       <TopVendorsSection vendors={vendors} />
       <section
@@ -36,4 +38,10 @@ export default async function HomePage() {
       </section>
     </>
   );
+}
+
+async function RuntimeFlashDeals() {
+  await connection();
+  const flashDeals = await getFlashDeals(getPricingTime());
+  return <FlashDealsSection items={flashDeals.items} endsInSeconds={flashDeals.endsInSeconds} />;
 }

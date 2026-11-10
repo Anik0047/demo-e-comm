@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { products } from "@/data/products";
+import { flashDeals } from "@/data/flash-deals";
 import { vendors } from "@/data/vendors";
+import { resolveEffectivePrice } from "@/services/effective-price";
 import {
   addCartItem,
   clearCart,
@@ -53,11 +55,11 @@ test("adds, safely merges, updates, removes, and clears cart lines by product an
   expect(separateVariant.ok).toBe(true);
   expect(cartLines(store).lineCount).toBe(2);
   expect(cartLines(store).itemCount).toBe(4);
-  expect(cartLines(store).subtotal).toBe(6400);
+  expect(cartLines(store).subtotal).toBe(4800);
 
   const update = await updateCartItemQuantity(store, { productId: "prod-cotton-panjabi", variantId: "var-panjabi-m" }, 4);
   expect(update.ok).toBe(true);
-  expect(cartLines(store).subtotal).toBe(8000);
+  expect(cartLines(store).subtotal).toBe(6000);
   expect((await removeCartItem(store, { productId: "prod-cotton-panjabi", variantId: "var-panjabi-l" })).ok).toBe(true);
   expect(cartLines(store).lineCount).toBe(1);
   expect((await clearCart(store)).ok).toBe(true);
@@ -113,12 +115,35 @@ test("derives current prices and presents changed products or variants as unavai
   expect(selectCartSummary(state.snapshot, state.activeAccountId, { products: [changedLimit], vendors }).lines[0]).toMatchObject({ available: false, issue: "above_maximum", lineTotal: null });
 });
 
+test("applies active flash prices consistently to cart lines, variants, and subtotals", async () => {
+  const store = await customerStore();
+  await addCartItem(store, { productId: "prod-wireless-earbuds-pro", quantity: 2 });
+  await addCartItem(store, { productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", quantity: 3 });
+  const summary = cartLines(store);
+  expect(summary.lines.map(({ unitPrice, lineTotal }) => ({ unitPrice, lineTotal }))).toEqual([
+    { unitPrice: 2450, lineTotal: 4900 },
+    { unitPrice: 1200, lineTotal: 3600 },
+  ]);
+  expect(summary.subtotal).toBe(8500);
+});
+
+test("flash deal pricing follows its start and expiration timestamps", () => {
+  const product = products.find(({ id }) => id === "prod-wireless-earbuds-pro");
+  if (!product) throw new Error("Expected the canonical earbuds product");
+  const beforeStart = resolveEffectivePrice(product, null, flashDeals, true, Date.parse("2026-10-31T23:59:59.999Z"));
+  const duringDeal = resolveEffectivePrice(product, null, flashDeals, true, Date.parse("2026-11-15T12:00:00.000Z"));
+  const afterExpiration = resolveEffectivePrice(product, null, flashDeals, true, Date.parse("2026-12-01T00:00:00.000Z"));
+  expect(beforeStart.price).toBe(3770);
+  expect(duringDeal.price).toBe(2450);
+  expect(afterExpiration.price).toBe(3770);
+});
+
 test("cart persists through store recreation and remains isolated by customer identity", async () => {
   const storage = memoryStorage();
   const firstStore = await customerStore(createLocalStorageDemoStateAdapter(storage));
   await addCartItem(firstStore, { productId: "prod-wireless-earbuds-pro", quantity: 2 });
   const restored = await customerStore(createLocalStorageDemoStateAdapter(storage));
-  expect(cartLines(restored)).toMatchObject({ itemCount: 2, subtotal: 7540 });
+  expect(cartLines(restored)).toMatchObject({ itemCount: 2, subtotal: 4900 });
 
   const snapshot = createDemoSeedSnapshot();
   snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });

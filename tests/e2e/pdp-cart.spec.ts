@@ -39,6 +39,18 @@ test("PDP add to cart saves the selected variant and quantity", async ({ page })
   });
 });
 
+test("flash deal effective prices appear on direct PDP navigation and in variant cart totals", async ({ page }) => {
+  await page.goto("/products/wireless-earbuds-pro");
+  await expect(page.getByRole("heading", { name: "Wireless Earbuds Pro" })).toBeVisible();
+  await expect(page.getByRole("article").getByText("Price: ৳2,450", { exact: true })).toBeVisible();
+  await page.goto("/products/cotton-panjabi");
+  await page.getByLabel("Size").selectOption("M");
+  await expect(page.getByRole("article").getByText("Price: ৳1,200", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Add to cart" }).click();
+  await page.goto("/cart");
+  await expect(page.getByRole("complementary", { name: "Order summary" }).getByText("৳1,200", { exact: true })).toBeVisible();
+});
+
 test("repeated PDP additions merge into the existing product and variant line", async ({ page }) => {
   await page.goto("/products/cotton-panjabi");
   await waitForCustomerAccount(page);

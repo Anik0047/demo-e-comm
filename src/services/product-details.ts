@@ -1,6 +1,7 @@
 import { categories } from "@/data/categories";
 import { products } from "@/data/products";
 import { vendors } from "@/data/vendors";
+import { flashDeals } from "@/data/flash-deals";
 import type { CatalogDataset } from "@/types/catalog";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
@@ -9,6 +10,7 @@ import type { Vendor } from "@/types/vendor";
 export interface ProductDetails {
   product: Product;
   vendor: Vendor;
+  deals: typeof flashDeals;
   categoryPath: Category[];
 }
 
@@ -39,7 +41,7 @@ export async function getProductDetails(slug: string, data: ProductDetailDataset
   }
 
   if (categoryPath[0]?.level !== 1) return null;
-  return { product, vendor, categoryPath };
+  return { product, vendor, deals: data === catalog ? flashDeals : [], categoryPath };
 }
 
 export async function getProductDetailSlugs(data: ProductDetailDataset = catalog): Promise<string[]> {

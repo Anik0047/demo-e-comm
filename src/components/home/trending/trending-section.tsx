@@ -1,8 +1,11 @@
+import { connection } from "next/server";
+import { getPricingTime } from "@/services/effective-price";
 import { TrendingTabs } from "@/components/home/trending/trending-tabs";
 import { getTrendingProducts } from "@/services/trending";
 
 export async function TrendingSection() {
-  const products = await getTrendingProducts();
+  await connection();
+  const products = await getTrendingProducts(getPricingTime());
 
   return (
     <section

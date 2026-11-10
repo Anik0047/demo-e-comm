@@ -1,5 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+async function expectPromotionListing(page: import("@playwright/test").Page, path: string, heading: string) {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  const response = await page.goto(path);
+
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name: heading, exact: true })).toBeVisible();
+  const earbuds = page.locator("article").filter({ has: page.getByRole("link", { name: "View Wireless Earbuds Pro" }) });
+  await expect(earbuds.getByText("৳2,450", { exact: true })).toBeVisible();
+  expect(pageErrors.filter((message) => message.includes("unstable value `Date.now()`"))).toEqual([]);
+}
+
+test("products listing evaluates promotion pricing without a prerender error", async ({ page }) => {
+  await expectPromotionListing(page, "/products", "All products");
+});
+
+test("category listing navigation evaluates promotion pricing without a prerender error", async ({ page }) => {
+  await expectPromotionListing(page, "/category/electronics/audio-headphones/wireless-earbuds", "Wireless earbuds");
+});
+
 test("homepage loads and a product card opens its product page", async ({ page }) => {
   await page.goto("/");
 
@@ -83,7 +103,7 @@ test("Cotton Panjabi size selection updates variant price, stock, and quantity l
     { option: "XXL", stock: "15 available" },
   ]) {
     await size.selectOption(option);
-    await expect(product.getByText("Price: ৳1,600", { exact: true })).toBeVisible();
+    await expect(product.getByText("Price: ৳1,200", { exact: true })).toBeVisible();
     await expect(product.getByText(`SKU: SKU-COTTON-PANJABI-${option}`, { exact: true })).toBeVisible();
     await expect(product.getByText(stock, { exact: true })).toBeVisible();
   }

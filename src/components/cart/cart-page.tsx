@@ -77,7 +77,7 @@ export function CartPage() {
           {feedback && <p role={feedback.type === "error" ? "alert" : "status"} className={`mb-4 text-sm font-medium ${feedback.type === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <ul aria-label="Cart items" className="card divide-y divide-line">
-              {summary.lines.map(({ item, product, variant, unitPrice, lineTotal, available, issue }) => {
+              {summary.lines.map(({ item, product, variant, unitPrice, lineTotal, maximumQuantity, available, issue }) => {
                 const image = variant?.image ?? product?.mainImage;
                 const options = product && variant ? product.options.map(({ name }) => variant.optionValues[name] ? `${name}: ${variant.optionValues[name]}` : null).filter((value): value is string => value !== null).join(" · ") : null;
                 const identity = { productId: item.productId, variantId: item.variantId };
@@ -93,8 +93,9 @@ export function CartPage() {
                       {available && <div role="group" aria-label={`Quantity for ${product?.name ?? "product"}`} className="flex h-11 items-center rounded-lg border border-line">
                         <button type="button" aria-label="Decrease quantity" className="grid size-10 place-items-center rounded-l-lg hover:bg-soft disabled:opacity-50" disabled={busy || item.quantity <= 1} onClick={() => void run(() => updateCartItemQuantity(demoStateStore, identity, item.quantity - 1), "Quantity updated.")}><Minus className="size-4" /></button>
                         <span aria-live="polite" className="min-w-9 text-center text-sm font-bold">{item.quantity}</span>
-                        <button type="button" aria-label="Increase quantity" className="grid size-10 place-items-center rounded-r-lg hover:bg-soft" disabled={busy} onClick={() => void run(() => updateCartItemQuantity(demoStateStore, identity, item.quantity + 1), "Quantity updated.")}><Plus className="size-4" /></button>
+                        <button type="button" aria-label="Increase quantity" aria-describedby={maximumQuantity !== null && item.quantity >= maximumQuantity ? `quantity-limit-${item.id}` : undefined} className="grid size-10 place-items-center rounded-r-lg hover:bg-soft disabled:opacity-50" disabled={busy || maximumQuantity === null || item.quantity >= maximumQuantity} onClick={() => void run(() => updateCartItemQuantity(demoStateStore, identity, item.quantity + 1), "Quantity updated.")}><Plus className="size-4" /></button>
                       </div>}
+                      {available && maximumQuantity !== null && item.quantity >= maximumQuantity && <p id={`quantity-limit-${item.id}`} role="status" className="text-xs text-mute">Maximum available quantity: {maximumQuantity}.</p>}
                       <button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-sale-strong hover:bg-blush" disabled={busy} onClick={() => void run(() => removeCartItem(demoStateStore, identity), "Item removed from your cart.")}><Trash2 aria-hidden="true" className="size-4" />Remove</button>
                     </div>
                   </div>
