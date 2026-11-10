@@ -1,22 +1,54 @@
 import { BadgeCheck, Star } from "lucide-react";
 import { calcDiscountPercent, formatPrice } from "@/lib/utils";
-import type { Product } from "@/types/product";
+import { getAvailableVariantOptionValues } from "@/services/product-variant-selection";
+import type { Product, ProductVariant } from "@/types/product";
 import type { Vendor } from "@/types/vendor";
 
 interface ProductInformationProps {
   product: Product;
   vendor: Vendor;
+  selectedVariant: ProductVariant | null;
+  selectedOptions: Record<string, string>;
+  variants: ProductVariant[];
+  minimumPrice: number;
+  maximumPrice: number;
+  minimumCompareAtPrice: number | null;
+  maximumCompareAtPrice: number | null;
+  quantity: number;
+  maximumQuantity: number;
+  canSetQuantity: boolean;
+  onOptionChange: (name: string, value: string) => void;
+  onQuantityChange: (quantity: number) => void;
 }
 
-export function ProductInformation({ product, vendor }: ProductInformationProps) {
-  const originalPrice = product.compareAtPrice !== null && product.compareAtPrice > product.price ? product.compareAtPrice : null;
-  const discount = originalPrice !== null ? calcDiscountPercent(product.price, originalPrice) : 0;
+export function ProductInformation({
+  product, vendor, selectedVariant, selectedOptions, variants, minimumPrice, maximumPrice,
+  minimumCompareAtPrice, maximumCompareAtPrice, quantity, maximumQuantity, canSetQuantity,
+  onOptionChange, onQuantityChange,
+}: ProductInformationProps) {
+  const currentPrice = selectedVariant?.price ?? (product.hasVariants ? null : product.price);
+  const originalPrice = selectedVariant
+    ? selectedVariant.compareAtPrice !== null && selectedVariant.compareAtPrice > selectedVariant.price ? selectedVariant.compareAtPrice : null
+    : product.hasVariants ? minimumCompareAtPrice : product.compareAtPrice !== null && product.compareAtPrice > product.price ? product.compareAtPrice : null;
+  const discount = currentPrice !== null && originalPrice !== null ? calcDiscountPercent(currentPrice, originalPrice) : 0;
   const highlights = product.highlights.filter((highlight) => highlight.trim());
   const specifications = product.specifications.filter(({ label, value }) => label.trim() && value.trim());
   const { min, max } = product.deliveryDays;
   const deliveryKnown = Number.isFinite(min) && Number.isFinite(max) && min >= 0 && max > 0 && max >= min;
+  const availability = !product.trackInventory
+    ? "Availability not tracked"
+    : product.hasVariants
+      ? variants.length === 0 ? "Out of stock" : selectedVariant ? stockMessage(selectedVariant.stock, product.lowStockThreshold) : "Choose options to check stock"
+      : stockMessage(product.stock, product.lowStockThreshold);
+  const quantityGuidance = product.hasVariants && !selectedVariant
+    ? `Choose options first. Order ${product.minOrderQty} to ${product.maxOrderQty} units.`
+    : !canSetQuantity
+      ? product.trackInventory && product.stock > 0 && product.stock < product.minOrderQty
+        ? "Available stock is below the minimum order quantity."
+        : "No quantity is currently available to order."
+      : `Order ${product.minOrderQty} to ${maximumQuantity} units.`;
   const facts = [
-    { label: "Availability", value: product.trackInventory ? (product.stock > 0 ? "In stock" : "Out of stock") : "Availability not tracked" },
+    { label: "Availability", value: availability },
     ...(product.shipsFrom.trim() ? [{ label: "Ships from", value: product.shipsFrom }] : []),
     ...(deliveryKnown ? [{ label: "Estimated delivery", value: min === max ? `${min} ${min === 1 ? "day" : "days"}` : `${min}–${max} days` }] : []),
     ...(product.freeShipping ? [{ label: "Shipping", value: "Free delivery" }] : []),
@@ -30,7 +62,6 @@ export function ProductInformation({ product, vendor }: ProductInformationProps)
       <div>
         {product.brand?.trim() && <p className="mb-2 text-sm font-medium text-mute">{product.brand}</p>}
         <h1 id="product-name" className="font-head text-3xl font-extrabold sm:text-4xl lg:text-3xl">{product.name}</h1>
-        {product.sku.trim() && <p className="mt-3 text-xs text-mute">SKU: {product.sku}</p>}
         <p className="mt-3 flex flex-wrap items-center gap-1.5 text-sm text-mute">
           {product.ratingCount > 0 ? <>
             <Star aria-hidden="true" className="size-4 shrink-0 fill-accent text-accent" />
@@ -42,12 +73,52 @@ export function ProductInformation({ product, vendor }: ProductInformationProps)
 
       <div className="border-y border-line py-6">
         <div className="flex flex-wrap items-baseline gap-3">
-          <p className="font-head text-3xl font-extrabold text-ink"><span className="sr-only">Price: </span>{formatPrice(product.price)}</p>
-          {originalPrice !== null && <p className="text-sm text-mute"><span className="sr-only">Original price: </span><s>{formatPrice(originalPrice)}</s></p>}
+          <p className="font-head text-3xl font-extrabold text-ink"><span className="sr-only">Price: </span>{
+            currentPrice !== null ? formatPrice(currentPrice) : `${formatPrice(minimumPrice)}${minimumPrice !== maximumPrice ? ` – ${formatPrice(maximumPrice)}` : ""}`
+          }</p>
+          {originalPrice !== null && <p className="text-sm text-mute"><span className="sr-only">Original price: </span><s>{
+            selectedVariant || !product.hasVariants || minimumCompareAtPrice === maximumCompareAtPrice
+              ? formatPrice(originalPrice)
+              : `${formatPrice(minimumCompareAtPrice ?? originalPrice)} – ${formatPrice(maximumCompareAtPrice ?? originalPrice)}`
+          }</s></p>}
           {discount > 0 && <span className="rounded-full bg-blush px-3 py-1 text-xs font-bold text-sale-strong">{discount}% off</span>}
         </div>
         {product.shortDescription.trim() && <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-mute">{product.shortDescription}</p>}
       </div>
+
+      {product.hasVariants && product.options.length > 0 && <fieldset className="space-y-4" aria-describedby="variant-help">
+        <legend className="font-bold text-ink">Choose options</legend>
+        {product.options.map((option) => {
+          const availableValues = getAvailableVariantOptionValues(variants, selectedOptions, option.name);
+          return <div key={option.name} className="space-y-2">
+            <label htmlFor={`product-option-${option.name}`} className="block text-sm font-medium text-ink">{option.name}</label>
+            <select id={`product-option-${option.name}`} className="input w-full" value={selectedOptions[option.name] ?? ""}
+              onChange={(event) => onOptionChange(option.name, event.target.value)}>
+              <option value="">Choose {option.name.toLowerCase()}</option>
+              {option.values.map((value) => <option key={value} value={value} disabled={!availableValues.has(value)}>{value}{!availableValues.has(value) ? " (unavailable)" : ""}</option>)}
+            </select>
+          </div>;
+        })}
+        <p id="variant-help" className="text-xs text-mute">Options that cannot be ordered are unavailable.</p>
+      </fieldset>}
+
+      <div className="space-y-3">
+        <p className="font-bold text-ink">Quantity</p>
+        <div role="group" aria-label="Quantity" className="flex items-center gap-3">
+          <button type="button" aria-label="Decrease quantity" className="btn btn-outline btn-md size-11 p-0"
+            disabled={!canSetQuantity || quantity <= product.minOrderQty}
+            onClick={() => onQuantityChange(Math.max(product.minOrderQty, quantity - 1))}>−</button>
+          <output aria-live="polite" aria-atomic="true" className="min-w-8 text-center font-bold text-ink">{quantity}</output>
+          <button type="button" aria-label="Increase quantity" className="btn btn-outline btn-md size-11 p-0"
+            disabled={!canSetQuantity || quantity >= maximumQuantity}
+            onClick={() => onQuantityChange(Math.min(maximumQuantity, quantity + 1))}>+</button>
+        </div>
+        <p className="text-sm text-mute">{quantityGuidance}</p>
+        {product.hasVariants && variants.length === 0 && <p role="status" className="text-sm font-medium text-sale-strong">No orderable variants are available.</p>}
+        {product.trackInventory && selectedVariant && selectedVariant.stock < product.minOrderQty && <p role="status" className="text-sm font-medium text-sale-strong">This option has less stock than the minimum order quantity.</p>}
+        {!product.hasVariants && product.trackInventory && product.stock === 0 && <p role="status" className="text-sm font-medium text-sale-strong">This item is currently out of stock.</p>}
+      </div>
+      <p className="text-xs text-mute">SKU: {selectedVariant?.sku ?? product.sku}</p>
 
       <div className="rounded-2xl border border-line p-4">
         <p className="text-xs text-mute">Sold by</p>
@@ -77,4 +148,10 @@ export function ProductInformation({ product, vendor }: ProductInformationProps)
       </section>}
     </section>
   );
+}
+
+function stockMessage(stock: number, threshold: number): string {
+  if (stock <= 0) return "Out of stock";
+  if (stock <= threshold) return `Low stock · ${stock} ${stock === 1 ? "unit" : "units"} left`;
+  return `${stock} available`;
 }
