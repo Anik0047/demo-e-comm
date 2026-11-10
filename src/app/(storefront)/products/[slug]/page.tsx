@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { ProductDetailsInteractive } from "@/components/products/product-details-interactive";
 import { ProductImageCredits } from "@/components/products/product-image-credits";
+import { RelatedProducts } from "@/components/products/related-products";
 import { getProductDetails, getProductDetailSlugs } from "@/services/product-details";
 import { getProductGallery } from "@/services/product-gallery";
+import { getPricingTime } from "@/services/effective-price";
+import { getRelatedProducts } from "@/services/related-products";
+import type { ProductCardData } from "@/types/product";
 
 interface ProductDetailsPageProps {
   params: Promise<{ slug: string }>;
@@ -36,9 +41,12 @@ export default function ProductDetailsPage({ params }: ProductDetailsPageProps) 
 }
 
 async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
+  await connection();
+  const pricingTime = getPricingTime();
   const { slug } = await params;
   const details = await getProductDetails(slug);
   if (!details) notFound();
+  const relatedProducts = getRelatedProducts(details.product.id, { now: pricingTime });
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8">
@@ -49,13 +57,13 @@ async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
           <li><Link href="/products" className="inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-strong hover:underline">Products</Link></li>
         </ol>
       </nav>
-      <ProductDetails details={details} />
+      <ProductDetails details={details} pricingTime={pricingTime} relatedProducts={relatedProducts} />
     </div>
   );
 }
 
-function ProductDetails({ details }: { details: NonNullable<Awaited<ReturnType<typeof getProductDetails>>> }) {
-  const { product, vendor, categoryPath } = details;
+function ProductDetails({ details, pricingTime, relatedProducts }: { details: NonNullable<Awaited<ReturnType<typeof getProductDetails>>>; pricingTime: number; relatedProducts: ProductCardData[] }) {
+  const { product, vendor, deals, categoryPath } = details;
   const images = getProductGallery(product);
 
   return (
@@ -79,11 +87,12 @@ function ProductDetails({ details }: { details: NonNullable<Awaited<ReturnType<t
       </nav>
 
       <article aria-labelledby="product-name">
-        <ProductDetailsInteractive product={product} vendor={vendor} images={images} />
+        <ProductDetailsInteractive product={product} vendor={vendor} deals={deals} images={images} pricingTime={pricingTime} />
         <div className="mt-8 min-w-0">
           <ProductImageCredits images={images} />
         </div>
       </article>
+      <RelatedProducts products={relatedProducts} />
     </>
   );
 }

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:catalog": "playwright test --config=playwright.catalog.config.ts",
     "test:demo-state": "playwright test --config=playwright.demo-state.config.ts",
     "test:e2e": "playwright test"
   },

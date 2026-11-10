@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useOptimistic, useState, useSyncExternalStore, useTransition } from "react";
+import { useCallback, useEffect, useOptimistic, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import type { ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ActiveFilters } from "@/components/products/active-filters";
@@ -29,7 +29,18 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(notices);
   const [priceError, setPriceError] = useState("");
-  const close = useCallback(() => setOpen(false), []);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const restoreFilterFocus = useRef(false);
+  const close = useCallback(() => {
+    restoreFilterFocus.current = true;
+    setOpen(false);
+  }, []);
+  useEffect(() => {
+    if (!open && !pending && restoreFilterFocus.current) {
+      filterButtonRef.current?.focus({ preventScroll: true });
+      restoreFilterFocus.current = false;
+    }
+  }, [open, pending]);
   // Reset drafts on accepted server state, including Back/Forward restoration.
   if (accepted !== href) {
     setAccepted(href);
@@ -70,7 +81,7 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
           <form role="search" className="mb-4 flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); commit({ type: "search", value: search }); }}>
             <label htmlFor="listing-search" className="sr-only">Search products</label><input id="listing-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products" className="input min-w-0 flex-1 basis-40 rounded-full" /><button className="btn btn-primary btn-md" type="submit">Search</button>
           </form>
-          <ListingToolbar sort={selection.sort} count={count} onSort={(value) => commit({ type: "sort", value })} onOpenFilters={() => setOpen(true)} />
+          <ListingToolbar sort={selection.sort} count={count} onSort={(value) => commit({ type: "sort", value })} onOpenFilters={() => setOpen(true)} filterButtonRef={filterButtonRef} />
           <ActiveFilters state={state} options={options} onRemove={(key) => commit({ type: "remove", key })} onClear={() => commit({ type: "clear" })} />
         </fieldset>
         <p role="status" aria-live="polite" className={pending ? "mb-3 text-sm text-mute" : "sr-only"}>{pending ? "Updating products…" : `Results updated: ${count}`}</p>

@@ -15,6 +15,8 @@ interface ProductInformationProps {
   maximumPrice: number;
   minimumCompareAtPrice: number | null;
   maximumCompareAtPrice: number | null;
+  selectedEffectivePrice: number | null;
+  selectedEffectiveCompareAtPrice: number | null;
   quantity: number;
   maximumQuantity: number;
   canSetQuantity: boolean;
@@ -31,13 +33,14 @@ interface ProductInformationProps {
 export function ProductInformation({
   product, vendor, selectedVariant, selectedOptions, variants, minimumPrice, maximumPrice,
   minimumCompareAtPrice, maximumCompareAtPrice, quantity, maximumQuantity, canSetQuantity,
+  selectedEffectivePrice, selectedEffectiveCompareAtPrice,
   canAddToCart, isCustomerAccount, isAccountReady, isAddingToCart, cartFeedback, onAddToCart,
   onOptionChange, onQuantityChange,
 }: ProductInformationProps) {
-  const currentPrice = selectedVariant?.price ?? (product.hasVariants ? null : product.price);
+  const currentPrice = selectedVariant ? selectedEffectivePrice : product.hasVariants ? null : minimumPrice;
   const originalPrice = selectedVariant
-    ? selectedVariant.compareAtPrice !== null && selectedVariant.compareAtPrice > selectedVariant.price ? selectedVariant.compareAtPrice : null
-    : product.hasVariants ? minimumCompareAtPrice : product.compareAtPrice !== null && product.compareAtPrice > product.price ? product.compareAtPrice : null;
+    ? selectedEffectiveCompareAtPrice !== null && selectedEffectiveCompareAtPrice > (selectedEffectivePrice ?? 0) ? selectedEffectiveCompareAtPrice : null
+    : product.hasVariants ? minimumCompareAtPrice : minimumCompareAtPrice !== null && minimumCompareAtPrice > minimumPrice ? minimumCompareAtPrice : null;
   const discount = currentPrice !== null && originalPrice !== null ? calcDiscountPercent(currentPrice, originalPrice) : 0;
   const highlights = product.highlights.filter((highlight) => highlight.trim());
   const specifications = product.specifications.filter(({ label, value }) => label.trim() && value.trim());

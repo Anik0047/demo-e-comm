@@ -19,7 +19,7 @@ export function createProduct(base: ProductBase): Product {
 
 export const products: Product[] = [
   createProduct({"id": "prod-wireless-earbuds-pro", "slug": "wireless-earbuds-pro", "sku": "SKU-WIRELESS-EARBUDS-PRO", "name": "Wireless Earbuds Pro", "vendorId": "vendor-tech-haven", "categoryId": "child-audio-earbuds", "price": 3770, "ratingAverage": 4.6, "ratingCount": 128, "stock": 76, "soldCount": 820, "publishedAt": "2026-09-15T00:00:00.000Z"}),
-  createProduct({"id": "prod-smart-watch-series-5", "slug": "smart-watch-series-5", "sku": "SKU-SMART-WATCH-SERIES-5", "name": "Smart Watch Series 5", "vendorId": "vendor-tech-haven", "categoryId": "sub-electronics-mobile-phones", "price": 6650, "ratingAverage": 4.4, "ratingCount": 86, "stock": 44, "soldCount": 510, "publishedAt": "2026-08-18T00:00:00.000Z"}),
+  createProduct({"id": "prod-smart-watch-series-5", "slug": "smart-watch-series-5", "sku": "SKU-SMART-WATCH-SERIES-5", "name": "Smart Watch Series 5", "vendorId": "vendor-tech-haven", "categoryId": "child-wearables-smart-watches", "price": 6650, "ratingAverage": 4.4, "ratingCount": 86, "stock": 44, "soldCount": 510, "publishedAt": "2026-08-18T00:00:00.000Z"}),
   createProduct({"id": "prod-cotton-panjabi", "slug": "cotton-panjabi", "sku": "SKU-COTTON-PANJABI", "name": "Cotton Panjabi", "vendorId": "vendor-urban-fit", "categoryId": "child-fashion-men-panjabi", "price": 1600, "ratingAverage": 4.7, "ratingCount": 212, "stock": 88, "soldCount": 940, "publishedAt": "2026-09-05T00:00:00.000Z",
     shortDescription: "A straight-cut cotton panjabi for everyday wear and family occasions.",
     description: "Made for warm-weather comfort, this panjabi has a simple band collar, a button-front placket, and a straight hem. Check the size guide before ordering; slight color variation may occur between screens and the delivered item.",
@@ -161,7 +161,7 @@ export const products: Product[] = [
     "sku": "SKU-POWER-BANK-10000",
     "name": "10000mAh Power Bank",
     "vendorId": "vendor-tech-haven",
-    "categoryId": "sub-electronics-mobile-phones",
+    "categoryId": "child-mobile-accessories-power-banks",
     "price": 1590,
     "compareAtPrice": null,
     "ratingAverage": 4.5,

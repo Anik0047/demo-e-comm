@@ -1,5 +1,6 @@
 import { CATALOG_PAGE_SIZE } from "@/types/catalog";
 import type { CatalogDataset, CatalogQueryResult, CatalogRow, ListingState } from "@/types/catalog";
+import { resolveEffectivePrice } from "@/services/effective-price";
 
 const ordinal = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 function categoryClosure(data: CatalogDataset, slug: string): Set<string> {
@@ -42,7 +43,7 @@ function compareRows(a: CatalogRow, b: CatalogRow, sort: ListingState["sort"]): 
 }
 
 // Input has passed catalog validation and slug resolution at the service boundary.
-export function queryCatalog(data: CatalogDataset, applied: ListingState, categoryScope?: string): CatalogQueryResult {
+export function queryCatalog(data: CatalogDataset, applied: ListingState, now: number, categoryScope?: string): CatalogQueryResult {
   const vendors = new Map(data.vendors.map((vendor) => [vendor.id, vendor]));
   const deals = new Map(data.deals.map((deal) => [deal.productId, deal]));
   const categories = applied.category ? categoryClosure(data, applied.category) : undefined;
@@ -54,10 +55,12 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
     if (product.status !== "active") continue;
     const vendor = vendors.get(product.vendorId);
     if (!vendor) continue;
-    const deal = applied.promotion ? deals.get(product.id) : undefined;
+    const configuredDeal = deals.get(product.id);
+    const effective = resolveEffectivePrice(product, null, configuredDeal ? [configuredDeal] : [], true, now);
+    const deal = effective.deal ?? undefined;
     if (applied.promotion && !deal) continue;
-    const price = deal?.dealPrice ?? product.price;
-    const inStock = (!product.trackInventory || product.stock > 0) && (!deal || deal.soldCount < deal.stockLimit);
+    const price = effective.price;
+    const inStock = !product.trackInventory || product.stock > 0;
     if (categories && !categories.has(product.categoryId)) continue;
     if (subcategories && !subcategories.has(product.categoryId)) continue;
     if (children && !children.has(product.categoryId)) continue;
@@ -69,7 +72,7 @@ export function queryCatalog(data: CatalogDataset, applied: ListingState, catego
     if (applied.availability && inStock !== (applied.availability === "in-stock")) continue;
     const fields = [product.name, product.brand ?? "", ...product.tags, vendor.name];
     if (!matchesCatalogSearchFields(fields, applied.search)) continue;
-    rows.push({ product, vendor, deal, price, compareAtPrice: deal ? product.price : product.compareAtPrice, inStock });
+    rows.push({ product, vendor, deal, price, compareAtPrice: effective.compareAtPrice, inStock });
   }
   rows.sort((a, b) => compareRows(a, b, applied.sort));
   const totalResults = rows.length;

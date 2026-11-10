@@ -48,12 +48,19 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
         </div>
         <div id={gridId} className="hidden grid-cols-2 gap-2 md:grid">
           {images.slice(0, expanded ? images.length : 4).map((image, index) => (
-            <button key={image.url} type="button" aria-label={`Enlarge image ${index + 1} of ${images.length}: ${image.alt}`}
-              className="relative aspect-square min-w-0 overflow-hidden rounded-2xl bg-soft hover:ring-2 hover:ring-line"
-              onClick={() => setViewer(index)}>
-              <ProductGalleryImage image={image} eager={index < 2} />
-              <span className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full border border-line bg-canvas"><ZoomIn aria-hidden="true" className="size-5" /></span>
-            </button>
+            <div key={image.url} className="relative aspect-square min-w-0">
+              <button type="button" aria-label={`View image ${index + 1} of ${images.length}: ${image.alt}`}
+                aria-pressed={active === index}
+                className={`relative block size-full overflow-hidden rounded-2xl bg-soft hover:ring-2 hover:ring-line ${active === index ? "ring-2 ring-brand" : ""}`}
+                onClick={() => setActive(index)}>
+                <ProductGalleryImage image={image} eager={index < 2} />
+              </button>
+              <button type="button" aria-label={`Enlarge image ${index + 1} of ${images.length}: ${image.alt}`}
+                className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full border border-line bg-canvas"
+                onClick={() => { setActive(index); setViewer(index); }}>
+                <ZoomIn aria-hidden="true" className="size-5" />
+              </button>
+            </div>
           ))}
         </div>
         {images.length > 4 && <button type="button" aria-expanded={expanded} aria-controls={gridId} className="btn btn-outline btn-md mx-auto mt-4 hidden md:flex" onClick={() => setExpanded((current) => !current)}>

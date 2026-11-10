@@ -41,6 +41,7 @@ export function getGlobalSearchData(data: CatalogDataset = catalog) {
       const vendor = vendorsById.get(product.vendorId);
       return category && mainCategory && vendor ? [{
         id: product.id,
+        slug: product.slug,
         name: product.name,
         categoryName: category.name,
         categorySlug: mainCategory.slug,
@@ -54,7 +55,15 @@ export function getGlobalSearchData(data: CatalogDataset = catalog) {
   };
 }
 
-export async function getProductListing(raw: RawListingQuery, data: CatalogDataset = catalog, categoryScope?: string, basePath = "/products", filterCategoryScope = categoryScope): Promise<ListingResult> {
+interface ProductListingOptions {
+  now: number;
+  data?: CatalogDataset;
+  categoryScope?: string;
+  basePath?: string;
+  filterCategoryScope?: string;
+}
+
+export async function getProductListing(raw: RawListingQuery, { now, data = catalog, categoryScope, basePath = "/products", filterCategoryScope = categoryScope }: ProductListingOptions): Promise<ListingResult> {
   const { state, notices } = parseListingQuery(raw);
   const validation = validateCatalog(data);
   const options = optionsFrom(data, validation);
@@ -97,7 +106,7 @@ export async function getProductListing(raw: RawListingQuery, data: CatalogDatas
     delete state.child;
     notices.push({ reason: "unavailable-filter", message: "An unavailable filter was removed." });
   }
-  const result = queryCatalog(data, state, categoryScope);
+  const result = queryCatalog(data, state, now, categoryScope);
   return {
     status: "ready", state: result.state, href: buildProductsHref(result.state, basePath), notices, options,
     totalResults: result.totalResults, totalPages: result.totalPages, pageSize: result.pageSize,
@@ -105,7 +114,7 @@ export async function getProductListing(raw: RawListingQuery, data: CatalogDatas
       ...projectProductCard(product, vendor, {
         price, compareAtPrice, inStock,
         placeholder: state.promotion ? flashDealPlaceholders[product.id] : trendingPlaceholders[product.id] ?? flashDealPlaceholders[product.id],
-      }),
+      }, now),
       availability: inStock ? "in-stock" : "out-of-stock",
       hasReviews: product.ratingCount > 0,
     })),

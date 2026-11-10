@@ -1,5 +1,7 @@
 import { DEMO_SEED_CATALOG } from "@/services/demo-state-seed";
 import { getCompleteVariants } from "@/services/product-variant-selection";
+import { maximumOrderQuantity, resolveEffectivePrice } from "@/services/effective-price";
+import { flashDeals } from "@/data/flash-deals";
 import type { DemoStateStoreApi, DemoTransactionResult } from "@/services/demo-state-store";
 import type { DemoCart, DemoCartItem, DemoStateSnapshot } from "@/types/demo-state";
 import type { Product, ProductVariant } from "@/types/product";
@@ -8,6 +10,7 @@ import type { Vendor } from "@/types/vendor";
 export interface DemoCartCatalog {
   products: readonly Product[];
   vendors: readonly Vendor[];
+  deals?: typeof flashDeals;
 }
 
 export type DemoCartIssue =
@@ -34,6 +37,7 @@ export interface DemoCartLineView {
   variant: ProductVariant | null;
   unitPrice: number | null;
   lineTotal: number | null;
+  maximumQuantity: number | null;
   available: boolean;
   issue: Extract<DemoCartIssue, "product_unavailable" | "vendor_unavailable" | "variant_unavailable" | "invalid_quantity" | "below_minimum" | "above_maximum" | "insufficient_stock"> | null;
 }
@@ -49,7 +53,7 @@ export interface DemoCartSummary {
 export interface CartLineIdentity { productId: string; variantId?: string | null }
 export interface AddCartItemInput extends CartLineIdentity { quantity: number }
 
-const catalog: DemoCartCatalog = DEMO_SEED_CATALOG;
+const catalog: DemoCartCatalog = { ...DEMO_SEED_CATALOG, deals: flashDeals };
 
 function customerCart(snapshot: DemoStateSnapshot, activeAccountId: string): DemoCart | null {
   const account = snapshot.data.accounts.find(({ id }) => id === activeAccountId);
@@ -86,17 +90,18 @@ function resolveLine(
 ): DemoCartLineView {
   const product = findProduct(catalogData, item.productId) ?? null;
   if (!product || product.status !== "active") {
-    return { item, product, variant: null, unitPrice: null, lineTotal: null, available: false, issue: "product_unavailable" };
+    return { item, product, variant: null, unitPrice: null, lineTotal: null, maximumQuantity: null, available: false, issue: "product_unavailable" };
   }
   const vendor = findVendor(catalogData, product);
   if (!vendor || vendor.status !== "approved") {
-    return { item, product, variant: null, unitPrice: null, lineTotal: null, available: false, issue: "vendor_unavailable" };
+    return { item, product, variant: null, unitPrice: null, lineTotal: null, maximumQuantity: null, available: false, issue: "vendor_unavailable" };
   }
   const variant = item.variantId ? getCompleteVariants(product).find(({ id }) => id === item.variantId) ?? null : null;
   if ((product.hasVariants && !variant) || (!product.hasVariants && item.variantId) || (variant && !product.options.length)) {
-    return { item, product, variant, unitPrice: null, lineTotal: null, available: false, issue: "variant_unavailable" };
+    return { item, product, variant, unitPrice: null, lineTotal: null, maximumQuantity: null, available: false, issue: "variant_unavailable" };
   }
-  const unitPrice = variant?.price ?? product.price;
+  const price = resolveEffectivePrice(product, variant, catalogData.deals ?? [], true);
+  const unitPrice = price.price;
   const issue = validateQuantity(product, variant, item.quantity);
   const available = issue === null;
   return {
@@ -105,6 +110,7 @@ function resolveLine(
     variant,
     unitPrice,
     lineTotal: available ? unitPrice * item.quantity : null,
+    maximumQuantity: maximumOrderQuantity(product, variant),
     available,
     issue,
   };

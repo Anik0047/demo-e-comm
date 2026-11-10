@@ -8,22 +8,20 @@ import { addCartItem } from "@/services/demo-cart";
 import { demoStateStore, selectActiveAccount, selectHydrationReady } from "@/services/demo-state-store";
 import type { GalleryImage } from "@/services/product-gallery";
 import { getCompleteVariants, matchesVariantOptions } from "@/services/product-variant-selection";
-import type { Product, ProductVariant } from "@/types/product";
+import type { Product } from "@/types/product";
 import type { Vendor } from "@/types/vendor";
+import type { FlashDeal } from "@/types/product";
+import { resolveEffectivePrice, maximumOrderQuantity as getMaximumOrderQuantity } from "@/services/effective-price";
 
 interface ProductDetailsInteractiveProps {
   product: Product;
   vendor: Vendor;
+  deals: readonly FlashDeal[];
   images: GalleryImage[];
+  pricingTime: number;
 }
 
-function getMaxQuantity(product: Product, variant: ProductVariant | null): number {
-  if (!product.trackInventory) return product.maxOrderQty;
-  const stock = variant ? variant.stock : product.stock;
-  return Math.min(product.maxOrderQty, stock);
-}
-
-export function ProductDetailsInteractive({ product, vendor, images }: ProductDetailsInteractiveProps) {
+export function ProductDetailsInteractive({ product, vendor, deals, images, pricingTime }: ProductDetailsInteractiveProps) {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(product.minOrderQty);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -37,16 +35,19 @@ export function ProductDetailsInteractive({ product, vendor, images }: ProductDe
   const selectionComplete = product.options.length > 0 && product.options.every(({ name }) => selectedOptions[name]);
   const selectedVariant = selectionComplete ? matchingOrderableVariants[0] ?? null : null;
   const rangeVariants = matchingVariants.length ? matchingVariants : variants;
-  const minimumPrice = rangeVariants.length ? Math.min(...rangeVariants.map(({ price }) => price)) : product.price;
-  const maximumPrice = rangeVariants.length ? Math.max(...rangeVariants.map(({ price }) => price)) : product.price;
-  const compareAtPrices = rangeVariants.map(({ price, compareAtPrice }) => compareAtPrice !== null && compareAtPrice > price ? compareAtPrice : null);
+  const basePrice = resolveEffectivePrice(product, null, deals, vendor.status === "approved", pricingTime);
+  const prices = rangeVariants.map((variant) => resolveEffectivePrice(product, variant, deals, vendor.status === "approved", pricingTime));
+  const selectedPrice = selectedVariant ? resolveEffectivePrice(product, selectedVariant, deals, vendor.status === "approved", pricingTime) : null;
+  const minimumPrice = prices.length ? Math.min(...prices.map(({ price }) => price)) : resolveEffectivePrice(product, null, deals, vendor.status === "approved", pricingTime).price;
+  const maximumPrice = prices.length ? Math.max(...prices.map(({ price }) => price)) : minimumPrice;
+  const compareAtPrices = prices.map(({ price, compareAtPrice }) => compareAtPrice !== null && compareAtPrice > price ? compareAtPrice : null);
   const minimumCompareAtPrice = rangeVariants.length > 0 && compareAtPrices.every((price): price is number => price !== null)
     ? Math.min(...compareAtPrices)
-    : null;
+    : !product.hasVariants && basePrice.compareAtPrice !== null && basePrice.compareAtPrice > basePrice.price ? basePrice.compareAtPrice : null;
   const maximumCompareAtPrice = rangeVariants.length > 0 && compareAtPrices.every((price): price is number => price !== null)
     ? Math.max(...compareAtPrices)
-    : null;
-  const maximumQuantity = getMaxQuantity(product, selectedVariant);
+    : !product.hasVariants && basePrice.compareAtPrice !== null && basePrice.compareAtPrice > basePrice.price ? basePrice.compareAtPrice : null;
+  const maximumQuantity = getMaximumOrderQuantity(product, selectedVariant);
   const canSetQuantity = product.hasVariants
     ? selectedVariant !== null && maximumQuantity >= product.minOrderQty
     : (!product.trackInventory || product.stock >= product.minOrderQty) && maximumQuantity >= product.minOrderQty;
@@ -72,7 +73,7 @@ export function ProductDetailsInteractive({ product, vendor, images }: ProductDe
 
     const nextIsComplete = product.options.every(({ name: optionName }) => next[optionName]);
     const nextVariant = nextIsComplete ? possible[0] : null;
-    const nextMax = getMaxQuantity(product, nextVariant);
+    const nextMax = getMaximumOrderQuantity(product, nextVariant);
     setSelectedOptions(next);
     setQuantity((current) => nextVariant
       ? Math.max(product.minOrderQty, Math.min(current, nextMax))
@@ -121,6 +122,8 @@ export function ProductDetailsInteractive({ product, vendor, images }: ProductDe
         maximumPrice={maximumPrice}
         minimumCompareAtPrice={minimumCompareAtPrice}
         maximumCompareAtPrice={maximumCompareAtPrice}
+        selectedEffectivePrice={selectedPrice?.price ?? null}
+        selectedEffectiveCompareAtPrice={selectedPrice?.compareAtPrice ?? null}
         quantity={quantity}
         maximumQuantity={maximumQuantity}
         canSetQuantity={canSetQuantity}

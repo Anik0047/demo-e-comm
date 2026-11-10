@@ -1,4 +1,6 @@
-import type { Product, ProductCardData } from "@/types/product";
+import type { FlashDeal, Product, ProductCardData } from "@/types/product";
+import { flashDeals } from "@/data/flash-deals";
+import { resolveEffectivePrice } from "@/services/effective-price";
 
 export interface ProductCardOverrides {
   price?: number;
@@ -8,14 +10,21 @@ export interface ProductCardOverrides {
 }
 
 // Projection only: callers retain ownership of membership and contextual rules.
-export function projectProductCard(product: Product, vendor: ProductCardData["vendor"], overrides: ProductCardOverrides = {}): ProductCardData {
+export function projectProductCard(
+  product: Product,
+  vendor: ProductCardData["vendor"],
+  overrides: ProductCardOverrides = {},
+  now?: number,
+  deals: readonly FlashDeal[] = flashDeals,
+): ProductCardData {
+  const effective = resolveEffectivePrice(product, null, deals, true, now);
   return {
     id: product.id,
     slug: product.slug,
     name: product.name,
     mainImage: { url: product.mainImage.url, alt: product.mainImage.alt },
-    price: overrides.price ?? product.price,
-    compareAtPrice: overrides.compareAtPrice === undefined ? product.compareAtPrice : overrides.compareAtPrice,
+    price: overrides.price ?? effective.price,
+    compareAtPrice: overrides.compareAtPrice === undefined ? effective.compareAtPrice : overrides.compareAtPrice,
     ratingAverage: product.ratingAverage,
     ratingCount: product.ratingCount,
     freeShipping: product.freeShipping,

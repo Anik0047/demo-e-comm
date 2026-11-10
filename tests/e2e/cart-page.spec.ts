@@ -22,15 +22,21 @@ test("cart navigation, quantity, subtotal, persistence, removal, and clear cart"
   const cartItems = page.getByRole("list", { name: "Cart items" });
   const orderSummary = page.getByRole("complementary", { name: "Order summary" });
   await expect(cartItems.getByText("Size: M", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Cart, 2 items, subtotal ৳3,200" })).toBeVisible();
-  await expect(cartItems.getByText("৳3,200", { exact: true })).toBeVisible();
-  await expect(orderSummary.getByText("৳3,200", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cart, 2 items, subtotal ৳2,400" })).toBeVisible();
+  await expect(cartItems.getByText("৳2,400", { exact: true })).toBeVisible();
+  await expect(orderSummary.getByText("৳2,400", { exact: true })).toBeVisible();
 
-  await page.getByRole("group", { name: "Quantity for Cotton Panjabi" }).getByRole("button", { name: "Increase quantity" }).click();
-  await expect(page.getByRole("link", { name: "Cart, 3 items, subtotal ৳4,800" })).toBeVisible();
+  const quantityGroup = page.getByRole("group", { name: "Quantity for Cotton Panjabi" });
+  await quantityGroup.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(page.getByRole("link", { name: "Cart, 3 items, subtotal ৳3,600" })).toBeVisible();
+  await quantityGroup.getByRole("button", { name: "Increase quantity" }).click();
+  await quantityGroup.getByRole("button", { name: "Increase quantity" }).click();
+  await expect(page.getByRole("link", { name: "Cart, 5 items, subtotal ৳6,000" })).toBeVisible();
+  await expect(quantityGroup.getByRole("button", { name: "Increase quantity" })).toBeDisabled();
+  await expect(page.getByText("Maximum available quantity: 5.", { exact: true })).toBeVisible();
   await page.reload();
   await expect(cartItems.getByText("Size: M", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Cart, 3 items, subtotal ৳4,800" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cart, 5 items, subtotal ৳6,000" })).toBeVisible();
 
   await page.getByRole("button", { name: "Remove" }).click();
   await expect(page.getByRole("heading", { name: "Your cart is empty", exact: true })).toBeVisible();
