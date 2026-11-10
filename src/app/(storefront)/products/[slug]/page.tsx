@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { ProductDetailsInteractive } from "@/components/products/product-details-interactive";
 import { ProductImageCredits } from "@/components/products/product-image-credits";
-import { ProductImageGallery } from "@/components/products/product-image-gallery";
-import { ProductInformation } from "@/components/products/product-information";
 import { getProductDetails, getProductDetailSlugs } from "@/services/product-details";
 import { getProductGallery } from "@/services/product-gallery";
 
@@ -27,13 +27,18 @@ export async function generateMetadata({ params }: ProductDetailsPageProps): Pro
   };
 }
 
-export default async function ProductDetailsPage({ params }: ProductDetailsPageProps) {
+export default function ProductDetailsPage({ params }: ProductDetailsPageProps) {
+  return (
+    <Suspense fallback={<ProductDetailsSkeleton />}>
+      <ProductDetailsPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
   const { slug } = await params;
   const details = await getProductDetails(slug);
   if (!details) notFound();
-
-  const { product, vendor, categoryPath } = details;
-  const images = getProductGallery(product);
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8">
@@ -41,7 +46,22 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <li><Link href="/" className="inline-flex min-h-11 items-center hover:text-brand-strong hover:underline">Home</Link></li>
           <li aria-hidden="true">/</li>
-          <li><Link href="/products" className="inline-flex min-h-11 items-center hover:text-brand-strong hover:underline">Products</Link></li>
+          <li><Link href="/products" className="inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-strong hover:underline">Products</Link></li>
+        </ol>
+      </nav>
+      <ProductDetails details={details} />
+    </div>
+  );
+}
+
+function ProductDetails({ details }: { details: NonNullable<Awaited<ReturnType<typeof getProductDetails>>> }) {
+  const { product, vendor, categoryPath } = details;
+  const images = getProductGallery(product);
+
+  return (
+    <>
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-mute">
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {categoryPath.map((category, index) => (
             <li key={category.id} className="flex min-w-0 items-center gap-2">
               <span aria-hidden="true">/</span>
@@ -58,14 +78,32 @@ export default async function ProductDetailsPage({ params }: ProductDetailsPageP
         </ol>
       </nav>
 
-      <article className="grid grid-cols-1 gap-8 lg:grid-cols-12" aria-labelledby="product-name">
-        <ProductImageGallery key={product.id} images={images} name={product.name} />
-
-        <ProductInformation product={product} vendor={vendor} />
-        <div className="min-w-0 lg:col-span-12">
+      <article aria-labelledby="product-name">
+        <ProductDetailsInteractive product={product} vendor={vendor} images={images} />
+        <div className="mt-8 min-w-0">
           <ProductImageCredits images={images} />
         </div>
       </article>
+    </>
+  );
+}
+
+function ProductDetailsSkeleton() {
+  return (
+    <div aria-label="Loading product details" aria-busy="true" className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="aspect-square animate-pulse rounded-2xl bg-soft lg:col-span-7" />
+      <div className="min-w-0 space-y-6 lg:col-span-5">
+        <div className="space-y-3">
+          <div className="skeleton h-8 w-4/5" />
+          <div className="skeleton h-4 w-1/3" />
+        </div>
+        <div className="space-y-3 border-y border-line py-6">
+          <div className="skeleton h-9 w-1/2" />
+          <div className="skeleton h-4 w-full" />
+          <div className="skeleton h-4 w-4/5" />
+        </div>
+        <div className="skeleton h-24 w-full rounded-2xl" />
+      </div>
     </div>
   );
 }
