@@ -65,6 +65,7 @@ test("a product page renders its image gallery", async ({ page }) => {
 
 test("Cotton Panjabi size selection updates variant price, stock, and quantity limits", async ({ page }) => {
   await page.goto("/products/cotton-panjabi");
+  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
 
   const product = page.getByRole("region", { name: "Cotton Panjabi" });
   const size = page.getByLabel("Size");

@@ -42,18 +42,12 @@ export function MobileDrawer({ isOpen, onClose, categories }: MobileDrawerProps)
           <X className="w-6 h-6" />
         </button>
       </div>
-      <div className="p-4 grid grid-cols-2 gap-2 border-b border-line">
+      <div className="p-4 border-b border-line">
         <Link
-          href="#"
-          className="text-center bg-brand text-white text-sm font-medium rounded-lg py-2"
+          href="/login"
+          className="block text-center bg-brand text-white text-sm font-medium rounded-lg py-3"
         >
-          Login
-        </Link>
-        <Link
-          href="#"
-          className="text-center border border-brand text-brand-strong text-sm font-medium rounded-lg py-2"
-        >
-          Register
+          Login or switch demo account
         </Link>
       </div>
       <ul id="drawer-cats" className="p-2">
