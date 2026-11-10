@@ -7,6 +7,10 @@ export interface EffectivePrice {
 }
 
 export function getPricingTime(): number {
+  const testTime = typeof window === "undefined" && process.env.PLAYWRIGHT_TEST === "1"
+    ? Date.parse(process.env.PLAYWRIGHT_TEST_NOW ?? "")
+    : Number.NaN;
+  if (Number.isFinite(testTime)) return testTime;
   return Date.now();
 }
 

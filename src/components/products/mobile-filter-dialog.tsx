@@ -14,7 +14,6 @@ export function MobileFilterDialog({ state, options, onClose, onApply, categoryL
   const [error, setError] = useState("");
   useEffect(() => {
     const element = dialog.current;
-    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previous = document.body.style.overflow;
     element?.showModal();
     document.body.style.overflow = "hidden";
@@ -25,7 +24,6 @@ export function MobileFilterDialog({ state, options, onClose, onApply, categoryL
       breakpoint.removeEventListener("change", resize);
       element?.close();
       document.body.style.overflow = previous;
-      trigger?.focus({ preventScroll: true });
     };
   }, [onClose]);
   return <dialog ref={dialog} aria-labelledby="filter-dialog-title" className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border border-line bg-canvas p-0 text-ink backdrop:bg-black/40" onCancel={(event) => { event.preventDefault(); onClose(); }} onClick={(event) => { if (event.target === event.currentTarget) { const bounds = event.currentTarget.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose(); } }}>

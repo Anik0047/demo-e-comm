@@ -5,9 +5,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { ProductDetailsInteractive } from "@/components/products/product-details-interactive";
 import { ProductImageCredits } from "@/components/products/product-image-credits";
+import { RelatedProducts } from "@/components/products/related-products";
 import { getProductDetails, getProductDetailSlugs } from "@/services/product-details";
 import { getProductGallery } from "@/services/product-gallery";
 import { getPricingTime } from "@/services/effective-price";
+import { getRelatedProducts } from "@/services/related-products";
+import type { ProductCardData } from "@/types/product";
 
 interface ProductDetailsPageProps {
   params: Promise<{ slug: string }>;
@@ -43,6 +46,7 @@ async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
   const { slug } = await params;
   const details = await getProductDetails(slug);
   if (!details) notFound();
+  const relatedProducts = getRelatedProducts(details.product.id, { now: pricingTime });
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8">
@@ -53,12 +57,12 @@ async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
           <li><Link href="/products" className="inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-strong hover:underline">Products</Link></li>
         </ol>
       </nav>
-      <ProductDetails details={details} pricingTime={pricingTime} />
+      <ProductDetails details={details} pricingTime={pricingTime} relatedProducts={relatedProducts} />
     </div>
   );
 }
 
-function ProductDetails({ details, pricingTime }: { details: NonNullable<Awaited<ReturnType<typeof getProductDetails>>>; pricingTime: number }) {
+function ProductDetails({ details, pricingTime, relatedProducts }: { details: NonNullable<Awaited<ReturnType<typeof getProductDetails>>>; pricingTime: number; relatedProducts: ProductCardData[] }) {
   const { product, vendor, deals, categoryPath } = details;
   const images = getProductGallery(product);
 
@@ -88,6 +92,7 @@ function ProductDetails({ details, pricingTime }: { details: NonNullable<Awaited
           <ProductImageCredits images={images} />
         </div>
       </article>
+      <RelatedProducts products={relatedProducts} />
     </>
   );
 }

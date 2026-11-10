@@ -9,6 +9,7 @@ export interface NavbarData {
 
 export interface SearchProduct {
   id: string;
+  slug: string;
   name: string;
   categoryName: string;
   categorySlug: string;

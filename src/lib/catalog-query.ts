@@ -99,7 +99,7 @@ export function transitionListingState(applied: ListingState, action: ListingCom
     case "sort": candidate.sort = action.value; break;
     case "page": candidate.page = action.value; break;
     case "remove": delete candidate[action.key]; break;
-    case "clear": candidate = { sort: applied.sort, page: applied.page }; break;
+    case "clear": candidate = { search: applied.search, sort: applied.sort, page: applied.page }; break;
   }
   const raw = new URLSearchParams(serializeListingState(candidate));
   if (priceText) {

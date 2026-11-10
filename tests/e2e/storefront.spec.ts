@@ -83,6 +83,42 @@ test("a product page renders its image gallery", async ({ page }) => {
   await expect(gallery.getByRole("img", { name: /Bluetooth speaker/i }).first()).toBeAttached();
 });
 
+test("desktop gallery image controls select images and open the viewer by keyboard", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/products/bluetooth-speaker");
+
+  const gallery = page.getByRole("region", { name: "Bluetooth Speaker images" });
+  const secondImage = gallery.getByRole("button", { name: /^View image 2 of 4/ });
+  await secondImage.focus();
+  await page.keyboard.press("Enter");
+  await expect(secondImage).toHaveAttribute("aria-pressed", "true");
+
+  await gallery.getByRole("button", { name: /^Enlarge image 2 of 4/ }).click();
+  await expect(page.getByRole("dialog", { name: "Bluetooth Speaker — image viewer" })).toBeVisible();
+  await page.keyboard.press("Escape");
+});
+
+test("mobile gallery can advance images with its keyboard-accessible controls", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/products/bluetooth-speaker");
+
+  const gallery = page.getByRole("region", { name: "Bluetooth Speaker images" });
+  await expect(gallery.getByText("Image 1 of 4")).toBeVisible();
+  await gallery.getByRole("button", { name: "Next image" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(gallery.getByText("Image 2 of 4")).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(gallery.getByText("Image 1 of 4")).toBeVisible();
+});
+
+test("products without catalog images show the intentional gallery fallback", async ({ page }) => {
+  await page.goto("/products/wireless-earbuds-pro");
+
+  const gallery = page.getByRole("region", { name: "Wireless Earbuds Pro images" });
+  await expect(gallery.getByText("No product images yet")).toBeVisible();
+  await expect(gallery.getByRole("img")).toHaveCount(0);
+});
+
 test("Cotton Panjabi size selection updates variant price, stock, and quantity limits", async ({ page }) => {
   await page.goto("/products/cotton-panjabi");
   await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();

@@ -78,7 +78,10 @@ export function SearchForm({ mobile = false, categories, searchProducts, popular
 
   function choose(item: ActiveItem) {
     if (item.type === "popular") navigate(item.value, selectedCategory || undefined);
-    else if (item.type === "product") navigate(item.value.name, item.value.categorySlug);
+    else if (item.type === "product") {
+      setOpen(false);
+      router.push(`/products/${encodeURIComponent(item.value.slug)}`);
+    }
     else if (item.type === "category") navigate("", item.value.slug);
     else if (item.type === "all-categories") navigate(item.value);
     else navigate(item.value, selectedCategory || undefined);
@@ -123,32 +126,32 @@ export function SearchForm({ mobile = false, categories, searchProducts, popular
     };
 
     return (
-        <div id={listId} role="listbox" aria-label={normalizedQuery ? "Search suggestions" : "Popular searches"} className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border border-line bg-white py-2 shadow-lg">
-        {!normalizedQuery ? (
-          <>
-            <p className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Popular searches</p>
-            {items.map((item, index) => option(item, <><Clock3 aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1 truncate">{item.value as string}</span><ArrowRight aria-hidden="true" className="size-4 text-mute" /></>, `popular-${index}`))}
-          </>
-        ) : (
-          <>
-            {productMatches.length > 0 && <p className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Products</p>}
-            {productMatches.map((product) => option(
-              { type: "product", value: product },
-              <><Search aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1"><span className="block truncate font-medium text-ink">{product.name}</span><span className="block truncate text-xs text-mute">{product.categoryName}</span></span></>,
-              `product-${product.id}`,
-            ))}
-            {categoryMatches.length > 0 && <p className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Categories</p>}
-            {categoryMatches.map((category) => option(
-              { type: "category", value: category },
-              <><Search aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1 truncate">{category.name}</span><span className="text-xs text-mute">Category</span></>,
-              `category-${category.id}`,
-            ))}
-            {!productMatches.length && (!categoryMatches.length || selectedCategory) && <p className="px-4 py-3 text-sm text-mute">{selectedCategory ? `No matching products in ${mainCategories.find((category) => category.slug === selectedCategory)?.name ?? "this category"} for “${normalizedQuery}”.` : `No matching suggestions for “${normalizedQuery}”.`}</p>}
+      <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border border-line bg-white py-2 shadow-lg">
+        {!normalizedQuery && <p role="presentation" className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Popular searches</p>}
+        {normalizedQuery && !productMatches.length && (!categoryMatches.length || selectedCategory) && <p role="status" aria-live="polite" className="px-4 py-3 text-sm text-mute">{selectedCategory ? `No matching products in ${mainCategories.find((category) => category.slug === selectedCategory)?.name ?? "this category"} for “${normalizedQuery}”.` : `No matching suggestions for “${normalizedQuery}”.`}</p>}
+        <div id={listId} role="listbox" aria-label={normalizedQuery ? "Search suggestions" : "Popular searches"}>
+          {!normalizedQuery ? items.map((item, index) => option(item, <><Clock3 aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1 truncate">{item.value as string}</span><ArrowRight aria-hidden="true" className="size-4 text-mute" /></>, `popular-${index}`)) : <>
+            {productMatches.length > 0 && <div role="group" aria-label="Products">
+              <p role="presentation" className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Products</p>
+              {productMatches.map((product) => option(
+                { type: "product", value: product },
+                <><Search aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1"><span className="block truncate font-medium text-ink">{product.name}</span><span className="block truncate text-xs text-mute">{product.categoryName}</span></span></>,
+                `product-${product.id}`,
+              ))}
+            </div>}
+            {categoryMatches.length > 0 && <div role="group" aria-label="Categories">
+              <p role="presentation" className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Categories</p>
+              {categoryMatches.map((category) => option(
+                { type: "category", value: category },
+                <><Search aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1 truncate">{category.name}</span><span className="text-xs text-mute">Category</span></>,
+                `category-${category.id}`,
+              ))}
+            </div>}
             {selectedCategory && !productMatches.length
               ? option({ type: "all-categories", value: normalizedQuery }, <><span className="min-w-0 flex-1 truncate font-bold text-brand-strong">Search all categories for “{normalizedQuery}”</span><ArrowRight aria-hidden="true" className="size-4 text-brand-strong" /></>, "all-categories")
               : option({ type: "all", value: normalizedQuery }, <><span className="min-w-0 flex-1 truncate font-bold text-brand-strong">View all results for “{normalizedQuery}”</span><ArrowRight aria-hidden="true" className="size-4 text-brand-strong" /></>, "view-all")}
-          </>
-        )}
+          </>}
+        </div>
       </div>
     );
   }

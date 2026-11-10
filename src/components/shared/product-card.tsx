@@ -15,8 +15,9 @@ const toneClasses: Record<CategoryTone, string> = {
 interface ProductCardProps {
   product: ProductCardData;
   deal?: { soldCount: number; stockLimit: number };
+  showAvailability?: boolean;
 }
-export function ProductCard({ product, deal }: ProductCardProps) {
+export function ProductCard({ product, deal, showAvailability = false }: ProductCardProps) {
   const productHref = `/products/${product.slug}`;
   return (
     <article className="flex flex-col h-full rounded-2xl border border-line bg-white overflow-hidden hover:border-brand transition-colors">
@@ -103,15 +104,19 @@ export function ProductCard({ product, deal }: ProductCardProps) {
               </p>
             </>
           )} */}
-          <ProductCardCartButton
-            productId={product.id}
-            productName={product.name}
-            productSlug={product.slug}
-            className={cn(
-              deal && "mt-3",
-              "relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:rounded-full w-full h-9 rounded-full border border-brand text-brand-strong hover:bg-brand-tint inline-flex items-center justify-center gap-2 text-sm font-bold transition-colors",
-            )}
-          />
+          {product.inStock || !showAvailability ? (
+            <ProductCardCartButton
+              productId={product.id}
+              productName={product.name}
+              productSlug={product.slug}
+              className={cn(
+                deal && "mt-3",
+                "relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:rounded-full w-full h-9 rounded-full border border-brand text-brand-strong hover:bg-brand-tint inline-flex items-center justify-center gap-2 text-sm font-bold transition-colors",
+              )}
+            />
+          ) : (
+            <p className="inline-flex min-h-9 items-center text-sm font-medium text-mute" role="status">Out of stock</p>
+          )}
         </div>
       </div>
     </article>

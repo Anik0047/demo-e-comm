@@ -81,6 +81,8 @@ export const categories: Category[] = [
   { id: "sub-electronics-computers", name: "Computers & laptops", slug: "computers-laptops", parentId: "cat-electronics", level: 2 },
   { id: "sub-electronics-audio", name: "Audio & headphones", slug: "audio-headphones", parentId: "cat-electronics", level: 2 },
   { id: "sub-electronics-home-appliances", name: "Home appliances", slug: "home-appliances", parentId: "cat-electronics", level: 2 },
+  { id: "sub-electronics-wearables", name: "Wearables", slug: "wearables", parentId: "cat-electronics", level: 2 },
+  { id: "sub-electronics-mobile-accessories", name: "Mobile accessories", slug: "mobile-accessories", parentId: "cat-electronics", level: 2 },
   { id: "child-mobile-samsung", name: "Samsung", slug: "samsung", parentId: "sub-electronics-mobile-phones", level: 3 },
   { id: "child-mobile-apple", name: "Apple", slug: "apple", parentId: "sub-electronics-mobile-phones", level: 3 },
   { id: "child-mobile-xiaomi", name: "Xiaomi", slug: "xiaomi", parentId: "sub-electronics-mobile-phones", level: 3 },
@@ -90,6 +92,8 @@ export const categories: Category[] = [
   { id: "child-audio-earbuds", name: "Wireless earbuds", slug: "wireless-earbuds", parentId: "sub-electronics-audio", level: 3 },
   { id: "child-audio-headphones", name: "Over-ear headphones", slug: "over-ear-headphones", parentId: "sub-electronics-audio", level: 3 },
   { id: "child-appliances-refrigerators", name: "Refrigerators", slug: "refrigerators", parentId: "sub-electronics-home-appliances", level: 3 },
+  { id: "child-wearables-smart-watches", name: "Smart watches", slug: "smart-watches", parentId: "sub-electronics-wearables", level: 3 },
+  { id: "child-mobile-accessories-power-banks", name: "Power banks", slug: "power-banks", parentId: "sub-electronics-mobile-accessories", level: 3 },
 
   { id: "child-fashion-men-panjabi", name: "Panjabi", slug: "mens-panjabi", parentId: "sub-fashion-mens-clothing", level: 3 },
   { id: "child-fashion-men-shirts", name: "Shirts", slug: "mens-shirts", parentId: "sub-fashion-mens-clothing", level: 3 },

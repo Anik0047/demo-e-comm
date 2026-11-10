@@ -41,6 +41,7 @@ export function getGlobalSearchData(data: CatalogDataset = catalog) {
       const vendor = vendorsById.get(product.vendorId);
       return category && mainCategory && vendor ? [{
         id: product.id,
+        slug: product.slug,
         name: product.name,
         categoryName: category.name,
         categorySlug: mainCategory.slug,
