@@ -107,7 +107,11 @@ export function CartPage() {
               <h2 className="text-xl">Order summary</h2>
               <div className="mt-4 flex justify-between gap-3 text-sm"><span className="text-mute">Subtotal ({summary.itemCount} {summary.itemCount === 1 ? "item" : "items"})</span><strong>{formatPrice(summary.subtotal)}</strong></div>
               {summary.lines.some((line) => !line.available) && <p className="mt-3 text-sm text-sale-strong">Unavailable items aren’t included in your subtotal.</p>}
-              <div className="mt-4 border-t border-line pt-4"><button type="button" disabled className="btn btn-primary btn-md w-full opacity-60">Checkout unavailable</button><p className="mt-2 text-center text-xs text-mute">Checkout will be available in a future phase.</p></div>
+              <div className="mt-4 border-t border-line pt-4">
+                {summary.lines.every((line) => line.available)
+                  ? <Link href="/checkout" className="btn btn-primary btn-md w-full">Continue to checkout</Link>
+                  : <><p role="status" className="text-sm text-sale-strong">Update unavailable items before continuing to checkout.</p><Link href="/checkout" className="btn btn-outline btn-md mt-3 w-full">Review checkout issues</Link></>}
+              </div>
               <Link href="/products" className="mt-3 flex min-h-11 items-center justify-center text-sm font-bold text-brand-strong hover:underline">Continue shopping</Link>
             </aside>
           </div>

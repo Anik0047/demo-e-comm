@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { MapPin, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { useDemoState } from "@/hooks/use-demo-state";
 import {
@@ -27,6 +28,7 @@ const emptyAddress: CustomerAddressInput = {
 };
 
 export default function CustomerAddressesPage() {
+  const router = useRouter();
   const account = useDemoState(selectActiveAccount);
   const snapshot = useDemoState(selectDemoSnapshot);
   const ready = useDemoState(selectHydrationReady);
@@ -102,6 +104,8 @@ export default function CustomerAddressesPage() {
     setFeedback(result.persisted
       ? editingAddressId ? "Address updated." : "Address saved."
       : "Address updated for this session, but browser storage is unavailable.");
+    const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+    if (returnTo === "/checkout") router.push("/checkout");
   }
 
   async function runAddressAction(action: () => ReturnType<typeof deleteCustomerAddress>, successMessage: string) {

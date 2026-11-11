@@ -87,6 +87,7 @@ function findOrderableProduct(
 function resolveLine(
   item: DemoCartItem,
   catalogData: DemoCartCatalog,
+  now?: number,
 ): DemoCartLineView {
   const product = findProduct(catalogData, item.productId) ?? null;
   if (!product || product.status !== "active") {
@@ -100,7 +101,7 @@ function resolveLine(
   if ((product.hasVariants && !variant) || (!product.hasVariants && item.variantId) || (variant && !product.options.length)) {
     return { item, product, variant, unitPrice: null, lineTotal: null, maximumQuantity: null, available: false, issue: "variant_unavailable" };
   }
-  const price = resolveEffectivePrice(product, variant, catalogData.deals ?? [], true);
+  const price = resolveEffectivePrice(product, variant, catalogData.deals ?? [], true, now);
   const unitPrice = price.price;
   const issue = validateQuantity(product, variant, item.quantity);
   const available = issue === null;
@@ -225,9 +226,10 @@ export function selectCartSummary(
   snapshot: DemoStateSnapshot,
   activeAccountId: string,
   catalogData: DemoCartCatalog = catalog,
+  now?: number,
 ): DemoCartSummary {
   const cart = customerCart(snapshot, activeAccountId);
-  const lines = cart?.items.map((item) => resolveLine(item, catalogData)) ?? [];
+  const lines = cart?.items.map((item) => resolveLine(item, catalogData, now)) ?? [];
   return {
     cart,
     lines,

@@ -23,7 +23,7 @@ export interface DemoStateStore {
   getCurrentSnapshot(): DemoStateSnapshot | null;
   setActiveAccount(accountId: string): boolean;
   applySnapshotUpdate(update: (current: DemoStateSnapshot) => DemoStateSnapshot): Promise<DemoUpdateResult>;
-  transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>): Promise<DemoTransactionResult<T>>;
+  transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>, options?: { requirePersistence?: boolean }): Promise<DemoTransactionResult<T>>;
   resetToSeed(): Promise<DemoUpdateResult>;
 }
 
@@ -128,7 +128,7 @@ export function createDemoStateStore(
       });
     },
 
-    transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>): Promise<DemoTransactionResult<T>> {
+    transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>, options?: { requirePersistence?: boolean }): Promise<DemoTransactionResult<T>> {
       return enqueue(async () => {
         const current = get();
         if (current.hydrationStatus !== "ready") return { ok: false, reason: "not_hydrated" } as const;
@@ -141,8 +141,19 @@ export function createDemoStateStore(
           return { ok: false, reason: "invalid_snapshot" } as const;
         }
         if (!validateDemoSnapshot(outcome.snapshot)) return { ok: false, reason: "invalid_snapshot" } as const;
-        const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === current.activeAccountId)
-          ? current.activeAccountId
+        if (options?.requirePersistence) {
+          const persisted = await persist(outcome.snapshot);
+          if (!persisted) return { ok: false, reason: "invalid_snapshot" } as const;
+          const latestActiveAccountId = get().activeAccountId;
+          const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === latestActiveAccountId)
+            ? latestActiveAccountId
+            : initialActiveAccountId(outcome.snapshot);
+          set({ snapshot: outcome.snapshot, activeAccountId });
+          return { ok: true, persisted: true, result: outcome.result } as const;
+        }
+        const latestActiveAccountId = get().activeAccountId;
+        const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === latestActiveAccountId)
+          ? latestActiveAccountId
           : initialActiveAccountId(outcome.snapshot);
         set({ snapshot: outcome.snapshot, activeAccountId });
         const persisted = await persist(outcome.snapshot);

@@ -89,8 +89,8 @@ test("migrates schema v1 customer data in place and repairs only invalid prefere
   storage.setItem(DEMO_STATE_STORAGE_KEY, JSON.stringify(oldSnapshot));
 
   const migrated = await createLocalStorageDemoStateAdapter(storage).read();
-  expect(migrated).toMatchObject({ schemaVersion: 2, data: { customers: [{ fullName: "Saved customer name", preferences: DEFAULT_DEMO_CUSTOMER_PREFERENCES, addresses: [{ id: "address-saved" }] }], carts: [{ items: [{ id: "cart-item-saved" }] }], wishlists: [{ productIds: ["prod-wireless-earbuds-pro"] }] } });
-  expect(JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null").schemaVersion).toBe(2);
+  expect(migrated).toMatchObject({ schemaVersion: 3, data: { customers: [{ fullName: "Saved customer name", preferences: DEFAULT_DEMO_CUSTOMER_PREFERENCES, addresses: [{ id: "address-saved" }] }], carts: [{ items: [{ id: "cart-item-saved" }] }], wishlists: [{ productIds: ["prod-wireless-earbuds-pro"] }] } });
+  expect(JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null").schemaVersion).toBe(3);
 
   const corrupted = JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null") as typeof oldSnapshot;
   const migratedCustomer = corrupted.data.customers[0];

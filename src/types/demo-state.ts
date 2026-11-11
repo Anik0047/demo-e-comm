@@ -73,11 +73,11 @@ export type DemoOrderStatus = "placed" | "processing" | "shipped" | "delivered" 
 export type DemoPaymentMethod = "cash_on_delivery" | "bkash" | "nagad" | "card";
 export type DemoPaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export interface DemoOrder {
-  id: DemoId;
-  orderNumber: string;
-  customerId: DemoId;
+  readonly id: DemoId;
+  readonly orderNumber: string;
+  readonly customerId: DemoId;
   fulfillmentGroupIds: DemoId[];
-  shippingAddress: DemoAddress;
+  readonly shippingAddress: Readonly<DemoAddress>;
   paymentMethod: DemoPaymentMethod;
   paymentStatus: DemoPaymentStatus;
   status: DemoOrderStatus;
@@ -90,24 +90,27 @@ export interface DemoOrder {
 }
 export type DemoFulfillmentStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
 export interface DemoVendorFulfillmentGroup {
-  id: DemoId;
-  orderId: DemoOrder["id"];
-  vendorId: Vendor["id"];
-  itemIds: DemoOrderItem["id"][];
+  readonly id: DemoId;
+  readonly orderId: DemoOrder["id"];
+  readonly vendorId: Vendor["id"];
+  readonly itemIds: DemoOrderItem["id"][];
+  readonly subtotal: number;
   status: DemoFulfillmentStatus;
   trackingNumber: string | null;
   updatedAt: ISODateTime;
 }
 export interface DemoOrderItem {
-  id: DemoId;
-  fulfillmentGroupId: DemoVendorFulfillmentGroup["id"];
-  productId: Product["id"];
-  variantId: string | null;
-  productName: string;
-  sku: string;
-  unitPrice: number;
-  quantity: number;
-  lineTotal: number;
+  readonly id: DemoId;
+  readonly fulfillmentGroupId: DemoVendorFulfillmentGroup["id"];
+  readonly productId: Product["id"];
+  readonly vendorId: Vendor["id"];
+  readonly variantId: string | null;
+  readonly selectedVariant: Readonly<{ id: string; optionValues: Readonly<Record<string, string>> }> | null;
+  readonly productName: string;
+  readonly sku: string;
+  readonly unitPrice: number;
+  readonly quantity: number;
+  readonly lineTotal: number;
 }
 
 export type DemoNotificationKind = "order" | "account" | "promotion" | "vendor" | "system";
@@ -201,7 +204,7 @@ export interface DemoStateData {
   managedBanners: ManagedBanner[];
 }
 
-export const DEMO_STATE_SCHEMA_VERSION = 2;
+export const DEMO_STATE_SCHEMA_VERSION = 3;
 export const DEMO_SEED_VERSION = 1;
 export interface DemoStateSnapshot {
   schemaVersion: number;
@@ -251,7 +254,7 @@ export function classifyDemoSnapshot(snapshot: Pick<DemoStateSnapshot, "schemaVe
 }
 
 export interface DemoStateValidationIssue {
-  code: "duplicate_id" | "missing_reference" | "invalid_quantity";
+  code: "duplicate_id" | "missing_reference" | "invalid_quantity" | "invalid_order_record";
   entity: string;
   id: string;
   reference?: string;
@@ -287,12 +290,32 @@ export function validateDemoState(data: DemoStateData): DemoStateValidation {
   for (const order of data.orders) {
     ref("order", order.customerId, "customer");
     for (const groupId of order.fulfillmentGroupIds) ref("order", groupId, "fulfillmentGroup");
+    const groups = data.fulfillmentGroups.filter(({ id, orderId }) => orderId === order.id && order.fulfillmentGroupIds.includes(id));
+    if (groups.reduce((total, group) => total + group.subtotal, 0) !== order.subtotal
+      || order.grandTotal !== order.subtotal + order.shippingTotal - order.discountTotal) {
+      issues.push({ code: "invalid_order_record", entity: "order", id: order.id });
+    }
   }
   for (const group of data.fulfillmentGroups) {
     ref("fulfillmentGroup", group.orderId, "order");
     for (const itemId of group.itemIds) ref("fulfillmentGroup", itemId, "orderItem");
+    const items = data.orderItems.filter(({ id, fulfillmentGroupId }) => fulfillmentGroupId === group.id && group.itemIds.includes(id));
+    if (items.reduce((total, item) => total + item.lineTotal, 0) !== group.subtotal) {
+      issues.push({ code: "invalid_order_record", entity: "fulfillmentGroup", id: group.id });
+    }
   }
-  for (const item of data.orderItems) ref("orderItem", item.fulfillmentGroupId, "fulfillmentGroup");
+  for (const item of data.orderItems) {
+    ref("orderItem", item.fulfillmentGroupId, "fulfillmentGroup");
+    const group = data.fulfillmentGroups.find(({ id }) => id === item.fulfillmentGroupId);
+    if (group?.vendorId !== item.vendorId || !group?.itemIds.includes(item.id)
+      || !Number.isSafeInteger(item.quantity) || item.quantity < 1
+      || !Number.isSafeInteger(item.unitPrice) || item.unitPrice < 0
+      || item.lineTotal !== item.unitPrice * item.quantity
+      || (item.variantId === null) !== (item.selectedVariant === null)
+      || (item.selectedVariant !== null && item.selectedVariant.id !== item.variantId)) {
+      issues.push({ code: "invalid_order_record", entity: "orderItem", id: item.id });
+    }
+  }
   for (const notification of data.notifications) ref("notification", notification.recipientAccountId, "account");
   return { valid: issues.length === 0, issues };
 }
