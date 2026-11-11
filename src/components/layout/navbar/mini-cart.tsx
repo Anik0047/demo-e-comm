@@ -42,7 +42,7 @@ export function MiniCart() {
     <div className="relative group">
       <Link
         href="/cart"
-        className="flex items-center gap-2 h-11 pl-3 pr-4 max-[359px]:pl-2.5 max-[359px]:pr-3 rounded-full bg-brand hover:bg-brand-strong text-white text-sm font-bold"
+        className="flex items-center gap-2 h-11 pl-3 pr-4 max-[389px]:pr-3 max-[359px]:pl-2.5 rounded-full bg-brand hover:bg-brand-strong text-white text-sm font-bold"
         aria-label={`Cart, ${itemCount} items, subtotal ${formatPrice(subtotal)}`}
         aria-controls="mini-cart-menu"
       >

@@ -4,12 +4,16 @@ import { categories } from "@/data/categories";
 import { flashDeals } from "@/data/flash-deals";
 import { products } from "@/data/products";
 import { vendors } from "@/data/vendors";
-import { getProductListing } from "@/services/catalog";
+import { getProductListing, getPublicVendorListing } from "@/services/catalog";
 import { validateCatalog } from "@/services/catalog-integrity";
 import { queryCatalog } from "@/services/catalog-rules";
 import { getProductDetails } from "@/services/product-details";
 import { getRelatedProducts, RELATED_PRODUCTS_LIMIT } from "@/services/related-products";
+import { getFlashDeals } from "@/services/flash-deals";
+import { getTrendingProducts } from "@/services/trending";
+import { getCategoryNavigation, getMainCategories } from "@/services/categories";
 import { transitionListingState } from "@/lib/catalog-query";
+import { getPublicVendorBySlug } from "@/services/vendors";
 import type { CatalogDataset, ListingResult } from "@/types/catalog";
 
 const NOW = Date.parse("2026-11-10T12:00:00.000Z");
@@ -22,6 +26,104 @@ async function listing(query: Record<string, string> = {}): Promise<Extract<List
 }
 
 const ids = (result: Awaited<ReturnType<typeof listing>>) => result.items.map(({ id }) => id);
+
+test("public vendor resolution admits approved canonical vendors only", () => {
+  assert.equal(getPublicVendorBySlug("tech-haven")?.id, "vendor-tech-haven");
+  assert.equal(getPublicVendorBySlug("not-a-vendor"), null);
+  const pending = { ...vendors[0]!, slug: "pending-store", status: "pending" as const };
+  const suspended = { ...vendors[0]!, slug: "suspended-store", status: "suspended" as const };
+  assert.equal(getPublicVendorBySlug(pending.slug, [pending]), null);
+  assert.equal(getPublicVendorBySlug(suspended.slug, [suspended]), null);
+});
+
+test("public vendor listings enforce route ownership, active products, and ignore vendor query overrides", async () => {
+  const vendor = getPublicVendorBySlug("tech-haven");
+  const other = vendors.find(({ slug }) => slug === "urban-fit");
+  assert.ok(vendor && other);
+  const ownProduct = products.find(({ vendorId, status }) => vendorId === vendor.id && status === "active");
+  const otherProduct = products.find(({ vendorId, status }) => vendorId === other.id && status === "active");
+  assert.ok(ownProduct && otherProduct);
+  const fixture = { ...data, products: [ownProduct, otherProduct, { ...ownProduct, id: "inactive-own", slug: "inactive-own", sku: "INACTIVE-OWN-SKU", status: "inactive" as const }] };
+  const result = await getPublicVendorListing(vendor, { vendor: other.slug }, { now: NOW, data: fixture });
+  assert.ok(result && result.status === "ready");
+  assert.deepEqual(ids(result), [ownProduct.id]);
+  assert.ok(result.items.every(({ vendor: itemVendor }) => itemVendor.slug === vendor.slug));
+  assert.equal(result.state.vendor, undefined);
+  assert.equal(result.href, `/vendor/${vendor.slug}`);
+  assert.equal(await getPublicVendorListing({ ...vendor, status: "suspended" }, {}, { now: NOW, data }), null);
+});
+
+test("public vendor search, category, price, stock, and sort filters intersect within the store", async () => {
+  const vendor = getPublicVendorBySlug("tech-haven");
+  assert.ok(vendor);
+  const earbuds = products.find(({ id }) => id === "prod-wireless-earbuds-pro");
+  assert.ok(earbuds);
+  const filtered = await getPublicVendorListing(vendor, {
+    search: "earbuds", category: "electronics", minPrice: "2450", maxPrice: "2450", availability: "in-stock", sort: "price-asc",
+  }, { now: NOW, data });
+  assert.ok(filtered && filtered.status === "ready");
+  assert.deepEqual(ids(filtered), [earbuds.id]);
+  assert.equal(filtered.items[0]?.price, 2450);
+  assert.equal(filtered.href, `/vendor/${vendor.slug}?category=electronics&search=earbuds&minPrice=2450&maxPrice=2450&availability=in-stock&sort=price-asc`);
+
+  const noMatch = await getPublicVendorListing(vendor, { search: "urban fit only" }, { now: NOW, data });
+  assert.ok(noMatch && noMatch.status === "ready");
+  assert.equal(noMatch.totalResults, 0);
+  assert.deepEqual(noMatch.items, []);
+});
+
+test("public vendor listings normalize malformed query values on the vendor base path", async () => {
+  const vendor = getPublicVendorBySlug("tech-haven");
+  assert.ok(vendor);
+  const result = await getPublicVendorListing(vendor, { sort: "unknown", page: "0", minPrice: "1.5" }, { now: NOW, data });
+  assert.ok(result && result.status === "ready");
+  assert.equal(result.state.sort, "catalog");
+  assert.equal(result.state.page, 1);
+  assert.equal(result.state.minPrice, undefined);
+  assert.equal(result.href, `/vendor/${vendor.slug}`);
+  assert.deepEqual(result.notices.map(({ reason }) => reason), ["invalid-price", "invalid-sort", "invalid-page"]);
+});
+
+test("public vendor listings preserve effective flash deal prices and out-of-stock visibility", async () => {
+  const vendor = getPublicVendorBySlug("tech-haven");
+  assert.ok(vendor);
+  const deal = await getPublicVendorListing(vendor, { promotion: "flash-deals", sort: "price-asc" }, { now: NOW, data });
+  assert.ok(deal && deal.status === "ready");
+  const earbuds = deal.items.find(({ id }) => id === "prod-wireless-earbuds-pro");
+  assert.equal(earbuds?.price, 2450);
+  assert.equal(earbuds?.compareAtPrice, 3770);
+
+  const refrigeratorVendor = getPublicVendorBySlug("dhaka-bazaar");
+  assert.ok(refrigeratorVendor);
+  const outOfStock = await getPublicVendorListing(refrigeratorVendor, { availability: "out-of-stock" }, { now: NOW, data });
+  assert.ok(outOfStock && outOfStock.status === "ready");
+  assert.ok(outOfStock.items.every(({ availability }) => availability === "out-of-stock"));
+  assert.ok(outOfStock.totalResults > 0);
+});
+
+test("public vendor listing pagination and ordering stay deterministic and empty stores stay empty", async () => {
+  const vendor = getPublicVendorBySlug("tech-haven");
+  const source = products.find(({ vendorId, status }) => vendorId === vendor?.id && status === "active");
+  assert.ok(vendor && source);
+  const synthetic = Array.from({ length: 14 }, (_, index) => ({ ...source, id: `synthetic-${index}`, slug: `synthetic-${index}`, sku: `SYNTHETIC-${index}`, name: `Synthetic item ${index}`, price: 1000 + index }));
+  const fixture = { ...data, products: synthetic };
+  const pageOne = await getPublicVendorListing(vendor, { sort: "price-asc" }, { now: NOW, data: fixture });
+  const pageTwo = await getPublicVendorListing(vendor, { sort: "price-asc", page: "2" }, { now: NOW, data: fixture });
+  assert.ok(pageOne && pageOne.status === "ready" && pageTwo && pageTwo.status === "ready");
+  assert.equal(pageOne.totalResults, 14);
+  assert.equal(pageOne.items.length, 12);
+  assert.equal(pageTwo.items.length, 2);
+  const repeated = await getPublicVendorListing(vendor, { sort: "price-asc" }, { now: NOW, data: fixture });
+  assert.ok(repeated && repeated.status === "ready");
+  assert.deepEqual(pageOne.items.map(({ id }) => id), repeated.items.map(({ id }) => id));
+  assert.equal(pageOne.items[0]?.price, 1000);
+  assert.equal(pageTwo.items[0]?.price, 1012);
+
+  const empty = await getPublicVendorListing(vendor, {}, { now: NOW, data: { ...data, products: [] } });
+  assert.ok(empty && empty.status === "ready");
+  assert.equal(empty.totalResults, 0);
+  assert.deepEqual(empty.items, []);
+});
 
 test("category, subcategory, and child filters include descendants", async () => {
   const category = await listing({ category: "electronics" });
@@ -37,6 +139,105 @@ test("category, subcategory, and child filters include descendants", async () =>
   const child = await listing({ subcategory: "audio-headphones", child: "wireless-earbuds" });
   assert.deepEqual(ids(child), ["prod-wireless-earbuds-pro"]);
   assert.equal(child.totalResults, 1);
+});
+
+test("homepage categories link only to canonical categories with active approved-vendor products", async () => {
+  const visible = await getMainCategories();
+  const visibleSlugs = visible.map(({ slug }) => slug);
+  assert.ok(visibleSlugs.includes("electronics"));
+  assert.ok(visibleSlugs.includes("fashion"));
+  assert.ok(visible.every(({ level, slug }) => level === 1 && categories.some((category) => category.slug === slug)));
+  for (const category of visible) {
+    const result = await getProductListing({ category: category.slug }, { now: NOW, data });
+    assert.equal(result.status, "ready");
+    assert.ok(result.totalResults > 0, `${category.slug} has eligible products`);
+  }
+});
+
+test("category navigation emits deterministic eligible paths from the canonical hierarchy", async () => {
+  const navigation = await getCategoryNavigation();
+  const byId = new Map(categories.map((category) => [category.id, category]));
+  assert.deepEqual(await getCategoryNavigation(), navigation);
+  const visibleIds = new Set(navigation.map(({ id }) => id));
+  assert.deepEqual(navigation.map(({ id }) => id), categories.filter(({ id }) => visibleIds.has(id)).map(({ id }) => id));
+
+  for (const category of navigation) {
+    const parent = category.parentId ? byId.get(category.parentId) : undefined;
+    const path: typeof category[] = [];
+    let node: typeof category | undefined = category;
+    while (node) {
+      path.unshift(node);
+      node = node.parentId ? byId.get(node.parentId) : undefined;
+    }
+    assert.equal(path.length, category.level, `${category.id} has a complete canonical path`);
+    assert.equal(`/category/${path.map(({ slug }) => slug).join("/")}`, category.level === 1
+      ? `/category/${category.slug}`
+      : category.level === 2
+        ? `/category/${path[0]?.slug}/${category.slug}`
+        : `/category/${path[0]?.slug}/${path[1]?.slug}/${category.slug}`);
+    if (category.level === 1) {
+      assert.equal(category.parentId, null);
+      assert.ok(await getProductListing({ category: category.slug }, { now: NOW, data }).then((result) => result.status === "ready" && result.totalResults > 0));
+    } else if (category.level === 2) {
+      assert.equal(parent?.level, 1);
+      assert.ok(navigation.some((item) => item.id === parent?.id), `${category.id} has a visible root`);
+    } else {
+      assert.equal(parent?.level, 2);
+      assert.ok(navigation.some((item) => item.id === parent?.id), `${category.id} has a visible subcategory`);
+    }
+  }
+
+  const watch = navigation.find(({ slug }) => slug === "smart-watches");
+  const powerBanks = navigation.find(({ slug }) => slug === "power-banks");
+  assert.equal(byId.get(watch?.parentId ?? "")?.slug, "wearables");
+  assert.equal(byId.get(powerBanks?.parentId ?? "")?.slug, "mobile-accessories");
+});
+
+test("homepage trending products preserve curated order and exclude duplicate, inactive, invalid, or unapproved items", async () => {
+  const first = products.find(({ id }) => id === "prod-wireless-earbuds-pro");
+  const second = products.find(({ id }) => id === "prod-smart-watch-series-5");
+  const vendor = vendors.find(({ id }) => id === "vendor-tech-haven");
+  assert.ok(first && second && vendor);
+  const unapprovedVendor = { ...vendor, id: "vendor-pending", status: "pending" as const };
+  const fixture = {
+    products: [first, second, { ...second, id: "duplicate-product" }, { ...second, id: "inactive-product", status: "inactive" as const }, { ...second, id: "unapproved-product", vendorId: unapprovedVendor.id }, { ...second, id: "invalid-category-product", categoryId: "missing-category" }],
+    vendors: [vendor, unapprovedVendor],
+    categories,
+    ids: [first.id, second.id, second.id, "inactive-product", "unapproved-product", "invalid-category-product"],
+  };
+  const result = await getTrendingProducts(NOW, fixture);
+  assert.deepEqual(result.all.map(({ id }) => id), [first.id, second.id]);
+  assert.deepEqual(result.all.map(({ slug }) => `/products/${slug}`), ["/products/wireless-earbuds-pro", "/products/smart-watch-series-5"]);
+  assert.deepEqual(result.all.map(({ price }) => price), [2450, 3990]);
+  assert.deepEqual((await getTrendingProducts(NOW, { ...fixture, ids: [] })).all, []);
+});
+
+test("homepage flash deals honor time windows, approved vendors, active products, sale pricing, and deterministic end time", async () => {
+  const baseDeal = flashDeals.find(({ productId }) => productId === "prod-wireless-earbuds-pro");
+  const activeProduct = products.find(({ id }) => id === "prod-wireless-earbuds-pro");
+  const inactiveProduct = products.find(({ id }) => id === "prod-smart-watch-series-5");
+  const soundVendor = vendors.find(({ id }) => id === "vendor-sound-wave");
+  const approvedVendor = vendors.find(({ id }) => id === activeProduct?.vendorId);
+  assert.ok(baseDeal && activeProduct && inactiveProduct && soundVendor && approvedVendor);
+  const inactiveVendor = { ...soundVendor, status: "suspended" as const };
+  const fixture = {
+    products: [activeProduct, { ...inactiveProduct, status: "inactive" as const }, { ...activeProduct, id: "unapproved-product", vendorId: inactiveVendor.id }],
+    vendors: [approvedVendor, { ...inactiveVendor, status: "suspended" as const }],
+    deals: [
+      { ...baseDeal, startsAt: "2026-11-10T12:00:00.000Z", endsAt: "2026-11-10T12:05:00.000Z" },
+      { ...baseDeal, id: "expired", startsAt: "2026-11-10T11:00:00.000Z", endsAt: "2026-11-10T11:59:59.000Z" },
+      { ...baseDeal, id: "future", startsAt: "2026-11-10T12:00:01.000Z", endsAt: "2026-11-10T12:05:00.000Z" },
+      { ...baseDeal, id: "inactive", productId: inactiveProduct.id },
+      { ...baseDeal, id: "unapproved", productId: "unapproved-product" },
+      { ...baseDeal, id: "invalid-price", dealPrice: activeProduct.price + 10 },
+    ],
+  };
+  const result = await getFlashDeals(NOW, fixture);
+  assert.deepEqual(result.items.map(({ id }) => id), [activeProduct.id]);
+  assert.equal(result.items[0]?.price, 2450);
+  assert.equal(result.items[0]?.compareAtPrice, activeProduct.price);
+  assert.equal(result.endsInSeconds, 300);
+  assert.deepEqual(await getFlashDeals(NOW + 6 * 60 * 1000, fixture), { endsInSeconds: 0, items: [] });
 });
 
 test("taxonomy references resolve and corrected products match their canonical descendants", async () => {

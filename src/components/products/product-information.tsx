@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BadgeCheck, ShoppingCart, Star } from "lucide-react";
 import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
 import { calcDiscountPercent, formatPrice } from "@/lib/utils";
@@ -154,7 +155,7 @@ export function ProductInformation({
 
       <div className="rounded-2xl border border-line p-4">
         <p className="text-xs text-mute">Sold by</p>
-        <p className="mt-1 flex items-center gap-2 font-bold text-ink"><span className="min-w-0">{vendor.name}</span>{vendor.verified && <BadgeCheck role="img" aria-label="Verified vendor" className="size-5 shrink-0 text-brand-strong" />}</p>
+        <p className="mt-1 flex items-center gap-2 font-bold text-ink"><Link href={`/vendor/${vendor.slug}`} className="min-w-0 rounded-sm hover:text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">{vendor.name}</Link>{vendor.verified && <BadgeCheck role="img" aria-label="Verified vendor" className="size-5 shrink-0 text-brand-strong" />}</p>
         {vendor.location.trim() && <p className="mt-1 text-sm text-mute">{vendor.location}</p>}
       </div>
 

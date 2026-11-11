@@ -6,7 +6,7 @@ function cardFor(page: import("@playwright/test").Page, name: string) {
 
 test("wishlist success feedback dismisses after three seconds and repeated actions restart it", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   const heart = cardFor(page, "Wireless Earbuds Pro").getByRole("button", { name: /Wireless Earbuds Pro.*wishlist/ });
   await heart.click();
   const feedback = page.getByRole("status").getByText("Wireless Earbuds Pro added to your wishlist.", { exact: true });
@@ -21,7 +21,7 @@ test("wishlist success feedback dismisses after three seconds and repeated actio
 
 test("product cards add eligible products and synchronize navbar and cart", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   const card = cardFor(page, "Wireless Earbuds Pro");
   await card.getByRole("button", { name: "Add Wireless Earbuds Pro to cart" }).click();
   await expect(card.getByRole("status").getByText("Wireless Earbuds Pro added to your cart.", { exact: true })).toBeVisible();
@@ -33,7 +33,7 @@ test("product cards add eligible products and synchronize navbar and cart", asyn
 
 test("variant products route to PDP and unavailable products report an error", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   const variantCard = cardFor(page, "Cotton Panjabi");
   await variantCard.getByRole("button", { name: "Add Cotton Panjabi to cart" }).click();
   await expect(page).toHaveURL(/\/products\/cotton-panjabi$/);
@@ -47,7 +47,7 @@ test("variant products route to PDP and unavailable products report an error", a
 
 test("non-customer accounts cannot add card products", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   await page.goto("/login");
   await page.getByRole("button", { name: "Demo Admin Admin demo account" }).click();
   await page.goto("/");

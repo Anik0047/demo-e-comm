@@ -7,6 +7,7 @@ import { validateCatalog } from "@/services/catalog-integrity";
 import { queryCatalog } from "@/services/catalog-rules";
 import { projectProductCard } from "@/services/product-card";
 import type { CatalogDataset, CatalogValidation, ListingOptions, ListingResult, RawListingQuery } from "@/types/catalog";
+import type { Vendor } from "@/types/vendor";
 
 const catalog: CatalogDataset = { products, categories, vendors, deals: flashDeals, trendingProductIds };
 
@@ -119,4 +120,21 @@ export async function getProductListing(raw: RawListingQuery, { now, data = cata
       hasReviews: product.ratingCount > 0,
     })),
   };
+}
+
+export async function getPublicVendorListing(
+  vendor: Vendor,
+  raw: RawListingQuery,
+  { now, data = catalog, basePath = `/vendor/${vendor.slug}` }: Omit<ProductListingOptions, "categoryScope" | "filterCategoryScope">,
+): Promise<ListingResult | null> {
+  if (vendor.status !== "approved") return null;
+  const scopedData: CatalogDataset = {
+    ...data,
+    products: data.products.filter((product) => product.vendorId === vendor.id),
+    vendors: data.vendors.filter((item) => item.id === vendor.id),
+  };
+  const withoutVendorQuery = raw instanceof URLSearchParams
+    ? new URLSearchParams([...raw.entries()].filter(([key]) => key !== "vendor"))
+    : Object.fromEntries(Object.entries(raw).filter(([key]) => key !== "vendor"));
+  return getProductListing(withoutVendorQuery, { now, data: scopedData, basePath });
 }

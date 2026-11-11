@@ -121,7 +121,7 @@ test("products without catalog images show the intentional gallery fallback", as
 
 test("Cotton Panjabi size selection updates variant price, stock, and quantity limits", async ({ page }) => {
   await page.goto("/products/cotton-panjabi");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
 
   const product = page.getByRole("region", { name: "Cotton Panjabi" });
   const size = page.getByLabel("Size");

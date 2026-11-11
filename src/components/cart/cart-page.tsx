@@ -77,12 +77,12 @@ export function CartPage() {
           {feedback && <p role={feedback.type === "error" ? "alert" : "status"} className={`mb-4 text-sm font-medium ${feedback.type === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <ul aria-label="Cart items" className="card divide-y divide-line">
-              {summary.lines.map(({ item, product, variant, unitPrice, lineTotal, maximumQuantity, available, issue }) => {
+              {summary.lines.map(({ item, product, variant, unitPrice, lineTotal, maximumQuantity, available, issue }, index) => {
                 const image = variant?.image ?? product?.mainImage;
                 const options = product && variant ? product.options.map(({ name }) => variant.optionValues[name] ? `${name}: ${variant.optionValues[name]}` : null).filter((value): value is string => value !== null).join(" · ") : null;
                 const identity = { productId: item.productId, variantId: item.variantId };
                 return <li key={item.id} className={`flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:items-center ${!available ? "bg-soft/60" : ""}`}>
-                  {image?.url ? <Image src={image.url} alt={image.alt} width={96} height={96} className="size-24 shrink-0 rounded-lg bg-soft object-cover" /> : <div aria-hidden="true" className="grid size-24 shrink-0 place-items-center rounded-lg bg-soft text-mute"><ShoppingBag className="size-7" /></div>}
+                  {image?.url ? <Image src={image.url} alt={image.alt} width={96} height={96} loading={index === 0 ? "eager" : "lazy"} className="size-24 shrink-0 rounded-lg bg-soft object-cover" /> : <div aria-hidden="true" className="grid size-24 shrink-0 place-items-center rounded-lg bg-soft text-mute"><ShoppingBag className="size-7" /></div>}
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-ink">{product?.name ?? "Product unavailable"}</p>
                     {options && <p className="mt-1 text-sm text-mute">{options}</p>}

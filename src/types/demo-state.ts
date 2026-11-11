@@ -22,9 +22,20 @@ export interface DemoCustomer {
   fullName: string;
   phone: string;
   addresses: DemoAddress[];
+  preferences: DemoCustomerPreferences;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 }
+
+export type ProductGridDensity = "standard" | "compact";
+export interface DemoCustomerPreferences {
+  promotionalUpdates: boolean;
+  productGridDensity: ProductGridDensity;
+}
+export const DEFAULT_DEMO_CUSTOMER_PREFERENCES: DemoCustomerPreferences = {
+  promotionalUpdates: false,
+  productGridDensity: "standard",
+};
 export interface DemoAddress {
   id: DemoId;
   label: string;
@@ -190,7 +201,7 @@ export interface DemoStateData {
   managedBanners: ManagedBanner[];
 }
 
-export const DEMO_STATE_SCHEMA_VERSION = 1;
+export const DEMO_STATE_SCHEMA_VERSION = 2;
 export const DEMO_SEED_VERSION = 1;
 export interface DemoStateSnapshot {
   schemaVersion: number;

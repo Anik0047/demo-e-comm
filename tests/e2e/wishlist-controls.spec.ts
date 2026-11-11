@@ -13,7 +13,7 @@ async function readSavedWishlist(page: Page) {
 }
 
 async function waitForCustomerAccount(page: Page) {
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
 }
 
 function navbarWishlist(page: Page, count: number | null) {

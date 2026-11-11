@@ -9,12 +9,14 @@ interface ProductCardImageProps {
   image: ProductCardData["mainImage"];
   name: string;
   placeholder: ProductCardData["placeholder"];
+  eager?: boolean;
 }
 
 export function ProductCardImage({
   image,
   name,
   placeholder,
+  eager = false,
 }: ProductCardImageProps) {
   const [failed, setFailed] = useState(false);
 
@@ -28,7 +30,7 @@ export function ProductCardImage({
       alt={image.alt.trim() || name}
       fill
       sizes="(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw"
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
       className="bg-canvas object-cover object-center"
       onError={() => setFailed(true)}
     />

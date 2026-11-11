@@ -73,7 +73,7 @@ export function WishlistPage() {
         <>
           {feedback && <p role={feedback.kind === "error" ? "alert" : "status"} className={`mb-4 text-sm font-medium ${feedback.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <ul aria-label="Wishlist items" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {summary.items.map(({ productId, product, availability }) => {
+            {summary.items.map(({ productId, product, availability }, index) => {
               const productName = product?.name ?? "Product unavailable";
               const price = product
                 ? product.hasVariants && product.variants.length > 0
@@ -84,7 +84,7 @@ export function WishlistPage() {
               return (
                 <li key={productId} className="card flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:items-center">
                   {product?.mainImage.url ? (
-                    <Image src={product.mainImage.url} alt={product.mainImage.alt} width={144} height={144} className="aspect-[4/3] w-full shrink-0 rounded-lg bg-soft object-cover sm:size-32 sm:aspect-square" />
+                    <Image src={product.mainImage.url} alt={product.mainImage.alt} width={144} height={144} loading={index === 0 ? "eager" : "lazy"} className="aspect-[4/3] w-full shrink-0 rounded-lg bg-soft object-cover sm:size-32 sm:aspect-square" />
                   ) : (
                     <div aria-hidden="true" className="grid aspect-[4/3] w-full shrink-0 place-items-center rounded-lg bg-soft text-mute sm:size-32 sm:aspect-square">
                       <ShoppingBag className="size-8" />

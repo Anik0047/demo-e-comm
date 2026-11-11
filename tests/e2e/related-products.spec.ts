@@ -67,7 +67,7 @@ test("variant recommendations keep variant selection required for purchase", asy
 
 test("wishlist and cart controls on related cards remain functional", async ({ page }) => {
   await page.goto("/products/wireless-earbuds-pro");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   const section = relatedSection(page);
   const card = section.locator("article").first();
   const productLink = card.getByRole("link", { name: /^View / });

@@ -4,8 +4,8 @@ export interface HeroSlide {
   tagClasses: string;
   headingLines: string[];
   paragraph: string;
-  hasCountdown?: boolean;
   ctaLabel: string;
+  ctaHref: string;
   ctaClasses: string;
   icon: "zap" | "shirt" | "bag" | "truck";
   bgClass: string;
@@ -17,11 +17,5 @@ export interface HeroSlide {
     badgeLines: string[];
     dot: string;
   };
-}
-
-export interface Vendor {
-  id: string;
-  initials: string;
-  colorClasses: string;
 }
 

@@ -16,8 +16,9 @@ interface ProductCardProps {
   product: ProductCardData;
   deal?: { soldCount: number; stockLimit: number };
   showAvailability?: boolean;
+  eagerImage?: boolean;
 }
-export function ProductCard({ product, deal, showAvailability = false }: ProductCardProps) {
+export function ProductCard({ product, deal, showAvailability = false, eagerImage = false }: ProductCardProps) {
   const productHref = `/products/${product.slug}`;
   return (
     <article className="flex flex-col h-full rounded-2xl border border-line bg-white overflow-hidden hover:border-brand transition-colors">
@@ -35,6 +36,7 @@ export function ProductCard({ product, deal, showAvailability = false }: Product
             image={product.mainImage}
             name={product.name}
             placeholder={product.placeholder}
+            eager={eagerImage}
           />
         </Link>
         {product.compareAtPrice !== null && (
@@ -51,7 +53,8 @@ export function ProductCard({ product, deal, showAvailability = false }: Product
       </div>
       <div className="flex flex-col flex-1 p-2 md:p-3">
         <Link
-          href="#"
+          href={`/vendor/${product.vendor.slug}`}
+          aria-label={`Shop products from ${product.vendor.name}`}
           className="text-xs text-mute truncate hover:text-brand-strong"
         >
           {product.vendor.name}
@@ -88,22 +91,20 @@ export function ProductCard({ product, deal, showAvailability = false }: Product
           )}
         </div>
         <div className="mt-auto pt-3">
-          {/* {deal && (
+          {deal && (
             <>
               <div
                 className="h-1.5 rounded-full bg-soft overflow-hidden"
-                aria-hidden="true"
+                role="img"
+                aria-label={`${deal.soldCount} of ${deal.stockLimit} deal units sold`}
               >
-                <div
-                  className="h-full rounded-full bg-sale"
-                  style={{ width: `${pct}%` }}
-                ></div>
+                <div className="h-full rounded-full bg-sale" style={{ width: `${Math.min(100, (deal.soldCount / deal.stockLimit) * 100)}%` }} />
               </div>
               <p className="mt-1 text-xs text-mute">
                 Sold {deal.soldCount} of {deal.stockLimit}
               </p>
             </>
-          )} */}
+          )}
           {product.inStock || !showAvailability ? (
             <ProductCardCartButton
               productId={product.id}

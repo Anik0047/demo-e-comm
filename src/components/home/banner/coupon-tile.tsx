@@ -1,43 +1,18 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 
 export function CouponTile() {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText("WELCOME200");
-    } catch {
-      // Clipboard write failed (e.g. permission/unsupported)
-    }
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 1800);
-  };
-
   return (
     <div className="rounded-2xl bg-info text-info-ink p-5 flex flex-col justify-between">
       <div>
         <p className="text-xs font-bold">New here?</p>
         <p className="font-head font-extrabold text-xl leading-snug mt-1">
-          Get ৳200 off your first order
+          Find something you’ll love
         </p>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-2 bg-white rounded-xl border border-dashed border-info-ink pl-4 pr-1.5 py-1.5">
-        <span id="code" className="font-head font-extrabold tracking-wider text-sm">
-          WELCOME200
-        </span>
-        <button
-          id="copy"
-          type="button"
-          onClick={handleCopy}
-          className="bg-info-ink text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-info-strong"
-        >
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
+      <p className="mt-2 text-sm">Explore products from independent sellers across Bangladesh.</p>
+      <Link href="/products" className="mt-4 inline-flex h-11 w-fit items-center rounded-full bg-info-ink px-5 text-sm font-bold text-white hover:bg-info-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info-ink">
+        Browse products
+      </Link>
     </div>
   );
 }

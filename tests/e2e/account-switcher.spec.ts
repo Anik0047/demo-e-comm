@@ -28,7 +28,7 @@ for (const account of seededAccounts) {
     await page.getByRole("button", { name: `${account.name} ${account.role} demo account` }).click();
     await expect(page).toHaveURL(account.route);
     if (account.role === "Customer") {
-      await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+      await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
     } else {
       await expect(page.getByRole("heading", { name: `${account.role} dashboard` })).toBeVisible();
       await expect(page.getByText("Demo dashboard placeholder")).toBeVisible();
@@ -42,9 +42,12 @@ for (const account of seededAccounts) {
   });
 }
 
-test("navbar account affordance returns to login to switch accounts", async ({ page }) => {
+test("customer navbar opens account overview and its switch link returns to login", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: /Account: Demo Customer/ }).click();
+  await page.getByRole("link", { name: /My account: Demo Customer/ }).click();
+  await expect(page).toHaveURL("/account");
+  await expect(page.getByRole("heading", { name: "Account overview" })).toBeVisible();
+  await page.getByRole("link", { name: "Switch demo account" }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
 

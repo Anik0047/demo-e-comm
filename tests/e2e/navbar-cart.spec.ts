@@ -13,7 +13,7 @@ interface StoredCartSnapshot {
 const cartLinkName = /^Cart,/;
 
 async function waitForCustomer(page: Page) {
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
 }
 
 async function showMiniCartOnDesktop(page: Page) {
@@ -82,7 +82,10 @@ test("navbar cart keeps its count and mini-cart contents after refresh", async (
 
 test("navbar cart is isolated when switching away from the customer account", async ({ page }) => {
   await addPanjabi(page, "L", 2);
-  await page.getByRole("link", { name: /Account: Demo Customer/ }).click();
+  await page.getByRole("link", { name: /My account: Demo Customer/ }).click();
+  await expect(page).toHaveURL("/account");
+  await page.getByRole("link", { name: "Switch demo account" }).click();
+  await expect(page).toHaveURL(/\/login$/);
   await page.getByRole("button", { name: "Demo Admin Admin demo account" }).click();
   await expect(page).toHaveURL("/admin/dashboard");
   await expect(page.getByRole("heading", { name: "Admin dashboard" })).toBeVisible();

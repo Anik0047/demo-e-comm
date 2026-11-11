@@ -11,6 +11,7 @@ export function FlashDealsSection({
   items,
   endsInSeconds,
 }: FlashDealsSectionProps) {
+  if (!items.length) return null;
   return (
     <section
       aria-labelledby="fd-title"

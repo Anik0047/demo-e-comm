@@ -147,7 +147,7 @@ test("cart persists through store recreation and remains isolated by customer id
 
   const snapshot = createDemoSeedSnapshot();
   snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
   snapshot.data.carts.push({ id: "cart-customer-second", customerId: "customer-second", items: [], updatedAt: snapshot.savedAt });
   const isolatedStore = createDemoStateStore({ read: async () => snapshot, write: async () => undefined, clear: async () => undefined });
   await isolatedStore.getState().hydrate();

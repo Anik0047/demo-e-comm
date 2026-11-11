@@ -1,7 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import { createDemoSeedSnapshot, resetDemoStateToSeed } from "@/services/demo-state-seed";
 import { clearDemoAccountPreference, readDemoAccountPreference, writeDemoAccountPreference } from "@/services/demo-account-preference";
-import { createBrowserDemoStateAdapter, validateDemoSnapshot } from "@/services/demo-state-persistence";
+import { createBrowserDemoStateAdapter, migrateDemoSnapshot, validateDemoSnapshot } from "@/services/demo-state-persistence";
 import type { DemoStatePersistenceAdapter, DemoStateSnapshot } from "@/types/demo-state";
 
 export type DemoHydrationStatus = "pending" | "ready";
@@ -63,7 +63,7 @@ export function createDemoStateStore(
         try {
           adapter = adapterFactory();
           const persisted = await adapter?.read() ?? null;
-          const snapshot = persisted && validateDemoSnapshot(persisted) ? persisted : createDemoSeedSnapshot();
+          const snapshot = persisted ? migrateDemoSnapshot(persisted) ?? createDemoSeedSnapshot() : createDemoSeedSnapshot();
           const preferredAccountId = readDemoAccountPreference();
           const activeAccountId = snapshot.data.accounts.some(({ id }) => id === preferredAccountId)
             ? preferredAccountId ?? initialActiveAccountId(snapshot)
@@ -75,7 +75,7 @@ export function createDemoStateStore(
             hydrationStatus: "ready",
             persistenceStatus: adapter ? "available" : "unavailable",
           });
-          if (!persisted && adapter) {
+          if (adapter && (!persisted || snapshot !== persisted)) {
             try {
               await adapter.write(snapshot);
             } catch {

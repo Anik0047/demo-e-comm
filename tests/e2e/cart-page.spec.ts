@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 async function waitForCustomer(page: import("@playwright/test").Page) {
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
 }
 
 async function addPanjabi(page: import("@playwright/test").Page, quantity = 1) {

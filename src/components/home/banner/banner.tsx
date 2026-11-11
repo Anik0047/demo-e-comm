@@ -1,4 +1,5 @@
-import { getHeroSlides, getTopVendors } from "@/services/banner";
+import { getHeroSlides } from "@/services/banner";
+import { getTopVendors } from "@/services/vendors";
 import type { HeroSlide } from "@/types/banner";
 import { HeroSlider } from "./hero-slider";
 import { PromoTiles } from "./promo-tiles";

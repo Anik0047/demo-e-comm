@@ -1,8 +1,8 @@
 import { categories } from "@/data/categories";
 import { products } from "@/data/products";
 import { vendors } from "@/data/vendors";
-import { classifyDemoSnapshot, validateDemoState } from "@/types/demo-state";
-import type { DemoStatePersistenceAdapter, DemoStateSnapshot } from "@/types/demo-state";
+import { classifyDemoSnapshot, DEFAULT_DEMO_CUSTOMER_PREFERENCES, validateDemoState } from "@/types/demo-state";
+import type { DemoCustomerPreferences, DemoStatePersistenceAdapter, DemoStateSnapshot } from "@/types/demo-state";
 import { createDemoSeedSnapshot } from "@/services/demo-state-seed";
 
 export const DEMO_STATE_STORAGE_KEY = "kenakata:demo-state";
@@ -42,6 +42,10 @@ export function validateDemoSnapshot(value: unknown): value is DemoStateSnapshot
     if (!valid) return false;
     const accountIds = new Set(value.data.accounts.map(({ id }) => id));
     const customerIds = new Set(value.data.customers.map(({ id }) => id));
+    for (const customer of value.data.customers) {
+      if (typeof customer.preferences?.promotionalUpdates !== "boolean") return false;
+      if (customer.preferences.productGridDensity !== "standard" && customer.preferences.productGridDensity !== "compact") return false;
+    }
     for (const account of value.data.accounts) {
       if (account.role === "vendor" && (!account.vendorId || !catalogIds.vendors.has(account.vendorId))) return false;
       if (account.vendorId && !catalogIds.vendors.has(account.vendorId)) return false;
@@ -56,6 +60,40 @@ export function validateDemoSnapshot(value: unknown): value is DemoStateSnapshot
   } catch {
     return false;
   }
+}
+
+function normalizeCustomerPreferences(value: unknown): DemoCustomerPreferences {
+  const preferences = isRecord(value) ? value : {};
+  return {
+    promotionalUpdates: typeof preferences.promotionalUpdates === "boolean"
+      ? preferences.promotionalUpdates
+      : DEFAULT_DEMO_CUSTOMER_PREFERENCES.promotionalUpdates,
+    productGridDensity: preferences.productGridDensity === "compact" || preferences.productGridDensity === "standard"
+      ? preferences.productGridDensity
+      : DEFAULT_DEMO_CUSTOMER_PREFERENCES.productGridDensity,
+  };
+}
+
+/** Adds version 2 customer preferences without replacing any other saved demo data. */
+export function migrateDemoSnapshot(value: unknown): DemoStateSnapshot | null {
+  if (!isDemoStateSnapshot(value)) return null;
+  const compatibility = classifyDemoSnapshot(value);
+  if (compatibility.kind === "reset_seed") return null;
+  if (compatibility.kind === "migrate_schema" && compatibility.fromSchemaVersion !== 1) return null;
+
+  const snapshot: DemoStateSnapshot = {
+    ...value,
+    schemaVersion: compatibility.kind === "migrate_schema" ? compatibility.toSchemaVersion : value.schemaVersion,
+    data: {
+      ...value.data,
+      customers: value.data.customers.map((customer) => ({
+        ...customer,
+        preferences: normalizeCustomerPreferences(customer.preferences),
+      })),
+    },
+  };
+  if (!validateDemoSnapshot(snapshot)) return null;
+  return JSON.stringify(snapshot) === JSON.stringify(value) ? value : snapshot;
 }
 
 export interface DemoStorage {
@@ -77,7 +115,17 @@ export function createLocalStorageDemoStateAdapter(storage: DemoStorage, key = D
       if (raw === null) return null;
       try {
         const parsed: unknown = JSON.parse(raw);
-        if (validateDemoSnapshot(parsed)) return parsed;
+        const migrated = migrateDemoSnapshot(parsed);
+        if (migrated) {
+          if (migrated !== parsed) {
+            try {
+              storage.setItem(key, JSON.stringify(migrated));
+            } catch {
+              // The migrated snapshot remains usable for this session if storage is unavailable.
+            }
+          }
+          return migrated;
+        }
       } catch {
         // Invalid JSON or inaccessible data falls back to a fresh seed below.
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -16,55 +16,6 @@ import type { HeroSlide } from "@/types/banner";
 
 interface HeroSliderProps {
   slides: HeroSlide[];
-}
-
-function Countdown() {
-  const [timeLeft, setTimeLeft] = useState({ h: "04", m: "32", s: "10" });
-
-  useEffect(() => {
-    const end = Date.now() + (4 * 3600 + 32 * 60 + 10) * 1000;
-    const p2 = (v: number) => String(v).padStart(2, "0");
-    const interval = setInterval(() => {
-      const s = Math.max(0, Math.floor((end - Date.now()) / 1000));
-      setTimeLeft({
-        h: p2(Math.floor(s / 3600)),
-        m: p2(Math.floor((s % 3600) / 60)),
-        s: p2(s % 60),
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div
-      className="mt-5 flex items-center gap-2 text-brand-strong font-head font-extrabold"
-      aria-label="Time left"
-    >
-      <span className="text-white text-sm font-body font-medium mr-1">
-        Ends in
-      </span>
-      <span
-        id="cd-h"
-        className="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg"
-      >
-        {timeLeft.h}
-      </span>
-      <span className="text-white">:</span>
-      <span
-        id="cd-m"
-        className="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg"
-      >
-        {timeLeft.m}
-      </span>
-      <span className="text-white">:</span>
-      <span
-        id="cd-s"
-        className="bg-white rounded-lg w-11 h-11 grid place-items-center text-lg"
-      >
-        {timeLeft.s}
-      </span>
-    </div>
-  );
 }
 
 function SlideArtIcon({
@@ -156,8 +107,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                   )}
                 </h2>
                 <p className="mt-3 text-sm sm:text-base">{slide.paragraph}</p>
-                {slide.hasCountdown && <Countdown />}
-                <Link href="#" className={slide.ctaClasses}>
+                <Link href={slide.ctaHref} className={slide.ctaClasses}>
                   {slide.ctaLabel}
                 </Link>
               </div>

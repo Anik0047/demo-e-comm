@@ -11,23 +11,17 @@ export function TopStrip({ message }: TopStripProps) {
         <p className="font-medium">{message}</p>
         <ul className="hidden md:flex items-center gap-5">
           <li>
-            <Link href="#" className="hover:underline">
+            <Link href="/login" className="hover:underline">
               Track order
             </Link>
           </li>
           <li>
-            <Link href="#" className="hover:underline">
+            <Link href="/login" className="hover:underline">
               Help center
             </Link>
           </li>
           <li>
-            <Link href="#" className="hover:underline">
-              EN
-            </Link>{" "}
-            /{" "}
-            <Link href="#" className="hover:underline">
-              বাং
-            </Link>
+            EN / বাং
           </li>
           <li>৳ BDT</li>
         </ul>
