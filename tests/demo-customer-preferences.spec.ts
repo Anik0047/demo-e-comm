@@ -59,7 +59,7 @@ test("saves preferences by customer ID without changing profile, addresses, cart
 test("preference changes are isolated to the active customer and restricted from admin accounts", async () => {
   const snapshot = createDemoSeedSnapshot();
   snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], preferences: { ...DEFAULT_DEMO_CUSTOMER_PREFERENCES }, createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], preferences: { ...DEFAULT_DEMO_CUSTOMER_PREFERENCES }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
   snapshot.data.carts.push({ id: "cart-customer-second", customerId: "customer-second", items: [], updatedAt: snapshot.savedAt });
   snapshot.data.wishlists.push({ id: "wishlist-customer-second", customerId: "customer-second", productIds: [], updatedAt: snapshot.savedAt });
   const store = createDemoStateStore({ read: async () => snapshot, write: async () => undefined, clear: async () => undefined });
@@ -89,8 +89,8 @@ test("migrates schema v1 customer data in place and repairs only invalid prefere
   storage.setItem(DEMO_STATE_STORAGE_KEY, JSON.stringify(oldSnapshot));
 
   const migrated = await createLocalStorageDemoStateAdapter(storage).read();
-  expect(migrated).toMatchObject({ schemaVersion: 3, data: { customers: [{ fullName: "Saved customer name", preferences: DEFAULT_DEMO_CUSTOMER_PREFERENCES, addresses: [{ id: "address-saved" }] }], carts: [{ items: [{ id: "cart-item-saved" }] }], wishlists: [{ productIds: ["prod-wireless-earbuds-pro"] }] } });
-  expect(JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null").schemaVersion).toBe(3);
+  expect(migrated).toMatchObject({ schemaVersion: 4, data: { customers: [{ fullName: "Saved customer name", preferences: DEFAULT_DEMO_CUSTOMER_PREFERENCES, hiddenOrderIds: [], addresses: [{ id: "address-saved" }] }], carts: [{ items: [{ id: "cart-item-saved" }] }], wishlists: [{ productIds: ["prod-wireless-earbuds-pro"] }] } });
+  expect(JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null").schemaVersion).toBe(4);
 
   const corrupted = JSON.parse(storage.getItem(DEMO_STATE_STORAGE_KEY) ?? "null") as typeof oldSnapshot;
   const migratedCustomer = corrupted.data.customers[0];

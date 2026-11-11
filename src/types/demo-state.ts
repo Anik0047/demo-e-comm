@@ -23,6 +23,7 @@ export interface DemoCustomer {
   phone: string;
   addresses: DemoAddress[];
   preferences: DemoCustomerPreferences;
+  hiddenOrderIds: DemoId[];
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 }
@@ -204,7 +205,7 @@ export interface DemoStateData {
   managedBanners: ManagedBanner[];
 }
 
-export const DEMO_STATE_SCHEMA_VERSION = 3;
+export const DEMO_STATE_SCHEMA_VERSION = 4;
 export const DEMO_SEED_VERSION = 1;
 export interface DemoStateSnapshot {
   schemaVersion: number;
@@ -279,6 +280,13 @@ export function validateDemoState(data: DemoStateData): DemoStateValidation {
   const has = (entity: string, id: string) => ids.get(entity)?.has(id) ?? false;
   const ref = (entity: string, id: string, target: string) => { if (!has(target, id)) issues.push({ code: "missing_reference", entity, id, reference: `${target}:${id}` }); };
   for (const customer of data.customers) ref("customer", customer.accountId, "account");
+  for (const customer of data.customers) {
+    for (const orderId of customer.hiddenOrderIds) {
+      if (!data.orders.some(({ id, customerId }) => id === orderId && customerId === customer.id)) {
+        issues.push({ code: "invalid_order_record", entity: "customer", id: customer.id, reference: `order:${orderId}` });
+      }
+    }
+  }
   for (const account of data.accounts) {
     if (account.customerId) ref("account", account.customerId, "customer");
   }

@@ -5,7 +5,7 @@ import { CheckCircle2, MapPin, ShoppingBag } from "lucide-react";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { formatPrice } from "@/lib/utils";
 import { getCustomerOrderConfirmation } from "@/services/checkout";
-import { selectActiveAccount, selectDemoSnapshot, selectPersistenceStatus } from "@/services/demo-state-store";
+import { selectActiveCustomerId, selectDemoSnapshot, selectPersistenceStatus } from "@/services/demo-state-store";
 
 interface OrderConfirmationPageProps {
   orderId: string;
@@ -23,7 +23,7 @@ function formatPlacementDate(value: string): string {
 
 export function OrderConfirmationPage({ orderId }: OrderConfirmationPageProps) {
   const snapshot = useDemoState(selectDemoSnapshot);
-  const account = useDemoState(selectActiveAccount);
+  const customerId = useDemoState(selectActiveCustomerId);
   const persistenceStatus = useDemoState(selectPersistenceStatus);
   let resolvedOrderId = orderId;
   try {
@@ -31,8 +31,8 @@ export function OrderConfirmationPage({ orderId }: OrderConfirmationPageProps) {
   } catch {
     resolvedOrderId = orderId;
   }
-  const confirmation = snapshot && account?.role === "customer" && account.customerId
-    ? getCustomerOrderConfirmation(snapshot, account.customerId, resolvedOrderId)
+  const confirmation = snapshot && customerId
+    ? getCustomerOrderConfirmation(snapshot, customerId, resolvedOrderId)
     : null;
   const order = confirmation?.order;
 
@@ -68,6 +68,8 @@ export function OrderConfirmationPage({ orderId }: OrderConfirmationPageProps) {
               </div>
             </dl>
           </header>
+
+          <p role="status" className="rounded-xl border border-info bg-info p-4 text-sm text-info-ink">A local demo order notification was saved to this customer account. No email, SMS, payment, or delivery service was contacted.</p>
 
           <section aria-labelledby="order-items-title" className="card min-w-0 p-4 sm:p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-2">

@@ -21,7 +21,7 @@ const seedData: DemoStateData = {
     { id: "account-customer-demo", email: "customer@kenakata.test", displayName: "Demo Customer", role: "customer", customerId: "customer-demo", vendorId: null, createdAt: SEEDED_AT },
   ],
   customers: [{
-    id: "customer-demo", accountId: "account-customer-demo", fullName: "Demo Customer", phone: "00000000000", addresses: [], preferences: { ...DEFAULT_DEMO_CUSTOMER_PREFERENCES }, createdAt: SEEDED_AT, updatedAt: SEEDED_AT,
+    id: "customer-demo", accountId: "account-customer-demo", fullName: "Demo Customer", phone: "00000000000", addresses: [], preferences: { ...DEFAULT_DEMO_CUSTOMER_PREFERENCES }, hiddenOrderIds: [], createdAt: SEEDED_AT, updatedAt: SEEDED_AT,
   }],
   carts: [{ id: "cart-customer-demo", customerId: "customer-demo", items: [], updatedAt: SEEDED_AT }],
   wishlists: [{ id: "wishlist-customer-demo", customerId: "customer-demo", productIds: [], updatedAt: SEEDED_AT }],

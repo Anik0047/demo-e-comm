@@ -3,6 +3,7 @@ import { createShippingAddressSnapshot, getCheckoutEligibility, resolveCheckoutS
 import type { DemoCartCatalog } from "@/services/demo-cart";
 import { flashDeals } from "@/data/flash-deals";
 import { demoStateStore, type DemoStateStoreApi } from "@/services/demo-state-store";
+import { addDemoOrderPlacementNotification } from "@/services/customer-order-actions";
 import type { DemoOrder, DemoOrderItem, DemoStateSnapshot, DemoVendorFulfillmentGroup } from "@/types/demo-state";
 
 export type DemoOrderPlacementIssue =
@@ -152,6 +153,7 @@ function placeInSnapshot(
   snapshot.data.orders.push(order);
   snapshot.data.fulfillmentGroups.push(...groups);
   snapshot.data.orderItems.push(...orderItems);
+  addDemoOrderPlacementNotification(snapshot, order, order.updatedAt);
   cart.items = [];
   cart.updatedAt = new Date(now).toISOString();
   return { snapshot, result: { ok: true, order } };

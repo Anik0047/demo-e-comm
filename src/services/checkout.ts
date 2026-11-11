@@ -1,11 +1,10 @@
 import { DEMO_SEED_CATALOG } from "@/services/demo-state-seed";
+import { getCustomerOrderDetails, type CustomerOrderDetails } from "@/services/customer-order-details";
 import { selectCartSummary, type DemoCartCatalog, type DemoCartSummary } from "@/services/demo-cart";
 import type { DemoStateSnapshot } from "@/types/demo-state";
 import type { DemoAddress, DemoCustomer } from "@/types/demo-state";
 import type { OrderItemSnapshot, VendorOrderGroup } from "@/types/order";
 import type { ShippingAddressSnapshot } from "@/types/order";
-import type { DemoOrder, DemoOrderItem, DemoVendorFulfillmentGroup } from "@/types/demo-state";
-import type { Vendor } from "@/types/vendor";
 import { validateCustomerAddress } from "@/services/customer-addresses";
 import { flashDeals } from "@/data/flash-deals";
 
@@ -17,14 +16,7 @@ export type CheckoutEligibility =
 
 const catalog: DemoCartCatalog = { ...DEMO_SEED_CATALOG, deals: flashDeals };
 
-export interface CustomerOrderConfirmation {
-  order: DemoOrder;
-  groups: readonly {
-    group: DemoVendorFulfillmentGroup;
-    vendorName: string;
-    items: readonly DemoOrderItem[];
-  }[];
-}
+export type CustomerOrderConfirmation = CustomerOrderDetails;
 
 /** Resolve confirmation details only when the order belongs to the active customer. */
 export function getCustomerOrderConfirmation(
@@ -32,21 +24,7 @@ export function getCustomerOrderConfirmation(
   customerId: string,
   orderId: string,
 ): CustomerOrderConfirmation | null {
-  const order = snapshot.data.orders.find((candidate) => candidate.id === orderId && candidate.customerId === customerId);
-  if (!order) return null;
-
-  const groups = order.fulfillmentGroupIds.flatMap((groupId) => {
-    const group = snapshot.data.fulfillmentGroups.find((candidate) => candidate.id === groupId && candidate.orderId === order.id);
-    if (!group) return [];
-    const vendor = catalog.vendors.find(({ id }: Vendor) => id === group.vendorId);
-    const items = group.itemIds.flatMap((itemId) => {
-      const item = snapshot.data.orderItems.find((candidate) => candidate.id === itemId && candidate.fulfillmentGroupId === group.id && candidate.vendorId === group.vendorId);
-      return item ? [item] : [];
-    });
-    return [{ group, vendorName: vendor?.name ?? "Seller", items }];
-  });
-
-  return { order, groups };
+  return getCustomerOrderDetails(snapshot, customerId, orderId);
 }
 
 export interface CheckoutShippingSelection {

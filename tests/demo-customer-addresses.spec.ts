@@ -93,7 +93,7 @@ test("promotes the first remaining address when the default is deleted and persi
 test("address mutations are isolated by customer identity and cannot be used by other roles", async () => {
   const snapshot = createDemoSeedSnapshot();
   snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "00000000001", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
   snapshot.data.carts.push({ id: "cart-customer-second", customerId: "customer-second", items: [], updatedAt: snapshot.savedAt });
   snapshot.data.wishlists.push({ id: "wishlist-customer-second", customerId: "customer-second", productIds: [], updatedAt: snapshot.savedAt });
   const store = createDemoStateStore({ read: async () => snapshot, write: async () => undefined, clear: async () => undefined });

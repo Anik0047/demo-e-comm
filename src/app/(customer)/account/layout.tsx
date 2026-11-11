@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { ArrowLeft, CircleUserRound } from "lucide-react";
+import { CustomerAccountNavigation } from "@/components/customer/customer-account-navigation";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { selectActiveAccount, selectDemoSnapshot, selectHydrationReady } from "@/services/demo-state-store";
 
 export default function CustomerAccountLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
   const ready = useDemoState(selectHydrationReady);
   const account = useDemoState(selectActiveAccount);
   const snapshot = useDemoState(selectDemoSnapshot);
@@ -47,12 +46,9 @@ export default function CustomerAccountLayout({ children }: { children: ReactNod
           <Link href="/login" className="btn btn-outline btn-sm shrink-0">Switch demo account</Link>
         </header>
         <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <nav aria-label="Customer account" className="card flex gap-2 overflow-x-auto p-2 lg:block lg:overflow-visible">
-            <Link href="/account" aria-current={pathname === "/account" ? "page" : undefined} className={`flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-bold transition-colors ${pathname === "/account" ? "bg-brand-tint text-brand-strong" : "text-ink hover:bg-soft"}`}>Overview</Link>
-            <Link href="/account/profile" aria-current={pathname === "/account/profile" ? "page" : undefined} className={`flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-bold transition-colors ${pathname === "/account/profile" ? "bg-brand-tint text-brand-strong" : "text-ink hover:bg-soft"}`}>Profile</Link>
-            <Link href="/account/addresses" aria-current={pathname === "/account/addresses" ? "page" : undefined} className={`flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-bold transition-colors ${pathname === "/account/addresses" ? "bg-brand-tint text-brand-strong" : "text-ink hover:bg-soft"}`}>Saved addresses</Link>
-            <Link href="/account/preferences" aria-current={pathname === "/account/preferences" ? "page" : undefined} className={`flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-bold transition-colors ${pathname === "/account/preferences" ? "bg-brand-tint text-brand-strong" : "text-ink hover:bg-soft"}`}>Preferences</Link>
-          </nav>
+          <Suspense fallback={<nav aria-label="Customer account" className="card min-h-14 p-2" role="status">Loading account navigation…</nav>}>
+            <CustomerAccountNavigation />
+          </Suspense>
           <div key={customer.id} className="min-w-0">{children}</div>
         </div>
       </div>

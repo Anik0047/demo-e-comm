@@ -45,6 +45,7 @@ export function validateDemoSnapshot(value: unknown): value is DemoStateSnapshot
     for (const customer of value.data.customers) {
       if (typeof customer.preferences?.promotionalUpdates !== "boolean") return false;
       if (customer.preferences.productGridDensity !== "standard" && customer.preferences.productGridDensity !== "compact") return false;
+      if (!Array.isArray(customer.hiddenOrderIds) || !customer.hiddenOrderIds.every((id) => typeof id === "string" && value.data.orders.some((order) => order.id === id && order.customerId === customer.id))) return false;
     }
     for (const account of value.data.accounts) {
       if (account.role === "vendor" && (!account.vendorId || !catalogIds.vendors.has(account.vendorId))) return false;
@@ -113,14 +114,14 @@ function migrateOrderSnapshots(data: DemoStateData): Pick<DemoStateData, "orderI
   };
 }
 
-/** Adds order-time vendor/variant snapshots while preserving all schema-v2 demo records. */
+/** Migrates older snapshots while preserving customer data, order records, and vendor groups. */
 export function migrateDemoSnapshot(value: unknown): DemoStateSnapshot | null {
   if (!isDemoStateSnapshot(value)) return null;
   const compatibility = classifyDemoSnapshot(value);
   if (compatibility.kind === "reset_seed") return null;
-  if (compatibility.kind === "migrate_schema" && ![1, 2].includes(compatibility.fromSchemaVersion)) return null;
+  if (compatibility.kind === "migrate_schema" && ![1, 2, 3].includes(compatibility.fromSchemaVersion)) return null;
 
-  const orderSnapshots = compatibility.kind === "migrate_schema"
+  const orderSnapshots = compatibility.kind === "migrate_schema" && [1, 2].includes(compatibility.fromSchemaVersion)
     ? migrateOrderSnapshots(value.data as DemoStateData)
     : { orderItems: value.data.orderItems, fulfillmentGroups: value.data.fulfillmentGroups };
 
@@ -132,6 +133,9 @@ export function migrateDemoSnapshot(value: unknown): DemoStateSnapshot | null {
       customers: value.data.customers.map((customer) => ({
         ...customer,
         preferences: normalizeCustomerPreferences(customer.preferences),
+        hiddenOrderIds: Array.isArray(customer.hiddenOrderIds)
+          ? [...new Set(customer.hiddenOrderIds.filter((id): id is string => typeof id === "string" && value.data.orders.some((order) => order.id === id && order.customerId === customer.id)))]
+          : [],
       })),
       ...orderSnapshots,
     },

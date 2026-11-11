@@ -209,6 +209,15 @@ export const selectActiveAccountId = (state: DemoStateStore): string | null =>
 export const selectActiveAccount = (state: DemoStateStore) => state.hydrationStatus === "ready"
   ? state.snapshot.data.accounts.find(({ id }) => id === state.activeAccountId) ?? null
   : null;
+/** Returns a customer ID only when it is linked back to the active customer account. */
+export const selectActiveCustomerId = (state: DemoStateStore): string | null => {
+  if (state.hydrationStatus !== "ready") return null;
+  const account = state.snapshot.data.accounts.find(({ id }) => id === state.activeAccountId);
+  if (account?.role !== "customer" || !account.customerId) return null;
+  return state.snapshot.data.customers.some(({ id, accountId }) => id === account.customerId && accountId === account.id)
+    ? account.customerId
+    : null;
+};
 export const selectDemoCarts = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.carts : null;
 export const selectDemoWishlists = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.wishlists : null;
 export const selectDemoOrders = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.orders : null;

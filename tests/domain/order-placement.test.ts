@@ -4,6 +4,7 @@ import { createDemoSeedSnapshot } from "@/services/demo-state-seed";
 import { createLocalStorageDemoStateAdapter } from "@/services/demo-state-persistence";
 import { createDemoStateStore } from "@/services/demo-state-store";
 import { placeDemoOrder } from "@/services/demo-order-placement";
+import { addDemoOrderPlacementNotification } from "@/services/customer-order-actions";
 import { products } from "@/data/products";
 import { getVendorOrderItems } from "@/types/order";
 import { getCustomerOrderConfirmation } from "@/services/checkout";
@@ -41,7 +42,7 @@ async function customerOrderStore() {
       { id: "cart-earbuds", productId: "prod-wireless-earbuds-pro", variantId: null, quantity: 1, addedAt: snapshot.savedAt },
     ];
     snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-    snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "01712345679", addresses: [], preferences: { promotionalUpdates: true, productGridDensity: "compact" }, createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+    snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "01712345679", addresses: [], preferences: { promotionalUpdates: true, productGridDensity: "compact" }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
     snapshot.data.carts.push({ id: "cart-customer-second", customerId: "customer-second", items: [{ id: "second-cart-item", productId: "prod-smart-watch-series-5", variantId: null, quantity: 1, addedAt: snapshot.savedAt }], updatedAt: snapshot.savedAt });
     snapshot.data.wishlists.push({ id: "wishlist-customer-second", customerId: "customer-second", productIds: ["prod-wireless-earbuds-pro"], updatedAt: snapshot.savedAt });
     return snapshot;
@@ -65,15 +66,29 @@ test("placement persists one COD parent order with canonical vendor groups and c
 
   const state = store.getState().snapshot;
   assert.equal(result.persisted, true);
-  assert.equal(state.schemaVersion, 3);
+  assert.equal(state.schemaVersion, 4);
+  assert.equal(state.data.notifications.filter(({ kind }) => kind === "order").length, 1);
   assert.equal(state.data.orders.length, 1);
   const order = state.data.orders[0];
   assert.ok(order);
+  assert.deepEqual(state.data.notifications[0], {
+    id: `notification:order-placed:${order.id}`,
+    recipientAccountId: "account-customer-demo",
+    kind: "order",
+    title: "Demo order placed",
+    message: `Your demo order ${order.orderNumber} was placed. Local demo notice only; no email, SMS, payment, or delivery update was sent.`,
+    href: `/account/orders/${encodeURIComponent(order.id)}`,
+    readAt: null,
+    createdAt: order.updatedAt,
+  });
   const confirmation = getCustomerOrderConfirmation(state, "customer-demo", order.id);
   assert.ok(confirmation);
   assert.equal(confirmation.groups.length, 2);
   assert.equal(getCustomerOrderConfirmation(state, "customer-second", order.id), null);
   assert.equal(getCustomerOrderConfirmation(state, "customer-demo", "missing-order"), null);
+  addDemoOrderPlacementNotification(state, order, order.updatedAt);
+  addDemoOrderPlacementNotification(state, order, order.updatedAt);
+  assert.equal(state.data.notifications.filter(({ id }) => id === `notification:order-placed:${order.id}`).length, 1);
   assert.equal(order.id, result.order.id);
   assert.equal(order.customerId, "customer-demo");
   assert.equal(order.paymentMethod, "cash_on_delivery");
@@ -176,14 +191,15 @@ test("parallel repeated placement submits create at most one order", async () =>
   assert.equal(store.getState().snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items.length, 0);
 });
 
-test("schema-v1 and v2 orders migrate with snapshots and preserve all customer records", async () => {
- for (const schemaVersion of [1, 2]) {
+test("schema-v1, v2, and v3 records migrate without losing customer data", async () => {
+ for (const schemaVersion of [1, 2, 3]) {
   const snapshot = createDemoSeedSnapshot();
   snapshot.schemaVersion = schemaVersion;
   const customer = snapshot.data.customers.find(({ id }) => id === "customer-demo");
   const cart = snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo");
   const wishlist = snapshot.data.wishlists.find(({ customerId }) => customerId === "customer-demo");
   assert.ok(customer && cart && wishlist);
+  delete (customer as { hiddenOrderIds?: string[] }).hiddenOrderIds;
   customer.fullName = "Saved name";
   customer.addresses.push({ ...address });
   customer.preferences = { promotionalUpdates: true, productGridDensity: "compact" };
@@ -194,12 +210,12 @@ test("schema-v1 and v2 orders migrate with snapshots and preserve all customer r
     shippingAddress: { ...address }, paymentMethod: "cash_on_delivery", paymentStatus: "pending", status: "placed",
     subtotal: 1600, shippingTotal: 0, discountTotal: 0, grandTotal: 1600, placedAt: snapshot.savedAt, updatedAt: snapshot.savedAt,
   });
-  snapshot.data.fulfillmentGroups.push({ id: "legacy-group", orderId: "legacy-order", vendorId: "vendor-urban-fit", itemIds: ["legacy-item"], status: "pending", trackingNumber: null, updatedAt: snapshot.savedAt } as never);
-  snapshot.data.orderItems.push({ id: "legacy-item", fulfillmentGroupId: "legacy-group", productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", productName: "Cotton Panjabi", sku: "SKU-COTTON-PANJABI-M", unitPrice: 1600, quantity: 1, lineTotal: 1600 } as never);
+  snapshot.data.fulfillmentGroups.push({ id: "legacy-group", orderId: "legacy-order", vendorId: "vendor-urban-fit", itemIds: ["legacy-item"], subtotal: 1600, status: "pending", trackingNumber: null, updatedAt: snapshot.savedAt });
+  snapshot.data.orderItems.push({ id: "legacy-item", fulfillmentGroupId: "legacy-group", productId: "prod-cotton-panjabi", vendorId: "vendor-urban-fit", variantId: "var-panjabi-m", selectedVariant: { id: "var-panjabi-m", optionValues: { Size: "M" } }, productName: "Cotton Panjabi", sku: "SKU-COTTON-PANJABI-M", unitPrice: 1600, quantity: 1, lineTotal: 1600 });
 
   const migrated = migrateDemoSnapshot(snapshot);
   assert.ok(migrated);
-  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.schemaVersion, 4);
   assert.equal(validateDemoSnapshot(migrated), true);
   assert.equal(migrated.data.customers[0]?.fullName, "Saved name");
   assert.deepEqual(migrated.data.customers[0]?.addresses, [address]);
