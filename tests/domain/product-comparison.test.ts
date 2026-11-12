@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "@playwright/test";
 import { products } from "@/data/products";
 import { addComparisonProduct, normalizeComparisonIds, removeComparisonProduct } from "@/lib/product-comparison-state";
-import { getComparableProductIds, getComparableProducts } from "@/services/product-comparison";
+import { getComparableProductCatalog, getComparableProductIds, getComparableProducts } from "@/services/product-comparison";
 
 const validIds = getComparableProductIds();
 
@@ -39,4 +39,15 @@ test("comparison resolves current canonical prices, orderable stock, category, v
 
   assert.ok(products.some(({ id }) => id === "prod-double-door-refrigerator"));
   assert.equal(getComparableProducts(["prod-double-door-refrigerator"])[0]?.inStock, false);
+});
+
+test("the comparison page catalog resolves products beyond the three-selection limit", () => {
+  const catalog = getComparableProductCatalog();
+  assert.ok(catalog.length > 3);
+  assert.deepEqual(catalog.slice(0, 3).map(({ id }) => id), [
+    "prod-wireless-earbuds-pro",
+    "prod-smart-watch-series-5",
+    "prod-cotton-panjabi",
+  ]);
+  assert.equal(catalog.find(({ id }) => id === "prod-bluetooth-speaker")?.name, "Bluetooth Speaker");
 });

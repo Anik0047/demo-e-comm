@@ -57,7 +57,7 @@ export async function saveCustomerPreferences(
     };
     snapshot.data.customers = snapshot.data.customers.map((entry) => entry.id === customer.id ? updatedCustomer : entry);
     return { snapshot, result: { ok: true, customer: updatedCustomer } };
-  });
+  }, { requirePersistence: true });
 
   if (!result.ok) return result;
   if (!result.result.ok) return result.result;

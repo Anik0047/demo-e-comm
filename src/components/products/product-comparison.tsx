@@ -13,7 +13,7 @@ interface ProductComparisonProps {
 }
 
 export function ProductComparison({ products }: ProductComparisonProps) {
-  const { ids, limit } = useProductComparison();
+  const { ids, hydrated, limit } = useProductComparison();
   const selected = ids.flatMap((id) => {
     const product = products.find((item) => item.id === id);
     return product ? [product] : [];
@@ -30,8 +30,13 @@ export function ProductComparison({ products }: ProductComparisonProps) {
     showToast("success", `${productName} removed from comparison.`);
   }
 
+  if (!hydrated) return <section className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8" aria-label="Loading product comparison" aria-busy="true">
+    <div className="skeleton h-10 w-64" />
+    <div className="skeleton mt-6 h-72 w-full rounded-2xl" />
+  </section>;
+
   return (
-    <section className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8" aria-labelledby="compare-title">
+    <section className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8" aria-labelledby="compare-title" data-selected-product-ids={ids.join(",")}>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 text-sm font-bold text-brand-strong"><ArrowLeftRight aria-hidden="true" className="size-4" /> Product comparison</p>
@@ -56,7 +61,7 @@ export function ProductComparison({ products }: ProductComparisonProps) {
                 <th scope="col" className="border-b border-line p-3 font-bold text-mute sm:p-4">Product details</th>
                 {Array.from({ length: limit }, (_, index) => {
                   const product = selected[index];
-                  return <th key={product?.id ?? `empty-${index}`} scope="col" className="min-w-0 border-b border-l border-line p-3 sm:p-4">
+                  return <th key={product?.id ?? `empty-${index}`} scope="col" data-product-id={product?.id} className="min-w-0 border-b border-l border-line p-3 sm:p-4">
                     {product ? <div className="min-w-0">
                       <div className="relative mb-3 grid aspect-square place-items-center overflow-hidden rounded-xl bg-white">
                         {product.image.url ? <Image src={product.image.url} alt={product.image.alt || product.name} fill sizes="(min-width: 768px) 220px, 180px" className="object-contain" /> : <ImageIcon aria-hidden="true" className="size-9 text-mute" />}

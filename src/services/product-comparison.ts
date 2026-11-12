@@ -29,10 +29,8 @@ export function getComparableProductIds(): Set<string> {
     .map(({ id }) => id));
 }
 
-export function getComparableProducts(ids: readonly string[], now = Date.now()): ComparableProduct[] {
-  const validIds = new Set(products.filter((product) => product.status === "active").map(({ id }) => id));
-  const normalizedIds = normalizeComparisonIds(ids, validIds);
-  return normalizedIds.flatMap((id) => {
+function resolveComparableProducts(ids: readonly string[], now: number): ComparableProduct[] {
+  return ids.flatMap((id) => {
     const product = catalog.products.find((item) => item.id === id);
     const vendor = product && catalog.vendors.find((item) => item.id === product.vendorId && item.status === "approved");
     const category = product && catalog.categories.find((item) => item.id === product.categoryId);
@@ -58,6 +56,15 @@ export function getComparableProducts(ids: readonly string[], now = Date.now()):
       specifications: product.specifications,
     }];
   });
+}
+
+export function getComparableProducts(ids: readonly string[], now = Date.now()): ComparableProduct[] {
+  const validIds = new Set(products.filter((product) => product.status === "active").map(({ id }) => id));
+  return resolveComparableProducts(normalizeComparisonIds(ids, validIds), now);
+}
+
+export function getComparableProductCatalog(now = Date.now()): ComparableProduct[] {
+  return resolveComparableProducts([...getComparableProductIds()], now);
 }
 
 export function getSupportedComparisonAttributes(items: readonly ComparableProduct[]): string[] {
