@@ -8,6 +8,7 @@ import { resetActiveCustomerDemoData } from "@/services/customer-demo-reset";
 import { demoStateStore, selectActiveAccount, selectDemoSnapshot, selectHydrationReady } from "@/services/demo-state-store";
 import { DEFAULT_DEMO_CUSTOMER_PREFERENCES, type DemoCustomerPreferences } from "@/types/demo-state";
 import { showToast } from "@/services/toast";
+import Link from "next/link";
 
 export default function CustomerPreferencesPage() {
   const account = useDemoState(selectActiveAccount);
@@ -51,19 +52,17 @@ export default function CustomerPreferencesPage() {
       setErrors(result.errors ?? {});
       const message = result.reason === "customer_required"
         ? "Switch to a customer demo account before saving preferences."
-        : "Preferences couldn’t be saved. Review the selections and try again.";
+        : result.reason === "persistence_unavailable"
+          ? "Preferences couldn’t be saved because browser storage is unavailable. Your saved choices are unchanged."
+          : "Preferences couldn’t be saved. Review the selections and try again.";
       setFeedback(message);
       showToast("error", message);
       return;
     }
     setValues(result.customer.preferences);
     setErrors({});
-    setFeedback(result.persisted
-      ? "Preferences saved in this browser."
-      : "Preferences saved for this session, but browser storage is unavailable.");
-    showToast(result.persisted ? "success" : "info", result.persisted
-      ? "Preferences saved in this browser."
-      : "Preferences saved for this session, but browser storage is unavailable.");
+    setFeedback("Preferences saved in this browser.");
+    showToast("success", "Preferences saved in this browser.");
   }
 
   async function confirmReset() {
@@ -90,29 +89,31 @@ export default function CustomerPreferencesPage() {
     <section className="card min-w-0 p-5 sm:p-7" aria-labelledby="preferences-title">
       <h2 id="preferences-title" className="font-head text-xl font-bold sm:text-2xl">Account preferences</h2>
       <p className="mt-1 text-sm text-mute">Choose how your customer account appears while you shop.</p>
-      <p className="mt-4 rounded-lg border border-info bg-info px-3 py-2 text-sm text-info-ink">These are local demo settings for this customer account. No emails, texts, or push notifications are sent.</p>
+      <p className="mt-4 rounded-lg border border-info bg-info px-3 py-2 text-sm text-info-ink">These are local demo settings for this customer account. Promotional updates are a saved preference only; this demo never sends email, SMS, or push messages.</p>
 
       <form className="mt-6 max-w-2xl space-y-6" onSubmit={(event) => void savePreferences(event)}>
         <fieldset className="rounded-xl border border-line p-4 sm:p-5">
           <legend className="px-1 font-head text-lg font-bold">Promotional updates</legend>
           <label htmlFor="promotional-updates" className="mt-2 flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium text-ink">
             <input id="promotional-updates" type="checkbox" className="size-5 accent-brand" checked={values.promotionalUpdates} aria-invalid={Boolean(errors.promotionalUpdates)} aria-describedby={errors.promotionalUpdates ? "promotional-updates-error" : "promotional-updates-help"} onChange={(event) => { setValues({ ...values, promotionalUpdates: event.target.checked }); setErrors((current) => ({ ...current, promotionalUpdates: undefined })); setFeedback(""); }} />
-            Save my opt-in choice for offers and promotions
+            Opt in to promotional updates in this demo
           </label>
-          {errors.promotionalUpdates ? <p id="promotional-updates-error" role="alert" className="mt-1 text-sm text-sale">{errors.promotionalUpdates}</p> : <p id="promotional-updates-help" className="mt-1 text-sm text-mute">This records your preference only. It does not subscribe you to a messaging service.</p>}
+          <p className="mt-1 text-sm text-mute">Saved state: <span className="font-bold text-ink">{activeCustomer.preferences.promotionalUpdates ? "Opted in" : "Opted out"}</span>. This checkbox stores your choice in this browser; it does not sign you up for messages.</p>
+          {errors.promotionalUpdates && <p id="promotional-updates-error" role="alert" className="mt-1 text-sm text-sale">{errors.promotionalUpdates}</p>}
+          <p id="promotional-updates-help" className="mt-1 text-sm text-mute">Only the saved choice appears above. No real offers or notifications will be delivered.</p>
         </fieldset>
 
         <fieldset className="rounded-xl border border-line p-4 sm:p-5" aria-describedby={errors.productGridDensity ? "grid-density-error" : "grid-density-help"}>
           <legend className="px-1 font-head text-lg font-bold">Product grid density</legend>
-          <p id="grid-density-help" className="mt-1 text-sm text-mute">Choose how many products appear across wide catalog pages.</p>
+          <p id="grid-density-help" className="mt-1 text-sm text-mute">Choose how many products appear across catalog, category, and search listings. Both modes keep two readable columns on phones.</p>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2 text-sm font-medium hover:bg-soft">
+            <label className={`flex min-h-12 cursor-pointer items-start gap-3 rounded-lg border px-3 py-3 text-sm font-medium hover:bg-soft ${values.productGridDensity === "standard" ? "border-brand bg-brand-tint" : "border-line"}`}>
               <input type="radio" name="product-grid-density" value="standard" className="size-5 accent-brand" checked={values.productGridDensity === "standard"} onChange={() => { setValues({ ...values, productGridDensity: "standard" }); setErrors((current) => ({ ...current, productGridDensity: undefined })); setFeedback(""); }} />
-              Standard grid
+              <span className="min-w-0"><span className="block font-bold">Standard grid</span><span className="mt-1 block text-xs font-normal text-mute">Larger cards · up to 4 columns</span><span aria-hidden="true" className="mt-3 grid max-w-40 grid-cols-2 gap-1"><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /></span></span>
             </label>
-            <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2 text-sm font-medium hover:bg-soft">
+            <label className={`flex min-h-12 cursor-pointer items-start gap-3 rounded-lg border px-3 py-3 text-sm font-medium hover:bg-soft ${values.productGridDensity === "compact" ? "border-brand bg-brand-tint" : "border-line"}`}>
               <input type="radio" name="product-grid-density" value="compact" className="size-5 accent-brand" checked={values.productGridDensity === "compact"} onChange={() => { setValues({ ...values, productGridDensity: "compact" }); setErrors((current) => ({ ...current, productGridDensity: undefined })); setFeedback(""); }} />
-              Compact grid
+              <span className="min-w-0"><span className="block font-bold">Compact grid</span><span className="mt-1 block text-xs font-normal text-mute">More cards · up to 5 columns</span><span aria-hidden="true" className="mt-3 grid max-w-40 grid-cols-4 gap-1"><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /></span></span>
             </label>
           </div>
           {errors.productGridDensity && <p id="grid-density-error" role="alert" className="mt-2 text-sm text-sale">{errors.productGridDensity}</p>}
@@ -120,6 +121,8 @@ export default function CustomerPreferencesPage() {
 
         <button type="submit" className="btn btn-primary btn-md" disabled={busy}>{busy ? "Saving…" : feedback.startsWith("Preferences saved") ? <><Check className="size-4" aria-hidden="true" /> Save preferences</> : <><Save className="size-4" aria-hidden="true" /> Save preferences</>}</button>
       </form>
+
+      <Link href="/products" className="mt-4 inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-bold text-brand-strong hover:bg-brand-tint">View products</Link>
 
       <section className="mt-8 max-w-2xl border-t border-line pt-6" aria-labelledby="demo-reset-title">
         <h3 id="demo-reset-title" className="font-head text-lg font-bold">Customer demo data</h3>

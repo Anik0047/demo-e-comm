@@ -127,3 +127,15 @@ test("invalid choices do not change persisted preferences", async () => {
   expect(await saveCustomerPreferences(store, "customer-demo", { promotionalUpdates: 1, productGridDensity: "wide" })).toMatchObject({ ok: false, reason: "invalid_input" });
   expect(store.getState().snapshot.data.customers[0]?.preferences).toEqual(before);
 });
+
+test("storage failures do not report a saved preference or mutate the customer", async () => {
+  const store = await customerStore({
+    read: async () => null,
+    write: async () => { throw new Error("storage unavailable"); },
+    clear: async () => undefined,
+  });
+  const before = structuredClone(store.getState().snapshot.data.customers[0]?.preferences);
+  const result = await saveCustomerPreferences(store, "customer-demo", { promotionalUpdates: true, productGridDensity: "compact" });
+  expect(result).toMatchObject({ ok: false, reason: "persistence_unavailable" });
+  expect(store.getState().snapshot.data.customers[0]?.preferences).toEqual(before);
+});
