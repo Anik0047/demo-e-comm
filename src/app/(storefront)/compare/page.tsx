@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { ProductComparison } from "@/components/products/product-comparison";
-import { getComparableProductIds, getComparableProducts } from "@/services/product-comparison";
+import { getComparableProductCatalog } from "@/services/product-comparison";
 import { getPricingTime } from "@/services/effective-price";
 
 export const metadata: Metadata = {
@@ -16,7 +16,9 @@ export default async function ComparePage() {
 
 async function CompareContent() {
   await connection();
-  const products = getComparableProducts([...getComparableProductIds()], getPricingTime());
+  // Session storage is client-only, so the server cannot know the selected IDs.
+  // Pass canonical candidates and let the hydrated shared store choose their order.
+  const products = getComparableProductCatalog(getPricingTime());
   return <ProductComparison products={products} />;
 }
 
