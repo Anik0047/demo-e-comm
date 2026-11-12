@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/shared/product-card";
 import { useDemoState } from "@/hooks/use-demo-state";
 import {
@@ -50,6 +50,32 @@ export function RecentlyViewedSection({
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const busyRef = useRef(false);
+  const clearTriggerRef = useRef<HTMLButtonElement>(null);
+  const keepHistoryRef = useRef<HTMLButtonElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
+
+  useLayoutEffect(() => {
+    if (!confirmClear) return;
+    const trigger = clearTriggerRef.current;
+    const heading = headingRef.current;
+    keepHistoryRef.current?.focus();
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || busyRef.current) return;
+      event.preventDefault();
+      setConfirmClear(false);
+    };
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("keydown", dismissOnEscape);
+      if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+      else heading?.focus({ preventScroll: true });
+    };
+  }, [confirmClear]);
 
   function setFeedback(next: Feedback) {
     if (next) showToast(next.kind, next.message);
@@ -245,6 +271,8 @@ export function RecentlyViewedSection({
       <header className="mb-4 flex min-w-0 flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2
+            ref={headingRef}
+            tabIndex={-1}
             id="recently-viewed-title"
             className="font-head text-xl font-bold sm:text-2xl"
           >
@@ -257,6 +285,7 @@ export function RecentlyViewedSection({
         {result?.items.length ? (
           <button
             type="button"
+            ref={clearTriggerRef}
             className="btn btn-ghost btn-sm text-sale-strong"
             disabled={busy}
             onClick={() => {
@@ -292,6 +321,7 @@ export function RecentlyViewedSection({
               {busy ? "Clearing…" : "Clear history"}
             </button>
             <button
+              ref={keepHistoryRef}
               type="button"
               className="btn btn-outline btn-sm"
               disabled={busy}

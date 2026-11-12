@@ -10,7 +10,7 @@ interface ProductCardProps {
   variant?: "standard" | "recently-viewed";
   onRemove?: () => void;
   removeDisabled?: boolean;
-  eagerImage?: boolean;
+  imageSizes?: string;
 }
 
 export function ProductCard({
@@ -18,7 +18,7 @@ export function ProductCard({
   variant = "standard",
   onRemove,
   removeDisabled = false,
-  eagerImage = false,
+  imageSizes = "(min-width: 1280px) calc((1280px - 96px) / 5), (min-width: 768px) calc((100vw - 80px) / 4), calc((100vw - 44px) / 2)",
 }: ProductCardProps) {
   const originalPrice = product.compareAtPrice !== null && product.compareAtPrice > product.price
     ? product.compareAtPrice
@@ -32,13 +32,13 @@ export function ProductCard({
         aria-label={`View ${product.name}`}
         className="flex h-full min-w-0 flex-col rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
       >
-        <div className="relative grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-t-2xl bg-soft md:aspect-square">
+        <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-t-2xl bg-soft">
           <ProductCardImage
             key={product.mainImage.url}
             image={product.mainImage}
             name={product.name}
             placeholder={product.placeholder}
-            eager={eagerImage}
+            sizes={imageSizes}
           />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2 p-3">

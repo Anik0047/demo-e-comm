@@ -157,7 +157,7 @@ export function MobileDrawer({ isOpen, onClose, categories }: MobileDrawerProps)
         <li><Link href="/wishlist" onClick={onClose} className="menu-link min-h-11">Wishlist</Link></li>
         <li><Link href="/cart" onClick={onClose} className="menu-link min-h-11">Cart</Link></li>
         <li>
-          <Link href="/products?promotion=flash-deals" onClick={onClose} className="menu-link min-h-11 text-sale font-bold">
+          <Link href="/products?promotion=flash-deals" onClick={onClose} className="menu-link min-h-11 text-sale-strong font-bold">
             Flash deals
           </Link>
         </li>

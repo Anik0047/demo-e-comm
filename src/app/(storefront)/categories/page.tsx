@@ -5,7 +5,10 @@ import { getCatalogCategories, getMainCategories } from "@/services/categories";
 
 export const metadata: Metadata = {
   title: "All categories",
-  description: "Browse all shopping categories on Kenakata and find what you need.",
+  description: "Explore the product categories represented in the Kenakata marketplace demo.",
+  alternates: { canonical: "/categories" },
+  openGraph: { title: "All categories", description: "Explore the product categories represented in the Kenakata marketplace demo.", url: "/categories", type: "website" },
+  twitter: { card: "summary", title: "All categories", description: "Explore the product categories represented in the Kenakata marketplace demo." },
 };
 
 export default async function CategoriesPage() {

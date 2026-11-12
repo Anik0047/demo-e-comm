@@ -9,12 +9,16 @@ interface ProductGalleryImageProps {
   image?: GalleryImage;
   enlarged?: boolean;
   eager?: boolean;
+  highPriority?: boolean;
+  announceFailure?: boolean;
 }
 
 export function ProductGalleryImage({
   image,
   enlarged = false,
   eager = false,
+  highPriority = false,
+  announceFailure = false,
 }: ProductGalleryImageProps) {
   const [failed, setFailed] = useState(false);
   const [useOriginal, setUseOriginal] = useState(false);
@@ -35,7 +39,7 @@ export function ProductGalleryImage({
   }
   if (!image || failed)
     return (
-      <span className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-soft p-4 text-mute">
+      <span role={failed && announceFailure ? "status" : undefined} className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-soft p-4 text-mute">
         <ProductPlaceholderIcon icon="backpack" className="size-16" />
         <span className="text-sm">
           {failed ? "Image unavailable" : "No product images yet"}
@@ -50,9 +54,10 @@ export function ProductGalleryImage({
       sizes={
         enlarged
           ? "(min-width: 1152px) 1102px, (min-width: 640px) calc(100vw - 50px), calc(100vw - 34px)"
-          : "(min-width: 1280px) 350px, (min-width: 1024px) 28vw, (min-width: 768px) 48vw, 100vw"
+          : "(min-width: 1024px) calc((7 * (100vw - 64px) / 12 + 184px) / 2), (min-width: 768px) calc((100vw - 40px) / 2), calc(100vw - 32px)"
       }
       loading={eager ? "eager" : "lazy"}
+      fetchPriority={highPriority ? "high" : "auto"}
       className="object-contain object-center"
       onError={() => {
         if (source !== image.url && !useOriginal) setUseOriginal(true);

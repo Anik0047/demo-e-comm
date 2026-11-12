@@ -6,6 +6,7 @@ import { ListingSkeleton } from "@/components/products/listing-states";
 import { ProductListing } from "@/components/products/product-listing";
 import { getCatalogCategories } from "@/services/categories";
 import type { RawListingQuery } from "@/types/catalog";
+import { listingMetadata } from "@/lib/seo";
 
 interface SubcategoryPageProps {
   params: Promise<{ category: string; subcategory: string }>;
@@ -27,12 +28,10 @@ async function resolveHierarchy(params: SubcategoryPageProps["params"]) {
   return { category, subcategory };
 }
 
-export async function generateMetadata({ params }: Pick<SubcategoryPageProps, "params">): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: SubcategoryPageProps): Promise<Metadata> {
   const { category, subcategory } = await resolveHierarchy(params);
-  return {
-    title: `${subcategory.name} | ${category.name}`,
-    description: `Browse ${subcategory.name.toLowerCase()} from trusted sellers on Kenakata.`,
-  };
+  const path = `/category/${category.slug}/${subcategory.slug}`;
+  return listingMetadata(`${subcategory.name} in ${category.name}`, `Browse sample ${subcategory.name.toLowerCase()} products in the Kenakata marketplace demo.`, path, searchParams);
 }
 
 async function SubcategoryContent({ params, searchParams }: SubcategoryPageProps) {

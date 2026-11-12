@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { useDemoState } from "@/hooks/use-demo-state";
@@ -41,12 +41,28 @@ export default function CustomerAddressesPage() {
   const [values, setValues] = useState<CustomerAddressInput>(emptyAddress);
   const [errors, setErrors] = useState<CustomerAddressFieldErrors>({});
   const [busy, setBusy] = useState(false);
+  const addressFormRef = useRef<HTMLFormElement>(null);
+  const formWasOpenRef = useRef(false);
+  const returnFocusIdRef = useRef("add-address-trigger");
+
+  useEffect(() => {
+    if (formOpen) {
+      formWasOpenRef.current = true;
+      addressFormRef.current?.querySelector<HTMLElement>("select, input:not([type='hidden']), textarea")?.focus();
+      return;
+    }
+    if (formWasOpenRef.current) {
+      formWasOpenRef.current = false;
+      document.getElementById(returnFocusIdRef.current)?.focus({ preventScroll: true });
+    }
+  }, [formOpen]);
 
   if (!ready) return <section className="card min-w-0 p-5 sm:p-7" role="status">Loading your saved addresses…</section>;
   if (!customer) return null;
   const activeCustomer = customer;
 
   function openAddForm() {
+    returnFocusIdRef.current = "add-address-trigger";
     setEditingAddressId(null);
     setValues({ ...emptyAddress, recipientName: activeCustomer.fullName, phone: activeCustomer.phone });
     setErrors({});
@@ -56,6 +72,7 @@ export default function CustomerAddressesPage() {
   function openEditForm(addressId: string) {
     const address = activeCustomer.addresses.find(({ id }) => id === addressId);
     if (!address) return;
+    returnFocusIdRef.current = `edit-address-trigger-${address.id}`;
     setEditingAddressId(address.id);
     setValues({ ...address });
     setErrors({});
@@ -123,11 +140,11 @@ export default function CustomerAddressesPage() {
           <h2 id="addresses-title" className="font-head text-xl font-bold sm:text-2xl">Saved addresses</h2>
           <p className="mt-1 text-sm text-mute">Manage delivery addresses saved to this customer account.</p>
         </div>
-        {!formOpen && <button type="button" className="btn btn-primary btn-sm shrink-0" onClick={openAddForm}><Plus className="size-4" aria-hidden="true" /> Add address</button>}
+        {!formOpen && <button id="add-address-trigger" type="button" className="btn btn-primary btn-sm shrink-0" onClick={openAddForm}><Plus className="size-4" aria-hidden="true" /> Add address</button>}
       </div>
 
 
-      {formOpen && <form className="mt-6 rounded-xl border border-line bg-soft p-4 sm:p-5" noValidate onSubmit={(event) => void submitAddress(event)}>
+      {formOpen && <form ref={addressFormRef} className="mt-6 rounded-xl border border-line bg-soft p-4 sm:p-5" noValidate onSubmit={(event) => void submitAddress(event)}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="font-head text-lg font-bold">{editingAddressId ? "Edit address" : "Add an address"}</h3>
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setFormOpen(false); setErrors({}); }}>Cancel</button>
@@ -138,7 +155,7 @@ export default function CustomerAddressesPage() {
             <select id="address-label" className="input bg-white" value={values.label} aria-invalid={Boolean(errors.label)} aria-describedby={errors.label ? "address-label-error" : undefined} onChange={(event) => changeField("label", event.target.value)} onBlur={() => validateField("label")}>
               <option>Home</option><option>Work</option><option>Other</option>
             </select>
-            {errors.label && <p id="address-label-error" role="alert" className="mt-1 text-sm text-sale">{errors.label}</p>}
+            {errors.label && <p id="address-label-error" role="alert" className="mt-1 text-sm text-sale-strong">{errors.label}</p>}
           </div>
           <AddressField id="recipient-name" label="Recipient name" value={values.recipientName} error={errors.recipientName} autoComplete="name" onChange={(value) => changeField("recipientName", value)} onBlur={() => validateField("recipientName")} />
           <AddressField id="recipient-phone" label="Mobile number" value={values.phone} error={errors.phone} type="tel" autoComplete="tel" placeholder="01712345678" onChange={(value) => changeField("phone", value)} onBlur={() => validateField("phone")} />
@@ -172,7 +189,7 @@ export default function CustomerAddressesPage() {
               {address.isDefault && <span className="badge badge-brand mt-2"><Star className="size-3" aria-hidden="true" /> Default address</span>}
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <button type="button" aria-label={`Edit ${address.label} address`} className="grid size-11 place-items-center rounded-lg text-ink hover:bg-soft" disabled={busy} onClick={() => openEditForm(address.id)}><Pencil className="size-4" aria-hidden="true" /></button>
+              <button id={`edit-address-trigger-${address.id}`} type="button" aria-label={`Edit ${address.label} address`} className="grid size-11 place-items-center rounded-lg text-ink hover:bg-soft" disabled={busy} onClick={() => openEditForm(address.id)}><Pencil className="size-4" aria-hidden="true" /></button>
               <button type="button" aria-label={`Delete ${address.label} address`} className="grid size-11 place-items-center rounded-lg text-sale-strong hover:bg-blush" disabled={busy} onClick={() => void runAddressAction(() => deleteCustomerAddress(demoStateStore, activeCustomer.id, address.id), address.isDefault && activeCustomer.addresses.length > 1 ? "Address removed. The next saved address is now the default." : "Address removed.")}><Trash2 className="size-4" aria-hidden="true" /></button>
             </div>
           </div>
@@ -208,6 +225,6 @@ function AddressField({ id, label, value, error, type = "text", autoComplete, in
   return <div className="min-w-0">
     <label htmlFor={id} className="mb-1.5 block text-sm font-bold">{label}</label>
     <input id={id} className="input bg-white" type={type} autoComplete={autoComplete} inputMode={inputMode} maxLength={maxLength} placeholder={placeholder} value={value} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} />
-    {error && <p id={errorId} role="alert" className="mt-1 text-sm text-sale">{error}</p>}
+    {error && <p id={errorId} role="alert" className="mt-1 text-sm text-sale-strong">{error}</p>}
   </div>;
 }

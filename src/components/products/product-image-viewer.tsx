@@ -3,7 +3,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { ProductGalleryImage } from "@/components/products/product-gallery-image";
-import { ProductImageCredits } from "@/components/products/product-image-credits";
 import type { GalleryImage } from "@/services/product-gallery";
 
 interface ProductImageViewerProps {
@@ -119,6 +118,7 @@ export function ProductImageViewer({
           image={images[index]}
           enlarged
           eager
+          announceFailure
         />
       </div>
       <div className="mt-4 flex shrink-0 items-center justify-center gap-4">

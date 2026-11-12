@@ -7,8 +7,8 @@ interface PromoTilesProps {
 }
 
 const avatarClasses: Record<VendorAvatarTone, string> = {
-  brand: "bg-brand text-white", accent: "bg-accent text-ink", sky: "bg-sky text-white", ink: "bg-ink text-white",
-  "info-ink": "bg-info-ink text-white", sale: "bg-sale text-white", "brand-strong": "bg-brand-strong text-white", "accent-strong": "bg-accent-strong text-ink",
+  brand: "bg-brand-strong text-white", accent: "bg-accent text-ink", sky: "bg-info-strong text-white", ink: "bg-ink text-white",
+  "info-ink": "bg-info-ink text-white", sale: "bg-sale-strong text-white", "brand-strong": "bg-brand-strong text-white", "accent-strong": "bg-accent-strong text-ink",
 };
 
 export function PromoTiles({ vendors }: PromoTilesProps) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ZoomIn } from "lucide-react";
 import { ProductGalleryImage } from "@/components/products/product-gallery-image";
 import { ProductImageViewer } from "@/components/products/product-image-viewer";
@@ -12,10 +12,19 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
   const [active, setActive] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [viewer, setViewer] = useState<number | null>(null);
+  const [desktopGallery, setDesktopGallery] = useState(false);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
   const gridId = useId();
   const move = (step: number) => setActive((current) => (current + step + images.length) % images.length);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const update = () => setDesktopGallery(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   return (
     <section aria-label={`${name} images`} className="min-w-0 lg:col-span-7">
@@ -37,7 +46,7 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
               touch.current = null;
             }}
             onClick={() => { if (swiped.current) { swiped.current = false; return; } setViewer(active); }}>
-            <ProductGalleryImage key={images[active].url} image={images[active]} eager />
+            <ProductGalleryImage key={images[active].url} image={images[active]} eager highPriority announceFailure />
             <span className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full border border-line bg-canvas"><ZoomIn aria-hidden="true" className="size-5" /></span>
           </button>
           <div className="mt-3 flex items-center justify-center gap-4">
@@ -53,7 +62,7 @@ export function ProductImageGallery({ images, name }: ProductImageGalleryProps) 
                 aria-pressed={active === index}
                 className={`relative block size-full overflow-hidden rounded-2xl bg-soft hover:ring-2 hover:ring-line ${active === index ? "ring-2 ring-brand" : ""}`}
                 onClick={() => setActive(index)}>
-                <ProductGalleryImage image={image} eager={index < 2} />
+                <ProductGalleryImage image={image} eager={index === 0 || (desktopGallery && index === 1)} highPriority={index === 0} announceFailure={index === active} />
               </button>
               <button type="button" aria-label={`Enlarge image ${index + 1} of ${images.length}: ${image.alt}`}
                 className="absolute bottom-3 right-3 grid size-11 place-items-center rounded-full border border-line bg-canvas"

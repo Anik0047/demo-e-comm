@@ -56,7 +56,7 @@ export function CustomerOrderActions({ order, allowCancel = false }: CustomerOrd
       <button type="button" className="btn btn-outline btn-sm" onClick={() => { setFeedback(""); setConfirmation("hide"); }}>
         Hide from history
       </button>
-      {feedback && <p className="basis-full text-sm text-mute" role="status" aria-live="polite">{feedback}</p>}
+      {feedback && <p className="basis-full text-sm text-mute" role="status">{feedback}</p>}
       {confirmation && (
         <section className="basis-full rounded-xl border border-line bg-soft p-4" role="alertdialog" aria-labelledby={`order-${confirmation}-title`} aria-describedby={`order-${confirmation}-description`}>
           <h3 id={`order-${confirmation}-title`} className="font-head font-bold text-ink">{confirmation === "cancel" ? "Cancel this demo order?" : "Hide this order from history?"}</h3>

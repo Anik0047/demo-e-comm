@@ -36,7 +36,7 @@ async function addPanjabi(page: Page, size = "M", quantity = 1) {
     await quantityGroup.getByRole("button", { name: "Increase quantity" }).click();
   }
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("region", { name: "Cotton Panjabi" }).getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
 }
 
 test("navbar cart count updates after PDP additions and mini-cart shows current item details", async ({ page }) => {
@@ -59,7 +59,7 @@ test("mini-cart uses the product image for products with photos", async ({ page 
   await page.goto("/products/bluetooth-speaker");
   await waitForCustomer(page);
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("region", { name: "Bluetooth Speaker" }).getByText("Bluetooth Speaker added to your cart.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText("Bluetooth Speaker added to your cart.", { exact: true })).toBeVisible();
   const preview = await showMiniCartOnDesktop(page);
   if (await page.evaluate(() => window.matchMedia("(min-width: 768px)").matches)) {
     const image = preview.getByRole("img", { name: /Blue JBL GO2 Bluetooth speaker/ });

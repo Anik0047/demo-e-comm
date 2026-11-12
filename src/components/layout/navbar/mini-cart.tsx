@@ -48,7 +48,7 @@ export function MiniCart() {
       >
         <span className="relative mr-1">
           <ShoppingCart aria-hidden="true" className="w-5 h-5" />
-          <span className="absolute -top-2 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-white text-brand-strong text-[11px] font-bold grid place-items-center" aria-live="polite" aria-atomic="true">
+          <span className="absolute -top-2 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-white text-brand-strong text-xs font-bold grid place-items-center" aria-hidden="true">
             {itemCount}
           </span>
         </span>

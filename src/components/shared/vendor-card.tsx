@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 import type { Vendor, VendorAvatarTone } from "@/types/vendor";
 
 const avatarClasses: Record<VendorAvatarTone, string> = {
-  brand: "bg-brand text-white",
+  brand: "bg-brand-strong text-white",
   accent: "bg-accent text-ink",
-  sky: "bg-sky text-white",
+  sky: "bg-info-strong text-white",
   ink: "bg-ink text-white",
   "info-ink": "bg-info-ink text-white",
-  sale: "bg-sale text-white",
+  sale: "bg-sale-strong text-white",
   "brand-strong": "bg-brand-strong text-white",
   "accent-strong": "bg-accent-strong text-ink",
 };

@@ -73,18 +73,27 @@ test("admin and vendor accounts cannot modify wishlists from product cards", asy
   await waitForCustomerAccount(page);
   const card = cardFor(page, "Wireless Earbuds Pro");
   const heart = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
+  const customerWishlistBefore = await readSavedWishlist(page);
+  const customerProductsBefore = customerWishlistBefore?.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds ?? [];
   await page.goto("/login");
   await page.getByRole("button", { name: "Demo Admin Admin demo account" }).click();
   await page.goto("/");
   await expect(heart).toHaveAttribute("aria-pressed", "false");
-  await expect(heart).toBeDisabled();
+  await expect(heart).toBeEnabled();
+  await heart.click();
+  await expect(page.getByRole("status").getByText("Switch to a customer demo account to save products to your wishlist.", { exact: true })).toBeVisible();
+  const afterAdminClick = await readSavedWishlist(page);
+  expect(afterAdminClick?.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds).toEqual(customerProductsBefore);
 
   await page.goto("/login");
   await page.getByRole("button", { name: "TechHaven seller Vendor demo account" }).click();
   await page.goto("/");
-  await expect(card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" })).toBeDisabled();
-  const wishlist = await readSavedWishlist(page);
-  expect(wishlist?.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds).toEqual([]);
+  const vendorHeart = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
+  await expect(vendorHeart).toBeEnabled();
+  await vendorHeart.click();
+  await expect(page.getByRole("status").getByText("Switch to a customer demo account to save products to your wishlist.", { exact: true })).toBeVisible();
+  const afterVendorClick = await readSavedWishlist(page);
+  expect(afterVendorClick?.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds).toEqual(customerProductsBefore);
 });
 
 test("out-of-stock products can be wishlisted and remain marked unavailable for purchase", async ({ page }) => {

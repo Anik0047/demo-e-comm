@@ -34,10 +34,11 @@ test("customer account navigation, profile data, saved state, and role switching
   await page.getByRole("link", { name: "Preferences", exact: true }).click();
   await expect(page).toHaveURL("/account/preferences");
   await expect(page.getByRole("heading", { name: "Account preferences" })).toBeVisible();
-  await page.getByRole("checkbox", { name: /Save my opt-in choice/ }).check();
+  await page.getByRole("checkbox", { name: "Opt in to promotional updates in this demo" }).check();
   await page.getByRole("radio", { name: "Compact grid" }).check();
   await page.getByRole("button", { name: "Save preferences" }).click();
   await expect(page.getByRole("status")).toHaveText("Preferences saved in this browser.");
+  await expect(page.getByText(/Saved state: Opted in\./)).toBeVisible();
 
   for (const path of ["/products", "/products?search=wireless", "/category/electronics", "/vendor/tech-haven"]) {
     await page.goto(path);
@@ -100,7 +101,7 @@ test("customer account navigation, profile data, saved state, and role switching
   await page.goto("/account/addresses");
   await expect(page.getByRole("article", { name: "Home address" })).toContainText("Default address");
   await page.goto("/account/preferences");
-  await expect(page.getByRole("checkbox", { name: /Save my opt-in choice/ })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Opt in to promotional updates in this demo" })).toBeChecked();
   await expect(page.getByRole("radio", { name: "Compact grid" })).toBeChecked();
   await page.goto("/cart");
   await expect(page.getByRole("list", { name: "Cart items" })).toContainText("Bluetooth Speaker");

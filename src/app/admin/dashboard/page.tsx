@@ -1,10 +1,12 @@
-"use client";
+import type { Metadata } from "next";
+import AdminDashboardClient from "./admin-dashboard-client";
 
-import { useDemoState } from "@/hooks/use-demo-state";
-import { selectActiveAccount } from "@/services/demo-state-store";
-import { DemoDashboardPlaceholder } from "@/components/shared/demo-dashboard-placeholder";
+export const metadata: Metadata = {
+  title: "Admin dashboard",
+  description: "Administration interface for the Kenakata frontend demonstration.",
+  robots: { index: false, follow: false },
+};
 
 export default function AdminDashboardPage() {
-  const account = useDemoState(selectActiveAccount);
-  return <DemoDashboardPlaceholder role="Admin" accountName={account?.displayName} />;
+  return <AdminDashboardClient />;
 }

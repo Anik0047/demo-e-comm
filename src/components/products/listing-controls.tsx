@@ -74,7 +74,7 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
       <aside aria-label="Product filters" className="hidden min-w-0 self-start rounded-2xl border border-line bg-canvas p-4 lg:block">
         <h2 className="mb-5 text-lg font-bold">Filters</h2>
         <fieldset disabled={!hydrated || pending} className="min-w-0"><FilterFields values={selection} options={options} {...prices} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope} showVendorFilter={showVendorFilter} onChange={(values) => commit({ type: "filters", values })} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} onApplyPrice={() => commit({ type: "price", ...prices })} /></fieldset>
-        {priceError && <p role="alert" className="mt-3 text-sm text-sale">{priceError}</p>}
+        {priceError && <p role="alert" className="mt-3 text-sm text-sale-strong">{priceError}</p>}
       </aside>
       <div className="min-w-0">
         <fieldset disabled={!hydrated || pending} className="min-w-0">
@@ -84,7 +84,7 @@ export function ListingControls({ state, options, href, rawQuery, notices, count
           <ListingToolbar sort={selection.sort} count={count} onSort={(value) => commit({ type: "sort", value })} onOpenFilters={() => setOpen(true)} filterButtonRef={filterButtonRef} />
           <ActiveFilters state={state} options={options} onRemove={(key) => commit({ type: "remove", key })} onClear={() => commit({ type: "clear" })} />
         </fieldset>
-        <p role="status" aria-live="polite" className={pending ? "mb-3 text-sm text-mute" : "sr-only"}>{pending ? "Updating products…" : `Results updated: ${count}`}</p>
+        <p role="status" className={pending ? "mb-3 text-sm text-mute" : "sr-only"}>{pending ? "Updating products…" : `Results updated: ${count}`}</p>
         <div aria-busy={pending} inert={pending}>{children}</div>
       </div>
     </div>

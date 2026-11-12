@@ -1,4 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+
+async function controlledMegaMenu(nav: Locator, trigger: Locator) {
+  const menuId = await trigger.getAttribute("aria-controls");
+  expect(menuId).toBeTruthy();
+  return nav.locator(`[id="${menuId}"]`);
+}
 
 function productCards(page: Page) {
   return page.getByRole("list", { name: "Products" }).locator(":scope > li[data-product-id]");
@@ -21,7 +27,7 @@ async function openElectronicsFromHomepage(page: Page) {
   } else {
     const nav = page.getByRole("navigation", { name: "Primary navigation" });
     await nav.getByRole("button", { name: "All categories" }).click();
-    await nav.locator("#category-mega-menu").getByRole("list", { name: "Main categories" })
+    await (await controlledMegaMenu(nav, nav.getByRole("button", { name: "All categories" }))).getByRole("list", { name: "Main categories" })
       .getByRole("link", { name: "Electronics", exact: true }).click();
   }
   await expect(page).toHaveURL("/category/electronics");
@@ -87,7 +93,7 @@ test("Journey B: shared search selects a variant and a persisted cart line", asy
   const line = page.getByRole("list", { name: "Cart items" }).getByRole("listitem");
   await expect(line).toContainText("Cotton Panjabi");
   await expect(line).toContainText("Size: XL");
-  await expect(line.getByRole("group", { name: "Quantity for Cotton Panjabi" }).locator('[aria-live="polite"]')).toHaveText("3");
+  await expect(line.getByRole("group", { name: "Quantity for Cotton Panjabi" }).getByText("3", { exact: true })).toBeVisible();
   expect(unitPrice).toBeTruthy();
   const expectedUnitPrice = Number((unitPrice ?? "").replace(/[^\d]/gu, ""));
   await expect(line).toContainText(`৳${(expectedUnitPrice * 3).toLocaleString("en-US")}`);
@@ -98,7 +104,7 @@ test("Journey B: shared search selects a variant and a persisted cart line", asy
     .toContainEqual(expect.objectContaining({ productId: "prod-cotton-panjabi", variantId: "var-panjabi-xl", quantity: 3 }));
   await page.reload();
   await expect(line).toContainText("Size: XL");
-  await expect(line.getByRole("group", { name: "Quantity for Cotton Panjabi" }).locator('[aria-live="polite"]')).toHaveText("3");
+  await expect(line.getByRole("group", { name: "Quantity for Cotton Panjabi" }).getByText("3", { exact: true })).toBeVisible();
 });
 
 test("Journey C: vendor-scoped filters preserve ownership through wishlist refresh and history", async ({ page }) => {

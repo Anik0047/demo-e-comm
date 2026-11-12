@@ -7,13 +7,14 @@ import { ChevronRight } from "lucide-react";
 import type { Category } from "@/types/category";
 
 interface MegaMenuProps {
+  id: string;
   categories: Category[];
   activeCategoryId?: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function MegaMenu({ categories, activeCategoryId, isOpen, onClose }: MegaMenuProps) {
+export function MegaMenu({ id, categories, activeCategoryId, isOpen, onClose }: MegaMenuProps) {
   const pathname = usePathname();
   const mainCategories = categories.filter((category) => category.level === 1);
   const [active, setActive] = useState<{ pathname: string; id: string }>({ pathname: "", id: "" });
@@ -26,7 +27,7 @@ export function MegaMenu({ categories, activeCategoryId, isOpen, onClose }: Mega
     : [];
 
   return (
-    <div id="category-mega-menu" hidden={!isOpen} className="absolute left-0 top-full w-[min(720px,calc(100vw-2rem))] pt-2">
+    <div id={id} hidden={!isOpen} className="absolute left-0 top-full w-[min(720px,calc(100vw-2rem))] pt-2">
       <div className="flex w-full bg-white border border-line rounded-xl shadow-lg overflow-hidden font-normal">
         <ul aria-label="Main categories" className="w-60 border-r border-line p-2">
           {mainCategories.map((category) => {

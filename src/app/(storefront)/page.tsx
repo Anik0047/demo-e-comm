@@ -15,6 +15,15 @@ import { TrustStrip } from "@/components/shared/trust-strip";
 import { getTrustPoints } from "@/services/trust-points";
 import { getPricingTime } from "@/services/effective-price";
 import { RecentlyViewedSection } from "@/components/home/recently-viewed-section";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Bangladesh marketplace demo",
+  description: "Explore sample products, category pages, and public seller storefronts in Kenakata’s frontend marketplace demonstration.",
+  alternates: { canonical: "/" },
+  openGraph: { title: "Bangladesh marketplace demo", description: "Explore sample products, category pages, and public seller storefronts in Kenakata’s frontend marketplace demonstration.", url: "/", type: "website" },
+  twitter: { card: "summary", title: "Bangladesh marketplace demo", description: "Explore sample products, category pages, and public seller storefronts in Kenakata’s frontend marketplace demonstration." },
+};
 
 export default async function HomePage() {
   const vendors = await getTopVendors();

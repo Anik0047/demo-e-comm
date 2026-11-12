@@ -68,6 +68,7 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
     message: string;
   } | null>(null);
   const [saving, setSaving] = useState(false);
+  const ratingValues = [1, 2, 3, 4, 5];
   const queryEdit = Boolean(
     ownReview && requestedReviewId === ownReview.id && !editorClosed,
   );
@@ -201,14 +202,31 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
                   aria-describedby={feedback?.kind === "error" ? "review-feedback" : undefined}
                   className="mt-1 flex gap-1"
                 >
-                  {[1, 2, 3, 4, 5].map((value) => (
+                  {ratingValues.map((value) => (
                     <button
                       key={value}
+                      id={`review-rating-${productId}-${value}`}
                       type="button"
                       role="radio"
                       aria-checked={draftRating === value}
                       aria-label={`${value} ${value === 1 ? "star" : "stars"}`}
+                      tabIndex={draftRating === value || (draftRating === null && value === 1) ? 0 : -1}
                       className="inline-flex size-11 items-center justify-center rounded-lg text-accent hover:bg-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      onKeyDown={(event) => {
+                        const currentIndex = ratingValues.indexOf(value);
+                        let nextIndex: number | null = null;
+                        if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (currentIndex + 1) % ratingValues.length;
+                        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (currentIndex - 1 + ratingValues.length) % ratingValues.length;
+                        else if (event.key === "Home") nextIndex = 0;
+                        else if (event.key === "End") nextIndex = ratingValues.length - 1;
+                        if (nextIndex === null) return;
+                        event.preventDefault();
+                        const nextRating = ratingValues[nextIndex];
+                        if (nextRating === undefined) return;
+                        setEditorOpen(true);
+                        setRating(nextRating);
+                        document.getElementById(`review-rating-${productId}-${nextRating}`)?.focus();
+                      }}
                       onClick={() => {
                         setEditorOpen(true);
                         setRating(value);

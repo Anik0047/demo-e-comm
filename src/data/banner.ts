@@ -36,7 +36,7 @@ export const heroSlides: HeroSlide[] = [
     artClasses: {
       circle: "relative w-48 h-48 xl:w-60 xl:h-60 rounded-full bg-white grid place-items-center",
       icon: "w-20 h-20 xl:w-28 xl:h-28 text-ink",
-      badge: "absolute top-2 -left-2 bg-sale text-white font-head font-extrabold text-sm px-4 py-2 rounded-full -rotate-6",
+      badge: "absolute top-2 -left-2 bg-sale-strong text-white font-head font-extrabold text-sm px-4 py-2 rounded-full -rotate-6",
       badgeLines: ["New", "season"],
       dot: "absolute bottom-0 right-2 w-10 h-10 rounded-full bg-brand",
     },
@@ -64,12 +64,12 @@ export const heroSlides: HeroSlide[] = [
   {
     id: "slide-4",
     tag: "Every order",
-    tagClasses: "inline-block bg-sale text-white text-xs font-bold px-3 py-1 rounded-full mb-4",
+    tagClasses: "inline-block bg-sale-strong text-white text-xs font-bold px-3 py-1 rounded-full mb-4",
     headingLines: ["Free delivery over", "৳2,000"],
     paragraph: "Cash on delivery available in all 64 districts.",
     ctaLabel: "Start shopping",
     ctaHref: "/products",
-    ctaClasses: "inline-block mt-6 bg-sale text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-sale-strong",
+    ctaClasses: "inline-block mt-6 bg-sale-strong text-white font-bold text-sm px-6 py-3 rounded-full hover:bg-sale-strong",
     icon: "truck",
     bgClass: "bg-blush",
     textClass: "text-blush-ink",

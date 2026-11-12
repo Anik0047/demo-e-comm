@@ -15,7 +15,7 @@ export function ListingSkeleton() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
           {Array.from({ length: 12 }, (_, index) => (
             <div key={index} className="min-w-0 overflow-hidden rounded-2xl border border-line">
-              <div className="aspect-[4/3] bg-soft md:aspect-square" />
+              <div className="aspect-square bg-soft" />
               <div className="space-y-3 p-2 md:p-3">
                 <div className="h-4 w-2/3 rounded bg-soft" />
                 <div className="h-10 rounded bg-soft" />

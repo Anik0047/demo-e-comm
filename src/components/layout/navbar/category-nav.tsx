@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useId, useRef, useState } from "react";
 import { ChevronDown, Menu } from "lucide-react";
 import type { Category } from "@/types/category";
 import { MegaMenu } from "./mega-menu";
@@ -17,6 +17,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
 
 function CategoryNavContent({ categories }: CategoryNavProps) {
   const pathname = usePathname();
+  const menuId = useId();
   const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null);
   const suppressFocusOpen = useRef(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -35,19 +36,19 @@ function CategoryNavContent({ categories }: CategoryNavProps) {
     <nav aria-label="Primary navigation" className="hidden lg:block relative z-20 bg-white border-b border-line font-body" onKeyDown={onMenuKeyDown}>
       <div className="max-w-[1280px] mx-auto px-4 h-12 flex items-center gap-3 text-sm font-medium xl:gap-7">
         <div className="relative group" onMouseEnter={() => setMenuOpenPath(pathname)} onMouseLeave={() => { if (!triggerRef.current?.parentElement?.contains(document.activeElement)) setMenuOpenPath(null); }}>
-          <button ref={triggerRef} type="button" aria-expanded={menuOpen} aria-controls="category-mega-menu" onClick={() => setMenuOpenPath(pathname)} onFocus={() => { if (suppressFocusOpen.current) suppressFocusOpen.current = false; else setMenuOpenPath(pathname); }} className="flex items-center gap-2 h-9 px-4 rounded-lg bg-brand-tint text-brand-strong border border-brand-border">
+          <button ref={triggerRef} type="button" aria-expanded={menuOpen} aria-controls={menuId} onClick={() => setMenuOpenPath(pathname)} onFocus={() => { if (suppressFocusOpen.current) suppressFocusOpen.current = false; else setMenuOpenPath(pathname); }} className="flex items-center gap-2 h-9 px-4 rounded-lg bg-brand-tint text-brand-strong border border-brand-border">
             <Menu className="w-5 h-5" />
             All categories
             <ChevronDown className="w-4 h-4" />
           </button>
-          <MegaMenu categories={categories} activeCategoryId={activeCategory?.id} isOpen={menuOpen} onClose={() => setMenuOpenPath(null)} />
+          <MegaMenu id={menuId} categories={categories} activeCategoryId={activeCategory?.id} isOpen={menuOpen} onClose={() => setMenuOpenPath(null)} />
         </div>
         <Link href="/products" aria-current={pathname === "/products" ? "page" : undefined} className={`hover:text-brand ${pathname === "/products" ? "text-brand-strong" : ""}`}>
           Products
         </Link>
         <Link
           href="/products?promotion=flash-deals"
-          className="flex items-center gap-2 text-sale font-bold"
+          className="flex items-center gap-2 text-sale-strong font-bold"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-sale" />
           Flash deals

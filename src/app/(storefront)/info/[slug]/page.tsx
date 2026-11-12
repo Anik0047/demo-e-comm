@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getPublicInfoPage } from "@/services/public-info-pages";
+import { canonicalMetadata } from "@/lib/seo";
 
 interface PublicInfoPageProps {
   params: Promise<{ slug: string }>;
@@ -11,7 +12,14 @@ interface PublicInfoPageProps {
 export async function generateMetadata({ params }: PublicInfoPageProps): Promise<Metadata> {
   const { slug } = await params;
   const page = getPublicInfoPage(slug);
-  return page ? { title: `${page.title} | Kenakata`, description: page.summary } : {};
+  if (!page) notFound();
+  return {
+    title: { absolute: page.title },
+    description: page.summary,
+    ...canonicalMetadata(`/info/${page.slug}`),
+    openGraph: { title: page.title, description: page.summary, url: `/info/${page.slug}`, type: "website" },
+    twitter: { card: "summary", title: page.title, description: page.summary },
+  };
 }
 
 export default function PublicInfoRoute({ params }: PublicInfoPageProps) {

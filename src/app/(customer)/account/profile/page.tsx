@@ -71,7 +71,7 @@ export default function CustomerProfilePage() {
         <div>
           <label htmlFor="profile-name" className="mb-1.5 block text-sm font-bold">Full name</label>
           <input id="profile-name" name="fullName" className="input" autoComplete="name" maxLength={100} value={values.fullName} aria-invalid={Boolean(errors.fullName)} aria-describedby={errors.fullName ? "profile-name-error" : undefined} onChange={(event) => updateField("fullName", event.target.value)} onBlur={() => validateField("fullName")} />
-          {errors.fullName && <p id="profile-name-error" role="alert" className="mt-1 text-sm text-sale">{errors.fullName}</p>}
+          {errors.fullName && <p id="profile-name-error" role="alert" className="mt-1 text-sm text-sale-strong">{errors.fullName}</p>}
         </div>
         <div>
           <label htmlFor="profile-email" className="mb-1.5 block text-sm font-bold">Email address</label>
@@ -81,7 +81,7 @@ export default function CustomerProfilePage() {
         <div>
           <label htmlFor="profile-phone" className="mb-1.5 block text-sm font-bold">Phone number</label>
           <input id="profile-phone" name="phone" className="input" type="tel" autoComplete="tel" inputMode="tel" maxLength={14} placeholder="01712345678" value={values.phone} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "profile-phone-error" : "profile-phone-help"} onChange={(event) => updateField("phone", event.target.value)} onBlur={() => validateField("phone")} />
-          {errors.phone ? <p id="profile-phone-error" role="alert" className="mt-1 text-sm text-sale">{errors.phone}</p> : <p id="profile-phone-help" className="mt-1 text-sm text-mute">Use a Bangladesh mobile number, such as 01712345678.</p>}
+          {errors.phone ? <p id="profile-phone-error" role="alert" className="mt-1 text-sm text-sale-strong">{errors.phone}</p> : <p id="profile-phone-help" className="mt-1 text-sm text-mute">Use a Bangladesh mobile number, such as 01712345678.</p>}
         </div>
         <button type="submit" className="btn btn-primary btn-md" disabled={busy}>{busy ? "Saving…" : feedback.startsWith("Profile updated") ? <><Check className="size-4" aria-hidden="true" /> Save changes</> : <><Save className="size-4" aria-hidden="true" /> Save changes</>}</button>
       </form>

@@ -20,6 +20,7 @@ export function ProductCompareButton({ product, compact = false }: ProductCompar
     const outcome = updateComparison(product.id);
     if (!outcome.added && outcome.reason === "limit") showToast("info", "You can compare up to three products. Remove one to add another.");
     if (!outcome.added && outcome.reason === "unavailable") showToast("error", "This product is unavailable for comparison.");
+    if (outcome.added) showToast("success", `${product.name} added to comparison.`);
   }
 
   if (selected) {

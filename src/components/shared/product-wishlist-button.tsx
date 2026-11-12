@@ -65,7 +65,7 @@ export function ProductWishlistButton({ productId, productName, className, showA
         aria-pressed={isWishlisted}
         title={`${isWishlisted ? "Remove from" : "Add to"} wishlist`}
         aria-describedby={showAccountGuidance && ready && !isCustomer ? guidanceId : undefined}
-        disabled={!ready || isUpdating || !isCustomer}
+        disabled={!ready || isUpdating}
         onClick={() => void handleToggle()}
       >
         <Heart aria-hidden="true" className="size-5" fill={isWishlisted ? "currentColor" : "none"} />

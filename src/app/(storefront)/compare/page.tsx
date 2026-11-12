@@ -6,8 +6,9 @@ import { getComparableProductCatalog } from "@/services/product-comparison";
 import { getPricingTime } from "@/services/effective-price";
 
 export const metadata: Metadata = {
-  title: "Compare products | Kenakata",
-  description: "Compare product details side by side on Kenakata.",
+  title: "Compare products",
+  description: "Compare sample product details side by side.",
+  robots: { index: false, follow: true },
 };
 
 export default async function ComparePage() {

@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { ProductListing } from "@/components/products/product-listing";
 import { ListingSkeleton } from "@/components/products/listing-states";
 import type { RawListingQuery } from "@/types/catalog";
+import { listingMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Products | Kenakata",
-  description: "Browse products from independent sellers on Kenakata. Discover electronics, fashion, home essentials and flash deals in Bangladesh.",
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<RawListingQuery> }): Promise<Metadata> {
+  return listingMetadata("Products", "Browse sample products from independent seller storefronts in Bangladesh.", "/products", searchParams);
+}
 
 export default function ProductsPage({ searchParams }: { searchParams: Promise<RawListingQuery> }) {
   return (
