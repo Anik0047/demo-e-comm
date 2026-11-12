@@ -6,21 +6,21 @@ import { ListingSkeleton } from "@/components/products/listing-states";
 import { ProductListing } from "@/components/products/product-listing";
 import { getCategoryBySlug } from "@/services/categories";
 import type { RawListingQuery } from "@/types/catalog";
+import { listingMetadata } from "@/lib/seo";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
   searchParams: Promise<RawListingQuery>;
 }
 
-export async function generateMetadata({ params }: Pick<CategoryPageProps, "params">): Promise<Metadata> {
+export const instant = false;
+
+export async function generateMetadata({ params, searchParams }: CategoryPageProps): Promise<Metadata> {
   const { category: slug } = await params;
   const category = await getCategoryBySlug(slug);
-  if (!category || category.level !== 1) return { title: "Category not found" };
+  if (!category || category.level !== 1) notFound();
 
-  return {
-    title: category.name,
-    description: `Browse ${category.name.toLowerCase()} from trusted sellers on Kenakata.`,
-  };
+  return listingMetadata(category.name, `Browse sample ${category.name.toLowerCase()} products in the Kenakata marketplace demo.`, `/category/${category.slug}`, searchParams);
 }
 
 async function MainCategoryContent({ params, searchParams }: CategoryPageProps) {
@@ -63,10 +63,9 @@ async function MainCategoryContent({ params, searchParams }: CategoryPageProps) 
   );
 }
 
-export default function MainCategoryPage(props: CategoryPageProps) {
-  return (
-    <Suspense fallback={<ListingSkeleton />}>
-      <MainCategoryContent {...props} />
-    </Suspense>
-  );
+export default async function MainCategoryPage(props: CategoryPageProps) {
+  const { category: slug } = await props.params;
+  const category = await getCategoryBySlug(slug);
+  if (!category || category.level !== 1) notFound();
+  return <MainCategoryContent {...props} />;
 }

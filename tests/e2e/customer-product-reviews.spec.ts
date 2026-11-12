@@ -34,7 +34,7 @@ test("customer reviews submit, edit once, persist, isolate owners, and reset by 
     Reflect.deleteProperty(window, "__reviewOriginalSetItem");
   });
   await reviews.getByRole("button", { name: "Submit review" }).click();
-  await expect(reviews.getByRole("status")).toHaveText("Your review has been submitted.");
+  await expect(page.getByRole("status").filter({ hasText: "Your review has been submitted." })).toBeVisible();
   await expect(reviews.getByLabel("Your review")).toHaveCount(0);
   await expect(reviews.getByRole("button", { name: "Edit your review" })).toBeVisible();
   await expect(reviews.getByText("Demo Customer", { exact: false })).toBeVisible();
@@ -52,7 +52,7 @@ test("customer reviews submit, edit once, persist, isolate owners, and reset by 
   await restoredReviews.getByRole("radio", { name: "5 stars" }).click();
   await restoredReviews.getByLabel("Your review").fill("Edited: sound stays clear, and the case lasts all week on one charge.");
   await restoredReviews.getByRole("button", { name: "Save changes" }).click();
-  await expect(restoredReviews.getByRole("status")).toHaveText("Your review has been updated.");
+  await expect(page.getByRole("status").filter({ hasText: "Your review has been updated." })).toBeVisible();
   await expect.poll(async () => page.evaluate(() => {
     const state = JSON.parse(localStorage.getItem("kenakata:demo-state") ?? "null");
     return state?.data.productReviews?.map((review: { customerId: string; body: string; rating: number }) => [review.customerId, review.body, review.rating]);

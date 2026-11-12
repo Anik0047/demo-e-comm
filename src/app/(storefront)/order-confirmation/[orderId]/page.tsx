@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import { OrderConfirmationPage } from "@/components/checkout/order-confirmation-page";
 
 export const metadata: Metadata = {
-  title: "Demo order confirmation | Kenakata",
-  description: "View your demo order placement confirmation.",
+  title: "Demo order confirmation",
+  description: "View a sample order confirmation from this frontend demonstration.",
+  robots: { index: false, follow: false },
 };
 
 export default function OrderConfirmationRoute({ params }: { params: Promise<{ orderId: string }> }) {

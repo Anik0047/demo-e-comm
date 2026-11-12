@@ -160,7 +160,7 @@
   .btn-primary { @apply bg-brand text-white hover:bg-brand-strong; }
   .btn-outline { @apply border border-brand bg-canvas text-brand-strong hover:bg-brand-tint; }
   .btn-ghost { @apply bg-transparent text-ink hover:bg-soft; }
-  .btn-sale { @apply bg-sale text-white hover:bg-sale-strong; }
+  .btn-sale { @apply bg-sale-strong text-white hover:bg-sale-strong; }
   .btn-dark { @apply bg-ink text-white hover:bg-brand-strong; }
   .btn:disabled { @apply bg-soft text-mute border-transparent; }
 
@@ -170,7 +170,8 @@
     transition: border-color var(--dur) var(--ease);
   }
   .input:hover { @apply border-mute; }
-  .input:focus { @apply border-brand outline-none; }
+  .input:focus { @apply border-brand; }
+  .input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .input-error { @apply border-sale; }
 
   /* Cards */
@@ -187,7 +188,7 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold;
   }
   .badge-brand { @apply bg-brand-tint text-brand-strong; }
-  .badge-sale { @apply bg-sale text-white; }
+  .badge-sale { @apply bg-sale-strong text-white; }
   .badge-warning { @apply bg-accent text-ink; }
   .badge-info { @apply bg-info text-info-ink; }
   .badge-danger { @apply bg-blush text-blush-ink; }
@@ -243,10 +244,13 @@ body::before {
 @layer components {
   .menu-link { display: block; padding: 7px 10px; border-radius: 8px; font-size: 14px; }
 }
-.menu-link:hover, .menu-link:focus {
+.menu-link:hover, .menu-link:focus-visible {
   background: var(--brand-tint);
   color: var(--brand-strong);
-  outline: none;
+}
+.menu-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 
 /* Banner story-style progress bars */

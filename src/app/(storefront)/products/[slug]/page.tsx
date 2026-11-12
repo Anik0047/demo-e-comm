@@ -14,6 +14,7 @@ import { getProductGallery } from "@/services/product-gallery";
 import { getPricingTime } from "@/services/effective-price";
 import { getRelatedProducts } from "@/services/related-products";
 import type { ProductCardData } from "@/types/product";
+import { absoluteSiteUrl, jsonLd } from "@/lib/seo";
 
 interface ProductDetailsPageProps {
   params: Promise<{ slug: string }>;
@@ -36,7 +37,21 @@ export async function generateMetadata({
     description:
       details.product.metaDescription ||
       details.product.shortDescription ||
-      undefined,
+      `Explore ${details.product.name} in the Kenakata marketplace demo.`,
+    alternates: { canonical: `/products/${details.product.slug}` },
+    openGraph: {
+      title: details.product.metaTitle || details.product.name,
+      description: details.product.metaDescription || details.product.shortDescription || `Explore ${details.product.name} in the Kenakata marketplace demo.`,
+      url: `/products/${details.product.slug}`,
+      type: "website",
+      ...(details.product.mainImage.url ? { images: [{ url: details.product.mainImage.url, alt: details.product.mainImage.alt || details.product.name }] } : {}),
+    },
+    twitter: {
+      card: details.product.mainImage.url ? "summary_large_image" : "summary",
+      title: details.product.metaTitle || details.product.name,
+      description: details.product.metaDescription || details.product.shortDescription || `Explore ${details.product.name} in the Kenakata marketplace demo.`,
+      ...(details.product.mainImage.url ? { images: [details.product.mainImage.url] } : {}),
+    },
   };
 }
 
@@ -85,6 +100,16 @@ function ProductDetails({
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.shortDescription || product.description,
+        sku: product.sku,
+        url: absoluteSiteUrl(`/products/${product.slug}`),
+        ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+        ...(images[0]?.url ? { image: images.map((image) => image.url).filter(Boolean) } : {}),
+      }) }} />
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-mute">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <li>

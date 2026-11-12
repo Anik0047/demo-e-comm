@@ -52,7 +52,7 @@ export function ProductComparison({ products }: ProductComparisonProps) {
         <p className="mt-2 text-sm text-mute">Add up to three products from their details pages to see them side by side.</p>
         <Link className="btn btn-primary btn-md mt-5" href="/products">Browse products</Link>
       </div> : <>
-        <p className="mt-5 text-sm text-mute" role="status" aria-live="polite">{selected.length} of {limit} products selected.{selected.length < limit ? ` Add ${limit - selected.length} more for a fuller comparison.` : ""}</p>
+        <p className="mt-5 text-sm text-mute" role="status">{selected.length} of {limit} products selected.{selected.length < limit ? ` Add ${limit - selected.length} more for a fuller comparison.` : ""}</p>
         <div className="mt-5 overflow-x-auto rounded-2xl border border-line" role="region" aria-label="Product comparison table" tabIndex={0}>
           <table className="w-full min-w-[760px] table-fixed border-collapse text-left text-sm">
             <colgroup><col className="w-36 sm:w-48" /><col /><col /><col /></colgroup>
@@ -64,7 +64,7 @@ export function ProductComparison({ products }: ProductComparisonProps) {
                   return <th key={product?.id ?? `empty-${index}`} scope="col" data-product-id={product?.id} className="min-w-0 border-b border-l border-line p-3 sm:p-4">
                     {product ? <div className="min-w-0">
                       <div className="relative mb-3 grid aspect-square place-items-center overflow-hidden rounded-xl bg-white">
-                        {product.image.url ? <Image src={product.image.url} alt={product.image.alt || product.name} fill sizes="(min-width: 768px) 220px, 180px" className="object-contain" /> : <ImageIcon aria-hidden="true" className="size-9 text-mute" />}
+                        {product.image.url ? <Image src={product.image.url} alt={product.image.alt || product.name} fill sizes="(min-width: 1024px) calc((min(1248px, 100vw - 32px) - 288px) / 3), 157px" className="object-contain" /> : <ImageIcon aria-hidden="true" className="size-9 text-mute" />}
                       </div>
                       <Link href={`/products/${product.slug}`} className="block min-h-11 font-bold text-ink hover:text-brand-strong hover:underline">{product.name}</Link>
                       <button type="button" className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-sale-strong hover:underline" aria-label={`Remove ${product.name} from comparison`} onClick={() => handleRemove(product.id, product.name)}>

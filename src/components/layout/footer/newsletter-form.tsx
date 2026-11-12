@@ -42,7 +42,7 @@ export function NewsletterForm({ content }: NewsletterFormProps) {
         <button type="submit" className="btn btn-primary btn-md shrink-0">{content.submitLabel}</button>
       </form>
       <div id={`${id}-message`} aria-live="polite" aria-atomic="true" className="mt-2 min-h-5 text-sm">
-        {status === "error" && <p className="text-sale">{content.errorMessage}</p>}
+        {status === "error" && <p className="text-sale-strong">{content.errorMessage}</p>}
         {status === "success" && <p className="text-brand-strong">{content.successMessage}</p>}
       </div>
     </div>

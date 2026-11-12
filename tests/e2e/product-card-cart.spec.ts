@@ -25,17 +25,16 @@ test("wishlist heart stays at the image top-right with responsive image proporti
   const card = cardFor(page, "Wireless Earbuds Pro");
   const image = card.locator("a > div").first();
   const wishlist = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
-  for (const [width, square] of [[360, false], [768, true], [1280, true]] as const) {
+  for (const width of [360, 768, 1280] as const) {
     await page.setViewportSize({ width, height: 900 });
     const imageBox = await image.boundingBox();
     const heartBox = await wishlist.boundingBox();
     expect(imageBox).not.toBeNull();
     expect(heartBox).not.toBeNull();
-    if (square) expect(Math.abs((imageBox?.width ?? 0) - (imageBox?.height ?? 0))).toBeLessThanOrEqual(1);
-    else expect(Math.abs((imageBox?.width ?? 0) / (imageBox?.height ?? 1) - 4 / 3)).toBeLessThan(0.02);
+    expect(Math.abs((imageBox?.width ?? 0) - (imageBox?.height ?? 0))).toBeLessThanOrEqual(1);
     expect((heartBox?.x ?? 0) + (heartBox?.width ?? 0)).toBeLessThanOrEqual((imageBox?.x ?? 0) + (imageBox?.width ?? 0) - 4);
     expect((heartBox?.y ?? 0)).toBeGreaterThanOrEqual(imageBox?.y ?? 0);
-    expect((heartBox?.y ?? 0)).toBeLessThan((imageBox?.y ?? 0) + 8);
+    expect(Math.abs((heartBox?.y ?? 0) - ((imageBox?.y ?? 0) + 8))).toBeLessThanOrEqual(1);
     const dimensions = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth }));
     expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport);
   }
@@ -51,6 +50,23 @@ test("card toast feedback is announced without changing card layout", async ({ p
   const titleAfter = await title.boundingBox();
   expect(titleAfter?.y).toBe(titleBefore?.y);
   await expect(page.getByRole("button", { name: "Dismiss notification" })).toBeVisible();
+});
+
+test("non-customer demo roles get wishlist guidance without changing customer data", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Demo Admin Admin demo account" }).click();
+  await page.goto("/products");
+
+  const card = cardFor(page, "Wireless Earbuds Pro");
+  const wishlist = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
+  await expect(wishlist).toBeEnabled();
+  await wishlist.click();
+  await expect(page.getByRole("status").getByText("Switch to a customer demo account to save products to your wishlist.")).toBeVisible();
+
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("kenakata:demo-state") ?? "null") as {
+    data: { wishlists: Array<{ customerId: string; productIds: string[] }> };
+  });
+  expect(stored.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds).not.toContain("prod-wireless-earbuds-pro");
 });
 
 test("product card opens its canonical PDP", async ({ page }) => {

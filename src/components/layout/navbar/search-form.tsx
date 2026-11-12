@@ -114,6 +114,7 @@ export function SearchForm({ mobile = false, categories, searchProducts, popular
           key={key}
           id={`${listId}-option-${index}`}
           type="button"
+          tabIndex={-1}
           role="option"
           aria-selected={activeIndex === index}
           onMouseEnter={() => setActiveIndex(index)}
@@ -128,7 +129,7 @@ export function SearchForm({ mobile = false, categories, searchProducts, popular
     return (
       <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border border-line bg-white py-2 shadow-lg">
         {!normalizedQuery && <p role="presentation" className="px-4 pb-1 pt-2 text-xs font-bold text-mute">Popular searches</p>}
-        {normalizedQuery && !productMatches.length && (!categoryMatches.length || selectedCategory) && <p role="status" aria-live="polite" className="px-4 py-3 text-sm text-mute">{selectedCategory ? `No matching products in ${mainCategories.find((category) => category.slug === selectedCategory)?.name ?? "this category"} for “${normalizedQuery}”.` : `No matching suggestions for “${normalizedQuery}”.`}</p>}
+        {normalizedQuery && !productMatches.length && (!categoryMatches.length || selectedCategory) && <p role="status" className="px-4 py-3 text-sm text-mute">{selectedCategory ? `No matching products in ${mainCategories.find((category) => category.slug === selectedCategory)?.name ?? "this category"} for “${normalizedQuery}”.` : `No matching suggestions for “${normalizedQuery}”.`}</p>}
         <div id={listId} role="listbox" aria-label={normalizedQuery ? "Search suggestions" : "Popular searches"}>
           {!normalizedQuery ? items.map((item, index) => option(item, <><Clock3 aria-hidden="true" className="size-4 shrink-0 text-mute" /><span className="min-w-0 flex-1 truncate">{item.value as string}</span><ArrowRight aria-hidden="true" className="size-4 text-mute" /></>, `popular-${index}`)) : <>
             {productMatches.length > 0 && <div role="group" aria-label="Products">

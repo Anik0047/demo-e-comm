@@ -26,6 +26,10 @@ export function getCatalogOptions(data: CatalogDataset = catalog): ListingOption
   return optionsFrom(data, validateCatalog(data));
 }
 
+export function getCatalogProducts(): readonly CatalogDataset["products"][number][] {
+  return catalog.products;
+}
+
 export function getGlobalSearchData(data: CatalogDataset = catalog) {
   const categoryById = new Map(data.categories.map((category) => [category.id, category]));
   const mainCategoryFor = (categoryId: string) => {

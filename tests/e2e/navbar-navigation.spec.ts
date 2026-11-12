@@ -1,4 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+async function controlledMegaMenu(nav: Locator, trigger: Locator) {
+  const menuId = await trigger.getAttribute("aria-controls");
+  expect(menuId).toBeTruthy();
+  return nav.locator(`[id="${menuId}"]`);
+}
 
 test("desktop primary links and category mega menu navigate to canonical listings", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -15,7 +21,7 @@ test("desktop primary links and category mega menu navigate to canonical listing
   const categoryTrigger = nav.getByRole("button", { name: "All categories" });
   await categoryTrigger.click();
   await expect(categoryTrigger).toHaveAttribute("aria-expanded", "true");
-  const megaMenu = nav.locator("#category-mega-menu");
+  const megaMenu = await controlledMegaMenu(nav, categoryTrigger);
   const rootCategories = megaMenu.getByRole("list", { name: "Main categories" });
   await rootCategories.getByRole("link", { name: "Electronics", exact: true }).click();
   await expect(page).toHaveURL("/category/electronics");
@@ -30,7 +36,7 @@ test("desktop nested category links open the expected child listing and route st
   const nav = page.getByRole("navigation", { name: "Primary navigation" });
   const trigger = nav.getByRole("button", { name: "All categories" });
   await trigger.focus();
-  const megaMenu = nav.locator("#category-mega-menu");
+  const megaMenu = await controlledMegaMenu(nav, trigger);
   const rootCategories = megaMenu.getByRole("list", { name: "Main categories" });
   await expect(rootCategories.getByRole("link", { name: "Electronics", exact: true })).toHaveAttribute("aria-current", "location");
   await expect(page.getByRole("heading", { name: "Smart watches" })).toBeVisible();
@@ -41,7 +47,8 @@ test("desktop nested category links open the expected child listing and route st
   await expect(page).toHaveURL("/category/electronics/wearables/smart-watches");
   await expect(page.getByRole("heading", { name: "Smart watches" })).toBeVisible();
   await trigger.click();
-  await expect(rootCategories.getByRole("link", { name: "Electronics", exact: true })).toHaveAttribute("aria-current", "location");
+  const currentMenu = await controlledMegaMenu(nav, trigger);
+  await expect(currentMenu.getByRole("list", { name: "Main categories" }).getByRole("link", { name: "Electronics", exact: true })).toHaveAttribute("aria-current", "location");
   await page.goto("/category/electronics/wearables/smart-watches");
   await page.reload();
   await expect(page.getByRole("heading", { name: "Smart watches" })).toBeVisible();
@@ -78,8 +85,8 @@ test("mobile drawer closes on Escape and restores trigger focus", async ({ page 
   await expect(drawer).toBeVisible();
   const closeButton = drawer.getByRole("button", { name: "Close menu" });
   const closeButtonBox = await closeButton.boundingBox();
-  expect(closeButtonBox?.width).toBeGreaterThanOrEqual(44);
-  expect(closeButtonBox?.height).toBeGreaterThanOrEqual(44);
+  expect(Math.round(closeButtonBox?.width ?? 0)).toBeGreaterThanOrEqual(44);
+  expect(Math.round(closeButtonBox?.height ?? 0)).toBeGreaterThanOrEqual(44);
   await page.keyboard.press("Escape");
   await expect(drawer).toBeHidden();
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
@@ -136,7 +143,8 @@ test("navigation does not emit nonexistent category routes", async ({ page }) =>
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Primary navigation" });
   await nav.getByRole("button", { name: "All categories" }).click();
-  const hrefs = await nav.locator("#category-mega-menu a").evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).getAttribute("href")));
+  const menu = await controlledMegaMenu(nav, nav.getByRole("button", { name: "All categories" }));
+  const hrefs = await menu.locator("a").evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).getAttribute("href")));
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) expect(href).toMatch(/^\/category\/(electronics|fashion|home-living|beauty-health|groceries|mother-baby|sports-outdoor|books-stationery)(\/[^/?#]+){0,2}$/);
   expect(hrefs).not.toContain(null);

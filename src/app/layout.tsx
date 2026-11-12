@@ -19,11 +19,24 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://kenakata.com"),
   title: {
-    default: "Kenakata | Multi-vendor marketplace",
+    default: "Bangladesh marketplace demo",
     template: "%s | Kenakata",
   },
-  description: "Shop from thousands of trusted vendors across Bangladesh.",
+  description: "Explore a frontend marketplace demonstration with sample products and independent seller storefronts in Bangladesh.",
+  openGraph: {
+    type: "website",
+    siteName: "Kenakata",
+    title: "Bangladesh marketplace demo",
+    description: "Explore a frontend marketplace demonstration with sample products and independent seller storefronts in Bangladesh.",
+    locale: "en_BD",
+  },
+  twitter: {
+    card: "summary",
+    title: "Bangladesh marketplace demo",
+    description: "Explore a frontend marketplace demonstration with sample products and independent seller storefronts in Bangladesh.",
+  },
 };
 
 export const viewport: Viewport = {

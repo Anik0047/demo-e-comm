@@ -35,7 +35,7 @@ export function MobileFilterDialog({ state, options, onClose, onApply, categoryL
     }}>
       <div className="mb-5 flex items-center justify-between gap-3"><h2 id="filter-dialog-title" className="text-xl font-bold">Filters</h2><button type="button" aria-label="Close filters" className="grid size-11 place-items-center rounded-full hover:bg-soft" onClick={onClose}><X aria-hidden="true" className="size-5" /></button></div>
       <FilterFields values={filters} options={options} {...prices} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope} showVendorFilter={showVendorFilter} onChange={(values) => setFilters((current) => ({ ...current, ...values }))} onPriceChange={(key, value) => setPrices((current) => ({ ...current, [key]: value }))} />
-      {error && <p role="alert" className="mt-3 text-sm text-sale">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-sale-strong">{error}</p>}
       <div className="mt-6 flex gap-3"><button type="button" className="btn btn-outline btn-md flex-1" onClick={onClose}>Cancel</button><button type="submit" className="btn btn-primary btn-md flex-1">Apply filters</button></div>
     </form>
   </dialog>;

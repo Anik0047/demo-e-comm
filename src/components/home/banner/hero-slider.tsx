@@ -97,15 +97,21 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             role="group"
             aria-roledescription="slide"
             aria-label={`${slideIndex + 1} of ${slides.length}`}
+            aria-hidden={slideIndex !== index}
+            inert={slideIndex !== index}
           >
             <div className="h-full flex items-center pt-6 pb-16 px-6 sm:px-12 lg:px-8 xl:px-12 gap-6">
               <div className="flex-1">
                 <span className={slide.tagClasses}>{slide.tag}</span>
-                <h2 className="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">
+                {slideIndex === index ? <h1 className="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">
                   {slide.headingLines.map((line, i) =>
                     i === 0 ? line : [<br key={i} />, line]
                   )}
-                </h2>
+                </h1> : <h2 className="font-head font-extrabold text-3xl sm:text-4xl xl:text-5xl leading-tight">
+                  {slide.headingLines.map((line, i) =>
+                    i === 0 ? line : [<br key={i} />, line]
+                  )}
+                </h2>}
                 <p className="mt-3 text-sm sm:text-base">{slide.paragraph}</p>
                 <Link href={slide.ctaHref} className={slide.ctaClasses}>
                   {slide.ctaLabel}

@@ -79,7 +79,15 @@ test("related cards retain wishlist access and move comparison to product detail
   await expect(addToWishlist).toBeEnabled();
   await addToWishlist.click();
   await expect(card.getByRole("button", { name: `Remove ${productName} from wishlist`, exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(card.getByRole("status").getByText(`${productName} added to your wishlist.`, { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText(`${productName} added to your wishlist.`, { exact: true })).toBeVisible();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("kenakata:demo-state") ?? "null") as {
+    data: { wishlists: Array<{ customerId: string; productIds: string[] }> };
+  });
+  const productHref = await productLink.getAttribute("href");
+  const productSlug = productHref?.split("/").at(-1);
+  const productId = productSlug ? `prod-${productSlug}` : null;
+  expect(productId).toBeTruthy();
+  expect(saved.data.wishlists.find(({ customerId }) => customerId === "customer-demo")?.productIds).toContain(productId);
 
   await expect(card.getByRole("button", { name: `Add ${productName} to cart`, exact: true })).toHaveCount(0);
   await expect(card.getByRole("button", { name: `Compare ${productName}`, exact: true })).toHaveCount(0);

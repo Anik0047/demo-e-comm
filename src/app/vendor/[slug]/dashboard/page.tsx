@@ -1,5 +1,12 @@
 import { Suspense } from "react";
 import { VendorDashboardContent } from "@/components/vendor/vendor-dashboard-content";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Vendor dashboard",
+  description: "Vendor management interface for the Kenakata frontend demonstration.",
+  robots: { index: false, follow: false },
+};
 
 interface VendorDashboardPageProps {
   params: Promise<{ slug: string }>;

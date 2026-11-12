@@ -18,9 +18,9 @@ const tones = {
   },
   blush: {
     card: "bg-blush text-blush-ink",
-    pill: "bg-sale text-white",
+    pill: "bg-sale-strong text-white",
     art: "before:bg-canvas text-blush-ink",
-    cta: "bg-sale text-white hover:bg-sale-strong group-hover:bg-sale-strong",
+    cta: "bg-sale-strong text-white hover:bg-sale-strong group-hover:bg-sale-strong",
   },
 } satisfies Record<PromoTone, { card: string; pill: string; art: string; cta: string }>;
 

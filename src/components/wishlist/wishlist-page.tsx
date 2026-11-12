@@ -80,7 +80,7 @@ export function WishlistPage() {
               return (
                 <li key={productId} className="card flex min-w-0 flex-col gap-4 p-4 sm:flex-row sm:items-center">
                   {product?.mainImage.url ? (
-                    <Image src={product.mainImage.url} alt={product.mainImage.alt} width={144} height={144} loading={index === 0 ? "eager" : "lazy"} className="aspect-[4/3] w-full shrink-0 rounded-lg bg-soft object-cover sm:size-32 sm:aspect-square" />
+                    <Image src={product.mainImage.url} alt={product.mainImage.alt} width={144} height={144} sizes="(min-width: 640px) 128px, calc(100vw - 64px)" loading={index === 0 ? "eager" : "lazy"} className="aspect-[4/3] w-full shrink-0 rounded-lg bg-soft object-cover sm:size-32 sm:aspect-square" />
                   ) : (
                     <div aria-hidden="true" className="grid aspect-[4/3] w-full shrink-0 place-items-center rounded-lg bg-soft text-mute sm:size-32 sm:aspect-square">
                       <ShoppingBag className="size-8" />

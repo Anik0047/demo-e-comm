@@ -21,17 +21,30 @@ export default function CustomerPreferencesPage() {
   const [errors, setErrors] = useState<CustomerPreferencesErrors>({});
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const resetTriggerRef = useRef<HTMLButtonElement>(null);
   const cancelResetRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
+
+  useEffect(() => {
     if (!resetDialogOpen) return;
+    const trigger = resetTriggerRef.current;
     cancelResetRef.current?.focus();
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setResetDialogOpen(false);
+      if (event.key === "Escape" && !busyRef.current) {
+        event.preventDefault();
+        setResetDialogOpen(false);
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+      trigger?.focus({ preventScroll: true });
+    };
   }, [resetDialogOpen]);
 
   if (!ready) return <section className="card min-w-0 p-5 sm:p-7" role="status">Loading your account preferences…</section>;
@@ -99,7 +112,7 @@ export default function CustomerPreferencesPage() {
             Opt in to promotional updates in this demo
           </label>
           <p className="mt-1 text-sm text-mute">Saved state: <span className="font-bold text-ink">{activeCustomer.preferences.promotionalUpdates ? "Opted in" : "Opted out"}</span>. This checkbox stores your choice in this browser; it does not sign you up for messages.</p>
-          {errors.promotionalUpdates && <p id="promotional-updates-error" role="alert" className="mt-1 text-sm text-sale">{errors.promotionalUpdates}</p>}
+          {errors.promotionalUpdates && <p id="promotional-updates-error" role="alert" className="mt-1 text-sm text-sale-strong">{errors.promotionalUpdates}</p>}
           <p id="promotional-updates-help" className="mt-1 text-sm text-mute">Only the saved choice appears above. No real offers or notifications will be delivered.</p>
         </fieldset>
 
@@ -116,7 +129,7 @@ export default function CustomerPreferencesPage() {
               <span className="min-w-0"><span className="block font-bold">Compact grid</span><span className="mt-1 block text-xs font-normal text-mute">More cards · up to 5 columns</span><span aria-hidden="true" className="mt-3 grid max-w-40 grid-cols-4 gap-1"><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /><i className="aspect-square rounded border border-brand-border bg-white" /></span></span>
             </label>
           </div>
-          {errors.productGridDensity && <p id="grid-density-error" role="alert" className="mt-2 text-sm text-sale">{errors.productGridDensity}</p>}
+          {errors.productGridDensity && <p id="grid-density-error" role="alert" className="mt-2 text-sm text-sale-strong">{errors.productGridDensity}</p>}
         </fieldset>
 
         <button type="submit" className="btn btn-primary btn-md" disabled={busy}>{busy ? "Saving…" : feedback.startsWith("Preferences saved") ? <><Check className="size-4" aria-hidden="true" /> Save preferences</> : <><Save className="size-4" aria-hidden="true" /> Save preferences</>}</button>
@@ -127,7 +140,7 @@ export default function CustomerPreferencesPage() {
       <section className="mt-8 max-w-2xl border-t border-line pt-6" aria-labelledby="demo-reset-title">
         <h3 id="demo-reset-title" className="font-head text-lg font-bold">Customer demo data</h3>
         <p className="mt-1 text-sm text-mute">Clear the local shopping activity and restore this customer’s demo profile and preferences.</p>
-        <button type="button" className="btn btn-sale btn-md mt-4" disabled={busy} onClick={() => setResetDialogOpen(true)}>
+        <button ref={resetTriggerRef} type="button" className="btn btn-sale btn-md mt-4" disabled={busy} onClick={() => setResetDialogOpen(true)}>
           <RotateCcw className="size-4" aria-hidden="true" /> Reset my demo data
         </button>
       </section>
@@ -135,9 +148,11 @@ export default function CustomerPreferencesPage() {
       {resetDialogOpen && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/50 p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setResetDialogOpen(false); }}>
         <section role="alertdialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-description" className="w-full max-w-lg rounded-2xl border border-line bg-canvas p-5 shadow-lg sm:p-6" onKeyDown={(event) => {
           if (event.key !== "Tab") return;
-          const controls = event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)");
+          const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])"));
           const first = controls[0];
           const last = controls[controls.length - 1];
+          const activeIsInside = event.currentTarget.contains(document.activeElement);
+          if (!activeIsInside) { event.preventDefault(); (event.shiftKey ? last : first)?.focus(); return; }
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         }}>

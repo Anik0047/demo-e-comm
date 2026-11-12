@@ -100,6 +100,6 @@ test("mobile reset stays within the viewport and storage failure does not report
   });
   await page.getByRole("button", { name: "Reset my demo data" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Permanently reset my data" }).click();
-  await expect(page.locator("p[role='alert']")).toContainText("Reset couldn’t be saved because browser storage is unavailable");
+  await expect(page.getByRole("alert").filter({ hasText: "Reset couldn’t be saved" })).toContainText("Reset couldn’t be saved because browser storage is unavailable");
   expect(await page.evaluate(() => localStorage.getItem("kenakata:demo-state"))).toBe(before);
 });

@@ -16,11 +16,10 @@ export function ToastViewport() {
   const Icon = toast.kind === "success" ? Check : toast.kind === "error" ? TriangleAlert : Info;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 sm:bottom-6" aria-live="off">
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[70] flex justify-center px-4 sm:bottom-6">
       <div
         key={toast.id}
         role={toast.kind === "error" ? "alert" : "status"}
-        aria-live={toast.kind === "error" ? "assertive" : "polite"}
         aria-atomic="true"
         className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border p-4 shadow-lg ${styles[toast.kind]}`}
       >

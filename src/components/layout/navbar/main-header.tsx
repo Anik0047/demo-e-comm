@@ -62,7 +62,7 @@ export function MainHeader({
             aria-label={wishlistCount === null ? "Wishlist" : `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`}
           >
             <Heart className="w-6 h-6" />
-            {wishlistCount !== null && <span aria-hidden="true" className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-sale text-white text-[11px] font-bold grid place-items-center">
+            {wishlistCount !== null && <span aria-hidden="true" className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-sale-strong text-white text-xs font-bold grid place-items-center">
               {wishlistCount}
             </span>}
           </Link>
