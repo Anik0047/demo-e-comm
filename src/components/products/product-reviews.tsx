@@ -17,6 +17,7 @@ import {
   selectHydrationReady,
 } from "@/services/demo-state-store";
 import type { DemoProductReview } from "@/types/demo-state";
+import { showToast } from "@/services/toast";
 
 interface ProductReviewsProps {
   productId: string;
@@ -63,7 +64,7 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
   const [rating, setRating] = useState<number | null>(null);
   const [body, setBody] = useState("");
   const [feedback, setFeedback] = useState<{
-    kind: "success" | "error";
+    kind: "error";
     message: string;
   } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -134,12 +135,7 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
           { scroll: false },
         );
       }
-      setFeedback({
-        kind: "success",
-        message: result.created
-          ? "Your review has been submitted."
-          : "Your review has been updated.",
-      });
+      showToast("success", result.created ? "Your review has been submitted." : "Your review has been updated.");
     } catch {
       setFeedback({
         kind: "error",
@@ -288,8 +284,8 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
                 {feedback && (
                   <p
                     id="review-feedback"
-                    role={feedback.kind === "error" ? "alert" : "status"}
-                    className={`text-sm font-medium ${feedback.kind === "success" ? "text-brand-strong" : "text-sale-strong"}`}
+                    role="alert"
+                    className="text-sm font-medium text-sale-strong"
                   >
                     {feedback.message}
                   </p>
@@ -305,11 +301,6 @@ function ProductReviewsContent({ productId }: ProductReviewsProps) {
               Edit your review
             </button>
           ) : null}
-          {feedback?.kind === "success" && !editorVisible && (
-            <p role="status" className="mt-3 text-sm font-medium text-brand-strong">
-              {feedback.message}
-            </p>
-          )}
         </div>
       ) : hydrationReady ? (
         <p className="mt-5 rounded-xl border border-info bg-info p-4 text-sm text-info-ink">

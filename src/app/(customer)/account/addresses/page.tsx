@@ -14,6 +14,7 @@ import {
   type CustomerAddressInput,
 } from "@/services/customer-addresses";
 import { demoStateStore, selectActiveAccount, selectDemoSnapshot, selectHydrationReady } from "@/services/demo-state-store";
+import { showToast } from "@/services/toast";
 
 const emptyAddress: CustomerAddressInput = {
   label: "Home",
@@ -39,7 +40,6 @@ export default function CustomerAddressesPage() {
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [values, setValues] = useState<CustomerAddressInput>(emptyAddress);
   const [errors, setErrors] = useState<CustomerAddressFieldErrors>({});
-  const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
 
   if (!ready) return <section className="card min-w-0 p-5 sm:p-7" role="status">Loading your saved addresses…</section>;
@@ -50,7 +50,6 @@ export default function CustomerAddressesPage() {
     setEditingAddressId(null);
     setValues({ ...emptyAddress, recipientName: activeCustomer.fullName, phone: activeCustomer.phone });
     setErrors({});
-    setFeedback("");
     setFormOpen(true);
   }
 
@@ -60,14 +59,12 @@ export default function CustomerAddressesPage() {
     setEditingAddressId(address.id);
     setValues({ ...address });
     setErrors({});
-    setFeedback("");
     setFormOpen(true);
   }
 
   function changeField(field: keyof CustomerAddressInput, value: string | boolean | null) {
     setValues((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
-    setFeedback("");
   }
 
   function validateField(field: keyof CustomerAddressInput) {
@@ -80,7 +77,6 @@ export default function CustomerAddressesPage() {
     const validation = validateCustomerAddress(values);
     if (!validation.ok) {
       setErrors(validation.errors);
-      setFeedback("");
       return;
     }
     setBusy(true);
@@ -89,11 +85,12 @@ export default function CustomerAddressesPage() {
       : await addCustomerAddress(demoStateStore, activeCustomer.id, validation.value);
     setBusy(false);
     if (!result.ok) {
-      setFeedback(result.reason === "customer_required"
+      const message = result.reason === "customer_required"
         ? "Switch to a customer demo account before saving addresses."
         : result.reason === "address_missing"
           ? "That address is no longer available. Refresh the list and try again."
-          : "The address couldn’t be saved. Check the fields and try again.");
+          : "The address couldn’t be saved. Check the fields and try again.";
+      showToast("error", message);
       if (result.errors) setErrors(result.errors);
       return;
     }
@@ -101,21 +98,22 @@ export default function CustomerAddressesPage() {
     setEditingAddressId(null);
     setValues(emptyAddress);
     setErrors({});
-    setFeedback(result.persisted
+    const message = result.persisted
       ? editingAddressId ? "Address updated." : "Address saved."
-      : "Address updated for this session, but browser storage is unavailable.");
+      : "Address updated for this session, but browser storage is unavailable.";
+    showToast(result.persisted ? "success" : "info", message);
     const returnTo = new URLSearchParams(window.location.search).get("returnTo");
     if (returnTo === "/checkout") router.push("/checkout");
   }
 
   async function runAddressAction(action: () => ReturnType<typeof deleteCustomerAddress>, successMessage: string) {
     setBusy(true);
-    setFeedback("");
     const result = await action();
     setBusy(false);
-    setFeedback(result.ok
+    const message = result.ok
       ? result.persisted ? successMessage : `${successMessage} Browser storage is unavailable, so it won’t remain after this session.`
-      : result.reason === "customer_required" ? "Switch to a customer demo account before changing addresses." : "That address is no longer available.");
+      : result.reason === "customer_required" ? "Switch to a customer demo account before changing addresses." : "That address is no longer available.";
+    showToast(result.ok ? result.persisted ? "success" : "info" : "error", message);
   }
 
   return (
@@ -128,7 +126,6 @@ export default function CustomerAddressesPage() {
         {!formOpen && <button type="button" className="btn btn-primary btn-sm shrink-0" onClick={openAddForm}><Plus className="size-4" aria-hidden="true" /> Add address</button>}
       </div>
 
-      {feedback && <p role={feedback.includes("couldn’t") || feedback.includes("Switch") || feedback.includes("no longer") ? "alert" : "status"} aria-live="polite" className={`mt-4 text-sm font-medium ${feedback.includes("couldn’t") || feedback.includes("Switch") || feedback.includes("no longer") ? "text-sale-strong" : "text-brand-strong"}`}>{feedback}</p>}
 
       {formOpen && <form className="mt-6 rounded-xl border border-line bg-soft p-4 sm:p-5" noValidate onSubmit={(event) => void submitAddress(event)}>
         <div className="flex flex-wrap items-center justify-between gap-3">

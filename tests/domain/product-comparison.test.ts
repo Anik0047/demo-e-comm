@@ -25,6 +25,11 @@ test("stored IDs normalize against active canonical products and support removal
 });
 
 test("comparison resolves current canonical prices, orderable stock, category, vendor, and specifications", () => {
+  const canonicalIds = [...getComparableProductIds()];
+  for (let index = 0; index < canonicalIds.length; index += 3) {
+    const selection = canonicalIds.slice(index, index + 3);
+    assert.deepEqual(getComparableProducts(selection).map(({ id }) => id), selection);
+  }
   const items = getComparableProducts(["prod-wireless-earbuds-pro", "prod-cotton-panjabi"], Date.parse("2026-11-10T12:00:00.000Z"));
   assert.equal(items[0]?.price, 2450);
   assert.equal(items[0]?.vendorName, "TechHaven");

@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/utils";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { selectActiveAccount, selectActiveAccountId, selectDemoSnapshot, demoStateStore } from "@/services/demo-state-store";
 import { clearCart, removeCartItem, selectCartSummary, updateCartItemQuantity } from "@/services/demo-cart";
+import { showToast } from "@/services/toast";
 
 const issueMessages = {
   product_unavailable: "This product is no longer available.",
@@ -23,23 +24,21 @@ export function CartPage() {
   const snapshot = useDemoState(selectDemoSnapshot);
   const activeAccountId = useDemoState(selectActiveAccountId);
   const account = useDemoState(selectActiveAccount);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const summary = useMemo(() => snapshot && activeAccountId ? selectCartSummary(snapshot, activeAccountId) : null, [snapshot, activeAccountId]);
   const isCustomer = account?.role === "customer" && account.customerId !== null;
 
   async function run(action: () => ReturnType<typeof clearCart>, success: string) {
     setBusy(true);
-    setFeedback(null);
     try {
       const result = await action();
       if (!result.ok || !result.result.ok) {
-        setFeedback({ type: "error", message: "Your cart could not be updated. Please try again." });
+        showToast("error", "Your cart could not be updated. Please try again.");
       } else {
-        setFeedback({ type: "success", message: success });
+        showToast("success", success);
       }
     } catch {
-      setFeedback({ type: "error", message: "Your cart could not be updated. Please try again." });
+      showToast("error", "Your cart could not be updated. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -74,7 +73,6 @@ export function CartPage() {
         </div>
       ) : (
         <>
-          {feedback && <p role={feedback.type === "error" ? "alert" : "status"} className={`mb-4 text-sm font-medium ${feedback.type === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <ul aria-label="Cart items" className="card divide-y divide-line">
               {summary.lines.map(({ item, product, variant, unitPrice, lineTotal, maximumQuantity, available, issue }, index) => {

@@ -5,6 +5,7 @@ import { Check, Save } from "lucide-react";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { updateCustomerProfile, validateCustomerProfile, type CustomerProfileInput } from "@/services/customer-profile";
 import { demoStateStore, selectActiveAccount, selectDemoSnapshot, selectHydrationReady } from "@/services/demo-state-store";
+import { showToast } from "@/services/toast";
 
 export default function CustomerProfilePage() {
   const account = useDemoState(selectActiveAccount);
@@ -42,14 +43,19 @@ export default function CustomerProfilePage() {
     const result = await updateCustomerProfile(demoStateStore, customer.id, validation.value);
     setBusy(false);
     if (!result.ok) {
-      setFeedback(result.reason === "customer_required"
+      const message = result.reason === "customer_required"
         ? "Switch to a customer demo account before saving profile details."
-        : "Your profile couldn’t be saved. Check your details and try again.");
+        : "Your profile couldn’t be saved. Check your details and try again.";
+      setFeedback(message);
+      showToast("error", message);
       if (result.errors) setErrors(result.errors);
       return;
     }
     setValues({ fullName: result.customer.fullName, phone: result.customer.phone });
     setFeedback(result.persisted
+      ? "Profile updated."
+      : "Profile updated for this session, but browser storage is unavailable.");
+    showToast(result.persisted ? "success" : "info", result.persisted
       ? "Profile updated."
       : "Profile updated for this session, but browser storage is unavailable.");
   }
@@ -77,7 +83,6 @@ export default function CustomerProfilePage() {
           <input id="profile-phone" name="phone" className="input" type="tel" autoComplete="tel" inputMode="tel" maxLength={14} placeholder="01712345678" value={values.phone} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "profile-phone-error" : "profile-phone-help"} onChange={(event) => updateField("phone", event.target.value)} onBlur={() => validateField("phone")} />
           {errors.phone ? <p id="profile-phone-error" role="alert" className="mt-1 text-sm text-sale">{errors.phone}</p> : <p id="profile-phone-help" className="mt-1 text-sm text-mute">Use a Bangladesh mobile number, such as 01712345678.</p>}
         </div>
-        {feedback && <p role={feedback.startsWith("Profile updated") ? "status" : "alert"} aria-live="polite" className={`text-sm font-medium ${feedback.startsWith("Profile updated") ? "text-brand-strong" : "text-sale-strong"}`}>{feedback}</p>}
         <button type="submit" className="btn btn-primary btn-md" disabled={busy}>{busy ? "Saving…" : feedback.startsWith("Profile updated") ? <><Check className="size-4" aria-hidden="true" /> Save changes</> : <><Save className="size-4" aria-hidden="true" /> Save changes</>}</button>
       </form>
     </section>

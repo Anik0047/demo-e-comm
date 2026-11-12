@@ -20,17 +20,42 @@ test("standard product cards show a minimal image, title, and price with wishlis
   await expect(page).toHaveURL(/\/products$/);
 });
 
-test("card image remains square at mobile and desktop widths, and the card opens its canonical PDP", async ({ page }) => {
+test("wishlist heart stays at the image top-right with responsive image proportions", async ({ page }) => {
   await page.goto("/products");
   const card = cardFor(page, "Wireless Earbuds Pro");
-  for (const width of [360, 768, 1280]) {
+  const image = card.locator("a > div").first();
+  const wishlist = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
+  for (const [width, square] of [[360, false], [768, true], [1280, true]] as const) {
     await page.setViewportSize({ width, height: 900 });
-    const imageBox = await card.locator(".aspect-square").boundingBox();
+    const imageBox = await image.boundingBox();
+    const heartBox = await wishlist.boundingBox();
     expect(imageBox).not.toBeNull();
-    expect(Math.abs((imageBox?.width ?? 0) - (imageBox?.height ?? 0))).toBeLessThanOrEqual(1);
+    expect(heartBox).not.toBeNull();
+    if (square) expect(Math.abs((imageBox?.width ?? 0) - (imageBox?.height ?? 0))).toBeLessThanOrEqual(1);
+    else expect(Math.abs((imageBox?.width ?? 0) / (imageBox?.height ?? 1) - 4 / 3)).toBeLessThan(0.02);
+    expect((heartBox?.x ?? 0) + (heartBox?.width ?? 0)).toBeLessThanOrEqual((imageBox?.x ?? 0) + (imageBox?.width ?? 0) - 4);
+    expect((heartBox?.y ?? 0)).toBeGreaterThanOrEqual(imageBox?.y ?? 0);
+    expect((heartBox?.y ?? 0)).toBeLessThan((imageBox?.y ?? 0) + 8);
     const dimensions = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth }));
     expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport);
   }
+});
+
+test("card toast feedback is announced without changing card layout", async ({ page }) => {
+  await page.goto("/products");
+  const card = cardFor(page, "Wireless Earbuds Pro");
+  const title = card.getByRole("heading", { name: "Wireless Earbuds Pro" });
+  const titleBefore = await title.boundingBox();
+  await card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" }).click();
+  await expect(page.getByRole("status").getByText("Wireless Earbuds Pro added to your wishlist.")).toBeVisible();
+  const titleAfter = await title.boundingBox();
+  expect(titleAfter?.y).toBe(titleBefore?.y);
+  await expect(page.getByRole("button", { name: "Dismiss notification" })).toBeVisible();
+});
+
+test("product card opens its canonical PDP", async ({ page }) => {
+  await page.goto("/products");
+  const card = cardFor(page, "Wireless Earbuds Pro");
   await card.getByRole("link", { name: "View Wireless Earbuds Pro" }).click();
   await expect(page).toHaveURL(/\/products\/wireless-earbuds-pro$/);
   await expect(page.getByRole("button", { name: "Compare Wireless Earbuds Pro" })).toBeVisible();
@@ -43,5 +68,5 @@ test("genuine discounts show the original price and comparison is available on t
   await expect(discounted.locator("s")).toBeVisible();
   await discounted.getByRole("link", { name: "View Bluetooth Speaker" }).click();
   await page.getByRole("button", { name: "Compare Bluetooth Speaker" }).click();
-  await expect(page.getByRole("link", { name: "View comparison (1)" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "View comparison with 1 product" })).toBeVisible();
 });

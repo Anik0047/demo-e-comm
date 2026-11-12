@@ -7,6 +7,7 @@ import { saveCustomerPreferences, type CustomerPreferencesErrors } from "@/servi
 import { resetActiveCustomerDemoData } from "@/services/customer-demo-reset";
 import { demoStateStore, selectActiveAccount, selectDemoSnapshot, selectHydrationReady } from "@/services/demo-state-store";
 import { DEFAULT_DEMO_CUSTOMER_PREFERENCES, type DemoCustomerPreferences } from "@/types/demo-state";
+import { showToast } from "@/services/toast";
 
 export default function CustomerPreferencesPage() {
   const account = useDemoState(selectActiveAccount);
@@ -48,14 +49,19 @@ export default function CustomerPreferencesPage() {
     setBusy(false);
     if (!result.ok) {
       setErrors(result.errors ?? {});
-      setFeedback(result.reason === "customer_required"
+      const message = result.reason === "customer_required"
         ? "Switch to a customer demo account before saving preferences."
-        : "Preferences couldn’t be saved. Review the selections and try again.");
+        : "Preferences couldn’t be saved. Review the selections and try again.";
+      setFeedback(message);
+      showToast("error", message);
       return;
     }
     setValues(result.customer.preferences);
     setErrors({});
     setFeedback(result.persisted
+      ? "Preferences saved in this browser."
+      : "Preferences saved for this session, but browser storage is unavailable.");
+    showToast(result.persisted ? "success" : "info", result.persisted
       ? "Preferences saved in this browser."
       : "Preferences saved for this session, but browser storage is unavailable.");
   }
@@ -67,14 +73,17 @@ export default function CustomerPreferencesPage() {
     setBusy(false);
     setResetDialogOpen(false);
     if (!result.ok) {
-      setFeedback(result.reason === "persistence_unavailable"
+      const message = result.reason === "persistence_unavailable"
         ? "Reset couldn’t be saved because browser storage is unavailable. No reset was applied; try again when storage is available."
-        : "Your demo data couldn’t be reset. No changes were applied; try again.");
+        : "Your demo data couldn’t be reset. No changes were applied; try again.";
+      setFeedback(message);
+      showToast("error", message);
       return;
     }
     setValues({ ...DEFAULT_DEMO_CUSTOMER_PREFERENCES });
     setErrors({});
     setFeedback("Your customer demo data has been reset in this browser.");
+    showToast("success", "Your customer demo data has been reset in this browser.");
   }
 
   return (
@@ -109,7 +118,6 @@ export default function CustomerPreferencesPage() {
           {errors.productGridDensity && <p id="grid-density-error" role="alert" className="mt-2 text-sm text-sale">{errors.productGridDensity}</p>}
         </fieldset>
 
-        {feedback && <p role={feedback.includes("couldn’t") || feedback.startsWith("Switch") ? "alert" : "status"} aria-live="polite" className={`text-sm font-medium ${feedback.includes("couldn’t") || feedback.startsWith("Switch") ? "text-sale-strong" : "text-brand-strong"}`}>{feedback}</p>}
         <button type="submit" className="btn btn-primary btn-md" disabled={busy}>{busy ? "Saving…" : feedback.startsWith("Preferences saved") ? <><Check className="size-4" aria-hidden="true" /> Save preferences</> : <><Save className="size-4" aria-hidden="true" /> Save preferences</>}</button>
       </form>
 

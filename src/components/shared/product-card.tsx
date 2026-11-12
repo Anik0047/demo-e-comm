@@ -32,7 +32,7 @@ export function ProductCard({
         aria-label={`View ${product.name}`}
         className="flex h-full min-w-0 flex-col rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
       >
-        <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-t-2xl bg-soft">
+        <div className="relative grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-t-2xl bg-soft md:aspect-square">
           <ProductCardImage
             key={product.mainImage.url}
             image={product.mainImage}

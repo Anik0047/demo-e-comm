@@ -5,15 +5,15 @@ import { getComparableProductIds } from "@/services/product-comparison";
 import { addComparisonProduct, COMPARISON_LIMIT, COMPARISON_STORAGE_KEY, normalizeComparisonIds, removeComparisonProduct } from "@/lib/product-comparison-state";
 
 const changedEvent = "kenakata:comparison-changed";
-let snapshot: string[] = [];
+let snapshot: readonly string[] = [];
 let initialized = false;
-const emptySnapshot: string[] = [];
+const emptySnapshot: readonly string[] = [];
 
 function initialize() {
   if (initialized || typeof window === "undefined") return;
   initialized = true;
   try {
-    snapshot = normalizeComparisonIds(JSON.parse(window.sessionStorage.getItem(COMPARISON_STORAGE_KEY) ?? "[]"), getComparableProductIds());
+    snapshot = Object.freeze(normalizeComparisonIds(JSON.parse(window.sessionStorage.getItem(COMPARISON_STORAGE_KEY) ?? "[]"), getComparableProductIds()));
   } catch {
     snapshot = [];
   }
@@ -26,12 +26,22 @@ function initialize() {
 
 function subscribe(callback: () => void) {
   if (typeof window === "undefined") return () => undefined;
-  const onChange = () => {
-    initialize();
+  const onChange = (event: Event) => {
+    if (event.type === "storage") {
+      try {
+        snapshot = Object.freeze(normalizeComparisonIds(JSON.parse(window.sessionStorage.getItem(COMPARISON_STORAGE_KEY) ?? "[]"), getComparableProductIds()));
+      } catch {
+        snapshot = Object.freeze([]);
+      }
+    }
     callback();
   };
   window.addEventListener(changedEvent, onChange);
-  return () => window.removeEventListener(changedEvent, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(changedEvent, onChange);
+    window.removeEventListener("storage", onChange);
+  };
 }
 
 function getSnapshot() {
@@ -39,8 +49,8 @@ function getSnapshot() {
   return snapshot;
 }
 
-function publish(ids: string[]) {
-  snapshot = ids;
+function publish(ids: readonly string[]) {
+  snapshot = Object.freeze([...ids]);
   try {
     window.sessionStorage.setItem(COMPARISON_STORAGE_KEY, JSON.stringify(ids));
   } catch {

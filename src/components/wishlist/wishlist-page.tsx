@@ -9,33 +9,30 @@ import { useDemoState } from "@/hooks/use-demo-state";
 import { ProductCardCartButton } from "@/components/shared/product-card-cart-button";
 import { demoStateStore, selectActiveAccount, selectActiveAccountId, selectDemoSnapshot } from "@/services/demo-state-store";
 import { removeWishlistProduct, selectWishlistSummary } from "@/services/demo-wishlist";
-
-type WishlistFeedback = { kind: "success" | "error"; message: string } | null;
+import { showToast } from "@/services/toast";
 
 export function WishlistPage() {
   const snapshot = useDemoState(selectDemoSnapshot);
   const accountId = useDemoState(selectActiveAccountId);
   const account = useDemoState(selectActiveAccount);
   const [busyProductId, setBusyProductId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<WishlistFeedback>(null);
   const isCustomer = account?.role === "customer" && account.customerId !== null;
   const summary = snapshot && accountId && isCustomer ? selectWishlistSummary(snapshot, accountId) : null;
 
   async function handleRemove(productId: string, productName: string) {
     if (!isCustomer || busyProductId) return;
     setBusyProductId(productId);
-    setFeedback(null);
     try {
       const result = await removeWishlistProduct(demoStateStore, productId);
       if (!result.ok || !result.result.ok) {
-        setFeedback({ kind: "error", message: `${productName} could not be removed. Please try again.` });
+        showToast("error", `${productName} could not be removed. Please try again.`);
       } else if (!result.persisted) {
-        setFeedback({ kind: "error", message: "Your wishlist change could not be saved. Please try again." });
+        showToast("error", "Your wishlist change could not be saved. Please try again.");
       } else {
-        setFeedback({ kind: "success", message: `${productName} removed from your wishlist.` });
+        showToast("success", `${productName} removed from your wishlist.`);
       }
     } catch {
-      setFeedback({ kind: "error", message: "Your wishlist could not be updated. Please try again." });
+      showToast("error", "Your wishlist could not be updated. Please try again.");
     } finally {
       setBusyProductId(null);
     }
@@ -67,12 +64,10 @@ export function WishlistPage() {
           <Heart aria-hidden="true" className="mx-auto size-9 text-mute" />
           <h2 className="mt-3 text-xl">Your wishlist is empty</h2>
           <p className="mt-2 text-sm text-mute">Save products you love and find them here later.</p>
-          {feedback && <p role={feedback.kind === "error" ? "alert" : "status"} className={`mt-3 text-sm font-medium ${feedback.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <Link href="/products" className="btn btn-primary btn-md mt-5">Browse products</Link>
         </div>
       ) : (
         <>
-          {feedback && <p role={feedback.kind === "error" ? "alert" : "status"} className={`mb-4 text-sm font-medium ${feedback.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{feedback.message}</p>}
           <ul aria-label="Wishlist items" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {summary.items.map(({ productId, product, availability }, index) => {
               const productName = product?.name ?? "Product unavailable";

@@ -28,7 +28,7 @@ test("PDP add to cart saves the selected variant and quantity", async ({ page })
   await quantity.getByRole("button", { name: "Increase quantity" }).click();
 
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("region", { name: "Cotton Panjabi" }).getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
   const snapshot = await readSavedCart(page);
   expect(snapshot?.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items).toContainEqual({
     id: expect.any(String),
@@ -57,7 +57,7 @@ test("repeated PDP additions merge into the existing product and variant line", 
   await page.getByLabel("Size").selectOption("M");
   const addToCart = page.getByRole("button", { name: "Add to cart" });
   await addToCart.click();
-  await expect(page.getByRole("region", { name: "Cotton Panjabi" }).getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText("Cotton Panjabi added to your cart.", { exact: true })).toBeVisible();
   await addToCart.click();
 
   const snapshot = await readSavedCart(page);
@@ -90,7 +90,7 @@ test("admin and vendor demo accounts cannot add card products", async ({ page })
 test("cart additions survive navigation and a page refresh", async ({ page }) => {
   await page.goto("/products/bluetooth-speaker");
   await page.getByRole("button", { name: "Add to cart" }).click();
-  await expect(page.getByRole("region", { name: "Bluetooth Speaker" }).getByText("Bluetooth Speaker added to your cart.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("status").getByText("Bluetooth Speaker added to your cart.", { exact: true })).toBeVisible();
 
   await page.goto("/");
   await page.reload();

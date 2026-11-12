@@ -5,7 +5,6 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { ProductDetailsInteractive } from "@/components/products/product-details-interactive";
 import { ProductReviews } from "@/components/products/product-reviews";
-import { ProductImageCredits } from "@/components/products/product-image-credits";
 import { RelatedProducts } from "@/components/products/related-products";
 import {
   getProductDetails,
@@ -63,27 +62,6 @@ async function ProductDetailsPageContent({ params }: ProductDetailsPageProps) {
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8">
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-mute">
-        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <li>
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center hover:text-brand-strong hover:underline"
-            >
-              Home
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li>
-            <Link
-              href="/products"
-              className="inline-flex min-h-11 items-center font-medium text-ink hover:text-brand-strong hover:underline"
-            >
-              Products
-            </Link>
-          </li>
-        </ol>
-      </nav>
       <ProductDetails
         details={details}
         pricingTime={pricingTime}
@@ -109,6 +87,9 @@ function ProductDetails({
     <>
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-mute">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <li>
+            <Link href="/" className="inline-flex min-h-11 items-center hover:text-brand-strong hover:underline">Home</Link>
+          </li>
           {categoryPath.map((category, index) => (
             <li key={category.id} className="flex min-w-0 items-center gap-2">
               <span aria-hidden="true">/</span>

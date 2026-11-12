@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
 import { DemoStateHydrator } from "@/components/shared/demo-state-hydrator";
+import { ToastViewport } from "@/components/shared/toast-viewport";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh bg-canvas font-body text-ink">
         <DemoStateHydrator />
         {children}
+        <ToastViewport />
       </body>
     </html>
   );

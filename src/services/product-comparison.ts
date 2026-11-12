@@ -23,7 +23,10 @@ export interface ComparableProduct {
 const catalog = { products, categories, vendors, deals: flashDeals };
 
 export function getComparableProductIds(): Set<string> {
-  return new Set(products.filter((product) => product.status === "active").map(({ id }) => id));
+  return new Set(products.filter((product) => product.status === "active"
+    && categories.some(({ id }) => id === product.categoryId)
+    && vendors.some(({ id, status }) => id === product.vendorId && status === "approved"))
+    .map(({ id }) => id));
 }
 
 export function getComparableProducts(ids: readonly string[], now = Date.now()): ComparableProduct[] {

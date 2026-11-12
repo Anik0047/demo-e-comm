@@ -18,6 +18,7 @@ import {
   selectHydrationReady,
 } from "@/services/demo-state-store";
 import type { ProductCardData } from "@/types/product";
+import { showToast } from "@/services/toast";
 
 interface RecentlyViewedSectionProps {
   accountPage?: boolean;
@@ -47,9 +48,12 @@ export function RecentlyViewedSection({
     items: ProductCardData[];
     status: "ready" | "error";
   } | null>(null);
-  const [feedback, setFeedback] = useState<Feedback>(null);
   const [busy, setBusy] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  function setFeedback(next: Feedback) {
+    if (next) showToast(next.kind, next.message);
+  }
 
   useEffect(() => {
     let current = true;
@@ -264,15 +268,6 @@ export function RecentlyViewedSection({
           </button>
         ) : null}
       </header>
-      {feedback && (
-        <p
-          className={`mb-4 text-sm font-medium ${feedback.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}
-          role={feedback.kind === "error" ? "alert" : "status"}
-          aria-live="polite"
-        >
-          {feedback.message}
-        </p>
-      )}
       {confirmClear && (
         <section
           className="mb-4 rounded-xl border border-line bg-soft p-4"
