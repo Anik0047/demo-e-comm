@@ -3,9 +3,40 @@ import { vendors } from "@/data/vendors";
 import { demoStateStore } from "@/services/demo-state-store";
 import type { DemoStateStoreApi } from "@/services/demo-state-store";
 import type { DemoProductReview } from "@/types/demo-state";
+import type { DemoStateSnapshot } from "@/types/demo-state";
+import type { Product } from "@/types/product";
 
 export const PRODUCT_REVIEW_MIN_LENGTH = 10;
 export const PRODUCT_REVIEW_MAX_LENGTH = 1000;
+
+export interface CustomerProductReviewHistoryItem {
+  review: DemoProductReview;
+  product: Pick<Product, "id" | "slug" | "name" | "mainImage"> | null;
+  productAvailable: boolean;
+}
+
+/** Resolves one customer's review history against canonical catalog products. */
+export function getCustomerProductReviewHistory(
+  snapshot: DemoStateSnapshot,
+  customerId: string,
+): CustomerProductReviewHistoryItem[] {
+  return snapshot.data.productReviews
+    .filter(({ customerId: ownerId }) => ownerId === customerId)
+    .slice()
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .map((review) => {
+      const product = products.find(({ id }) => id === review.productId);
+      return {
+        review,
+        product: product
+          ? { id: product.id, slug: product.slug, name: product.name, mainImage: product.mainImage }
+          : null,
+        productAvailable: product?.status === "active" && vendors.some(
+          ({ id, status }) => id === product.vendorId && status === "approved",
+        ),
+      };
+    });
+}
 
 export type CustomerProductReviewMutationResult =
   | { ok: true; review: DemoProductReview; created: boolean }

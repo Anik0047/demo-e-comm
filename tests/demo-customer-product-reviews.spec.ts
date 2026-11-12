@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { createDemoSeedSnapshot } from "@/services/demo-state-seed";
 import { createDemoStateStore } from "@/services/demo-state-store";
-import { saveCustomerProductReview, getProductReviewSummary } from "@/services/customer-product-reviews";
+import { saveCustomerProductReview, getProductReviewSummary, getCustomerProductReviewHistory } from "@/services/customer-product-reviews";
 import { migrateDemoSnapshot, validateDemoSnapshot } from "@/services/demo-state-persistence";
 import type { DemoStatePersistenceAdapter } from "@/types/demo-state";
 
@@ -78,6 +78,19 @@ test("isolates reviews by active customer and never edits another customer's rev
   await saveCustomerProductReview({ productId: "prod-wireless-earbuds-pro", rating: 5, body: "Edited only by the first customer." }, store);
   expect(store.getState().snapshot.data.productReviews.find(({ customerId }) => customerId === "customer-demo")).toMatchObject({ id: first?.id, rating: 5 });
   expect(store.getState().snapshot.data.productReviews.find(({ customerId }) => customerId === "customer-second")).toMatchObject({ rating: 2, body: "The second customer review." });
+});
+
+test("review history is owner scoped, newest first, and tolerates missing canonical products", () => {
+  const snapshot = createDemoSeedSnapshot();
+  snapshot.data.productReviews.push(
+    { id: "review-older", customerId: "customer-demo", productId: "prod-wireless-earbuds-pro", rating: 4, body: "An older review with enough detail.", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
+    { id: "review-newer", customerId: "customer-demo", productId: "missing-product", rating: 5, body: "A newer review with enough detail.", createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z" },
+    { id: "review-foreign", customerId: "another-customer", productId: "prod-wireless-earbuds-pro", rating: 3, body: "A different customer's review.", createdAt: "2026-03-01T00:00:00.000Z", updatedAt: "2026-03-01T00:00:00.000Z" },
+  );
+  expect(getCustomerProductReviewHistory(snapshot, "customer-demo")).toMatchObject([
+    { review: { id: "review-newer" }, product: null, productAvailable: false },
+    { review: { id: "review-older" }, product: { id: "prod-wireless-earbuds-pro", name: "Wireless Earbuds Pro" }, productAvailable: true },
+  ]);
 });
 
 test("uses a data-preserving v6 to v7 migration and refuses partial writes", async () => {
