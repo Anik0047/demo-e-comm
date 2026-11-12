@@ -113,8 +113,9 @@ export default function CustomerOrdersPage() {
                       <dd className="mt-1 break-words text-sm font-bold text-ink">{getPaymentMethodLabel(order.paymentMethod)}</dd>
                     </div>
                     <div className="min-w-0 col-span-2 sm:col-span-1">
-                      <dt className="text-xs font-bold text-mute">Captured total</dt>
+                      <dt className="text-xs font-bold text-mute">Final demo total</dt>
                       <dd className="mt-1 font-head text-base font-bold text-ink">{total}</dd>
+                      {order.discountTotal > 0 && <dd className="mt-1 text-xs text-sale-strong">{order.couponCode ?? "Discount"} · −{formatPrice(order.discountTotal)}</dd>}
                     </div>
                     <div className="col-span-2 sm:col-span-3 lg:col-span-2">
                       <Link href={`/account/orders/${encodeURIComponent(order.id)}`} className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-bold text-brand-strong hover:bg-brand-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">

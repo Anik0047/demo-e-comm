@@ -14,6 +14,14 @@ export type CheckoutEligibility =
   | { status: "unavailable"; summary: DemoCartSummary }
   | { status: "ready"; summary: DemoCartSummary; groups: readonly VendorOrderGroup[] };
 
+export const DEMO_COUPON_CODE = "WELCOME200";
+export const DEMO_COUPON_DISCOUNT = 200;
+export const DEMO_COUPON_MINIMUM_SUBTOTAL = 1000;
+
+export type DemoCouponResult =
+  | { ok: true; code: typeof DEMO_COUPON_CODE; discount: number; subtotal: number; cartKey: string; customerId: string }
+  | { ok: false; reason: "customer_required" | "cart_unavailable" | "invalid_code" | "minimum_not_met" | "already_redeemed" };
+
 const catalog: DemoCartCatalog = { ...DEMO_SEED_CATALOG, deals: flashDeals };
 
 export type CustomerOrderConfirmation = CustomerOrderDetails;
@@ -143,4 +151,51 @@ export function getCheckoutEligibility(
     subtotal: items.reduce((total, item) => total + item.lineTotal, 0),
   }));
   return { status: "ready", summary, groups };
+}
+
+/** A stable identity for the canonical, currently-priced checkout lines. */
+export function getCheckoutCartKey(eligibility: Extract<CheckoutEligibility, { status: "ready" }>): string {
+  return JSON.stringify(eligibility.summary.lines.map(({ item, product, variant, unitPrice, lineTotal }) => ({
+    itemId: item.id,
+    productId: product?.id ?? item.productId,
+    vendorId: product?.vendorId ?? null,
+    variantId: variant?.id ?? item.variantId,
+    quantity: item.quantity,
+    unitPrice,
+    lineTotal,
+  })));
+}
+
+/** Validates the single-use demo code against canonical checkout subtotal and customer history. */
+export function calculateDemoCoupon(
+  snapshot: DemoStateSnapshot,
+  activeAccountId: string,
+  rawCode: string,
+  catalogData: DemoCartCatalog = catalog,
+  now = Date.now(),
+): DemoCouponResult {
+  const account = snapshot.data.accounts.find(({ id }) => id === activeAccountId);
+  if (account?.role !== "customer" || !account.customerId) return { ok: false, reason: "customer_required" };
+  const customer = snapshot.data.customers.find(({ id, accountId }) => id === account.customerId && accountId === account.id);
+  if (!customer) return { ok: false, reason: "customer_required" };
+  const eligibility = getCheckoutEligibility(snapshot, activeAccountId, catalogData, now);
+  if (eligibility.status !== "ready") return { ok: false, reason: "cart_unavailable" };
+  if (typeof rawCode !== "string" || rawCode.trim().toUpperCase() !== DEMO_COUPON_CODE) return { ok: false, reason: "invalid_code" };
+  if (snapshot.data.orders.some((order) => order.customerId === account.customerId
+    && order.couponCode?.toUpperCase() === DEMO_COUPON_CODE)) {
+    return { ok: false, reason: "already_redeemed" };
+  }
+  if (eligibility.summary.subtotal < DEMO_COUPON_MINIMUM_SUBTOTAL) return { ok: false, reason: "minimum_not_met" };
+  const discount = Math.min(DEMO_COUPON_DISCOUNT, eligibility.summary.subtotal);
+  if (!Number.isSafeInteger(discount) || discount < 0 || discount > eligibility.summary.subtotal) {
+    return { ok: false, reason: "cart_unavailable" };
+  }
+  return {
+    ok: true,
+    code: DEMO_COUPON_CODE,
+    discount,
+    subtotal: eligibility.summary.subtotal,
+    cartKey: getCheckoutCartKey(eligibility),
+    customerId: customer.id,
+  };
 }

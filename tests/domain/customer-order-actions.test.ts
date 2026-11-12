@@ -24,7 +24,7 @@ async function createStore() {
   await store.getState().hydrate();
   await store.getState().applySnapshotUpdate((snapshot) => {
     snapshot.data.accounts.push({ id: "account-second", email: "second@example.test", displayName: "Second", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-    snapshot.data.customers.push({ id: "customer-second", accountId: "account-second", fullName: "Second", phone: "0", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+    snapshot.data.customers.push({ id: "customer-second", accountId: "account-second", fullName: "Second", phone: "0", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], recentlyViewedProductIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
     const order: DemoOrder = {
       id: "order:owned", orderNumber: "KN-OWNED", customerId: "customer-demo", fulfillmentGroupIds: ["group:owned"],
       shippingAddress: { id: "address:snapshot", label: "Home", recipientName: "Demo", phone: "0", division: "Dhaka", district: "Dhaka", area: "Area", streetAddress: "Road", postalCode: null, isDefault: true },
@@ -95,7 +95,7 @@ test("history visibility persists per customer and hidden orders resolve unavail
     snapshot.data.fulfillmentGroups.push({ id: "group:hidden", orderId: "order:hidden", vendorId: "vendor-tech-haven", itemIds: ["item:hidden"], subtotal: 1200, status: "pending", trackingNumber: null, updatedAt: snapshot.savedAt });
     snapshot.data.orderItems.push({ id: "item:hidden", fulfillmentGroupId: "group:hidden", productId: "prod-wireless-earbuds-pro", vendorId: "vendor-tech-haven", variantId: null, selectedVariant: null, productName: "Preserved item", sku: "SKU-HIDDEN", unitPrice: 1200, quantity: 1, lineTotal: 1200 });
     snapshot.data.accounts.push({ id: "account-second", email: "second@example.test", displayName: "Second", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-    snapshot.data.customers.push({ id: "customer-second", accountId: "account-second", fullName: "Second", phone: "0", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+    snapshot.data.customers.push({ id: "customer-second", accountId: "account-second", fullName: "Second", phone: "0", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], recentlyViewedProductIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
     return snapshot;
   });
   const canonicalBefore = structuredClone(store.getState().snapshot.data.orders[0]);
@@ -130,6 +130,6 @@ test("failed cancellation persistence and invalid or stale actions leave canonic
   assert.deepEqual(await cancelCustomerDemoOrder("missing-order", store), { ok: false, reason: "order_unavailable" });
   assert.deepEqual(await hideCustomerOrderFromHistory("missing-order", store), { ok: false, reason: "order_unavailable" });
   storage.setItem = () => { throw new Error("storage unavailable"); };
-  assert.deepEqual(await cancelCustomerDemoOrder("order:owned", store), { ok: false, reason: "invalid_snapshot" });
+  assert.deepEqual(await cancelCustomerDemoOrder("order:owned", store), { ok: false, reason: "persistence_unavailable" });
   assert.deepEqual(store.getState().snapshot.data, before);
 });

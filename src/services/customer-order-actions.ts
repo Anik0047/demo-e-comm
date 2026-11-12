@@ -1,7 +1,7 @@
 import { demoStateStore, type DemoStateStoreApi } from "@/services/demo-state-store";
 import type { DemoNotification, DemoOrder, DemoStateSnapshot } from "@/types/demo-state";
 
-export type CustomerOrderActionIssue = "customer_required" | "order_unavailable" | "invalid_status" | "already_hidden" | "not_hydrated" | "invalid_snapshot";
+export type CustomerOrderActionIssue = "customer_required" | "order_unavailable" | "invalid_status" | "already_hidden" | "not_hydrated" | "invalid_snapshot" | "persistence_unavailable";
 export type CustomerOrderActionResult =
   | { ok: true; persisted: boolean; order?: DemoOrder }
   | { ok: false; reason: CustomerOrderActionIssue };

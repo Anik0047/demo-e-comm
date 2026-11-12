@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ProductDetailsInteractive } from "@/components/products/product-details-interactive";
+import { ProductReviews } from "@/components/products/product-reviews";
 import { ProductImageCredits } from "@/components/products/product-image-credits";
 import { RelatedProducts } from "@/components/products/related-products";
 import { getProductDetails, getProductDetailSlugs } from "@/services/product-details";
@@ -88,6 +89,7 @@ function ProductDetails({ details, pricingTime, relatedProducts }: { details: No
 
       <article aria-labelledby="product-name">
         <ProductDetailsInteractive product={product} vendor={vendor} deals={deals} images={images} pricingTime={pricingTime} />
+        <ProductReviews productId={product.id} />
         <div className="mt-8 min-w-0">
           <ProductImageCredits images={images} />
         </div>

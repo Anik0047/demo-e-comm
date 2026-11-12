@@ -128,8 +128,8 @@ export function OrderConfirmationPage({ orderId }: OrderConfirmationPageProps) {
                 <div className="flex justify-between gap-3"><dt className="text-mute">Payment method</dt><dd className="font-bold text-ink">Cash on delivery</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-mute">Items subtotal</dt><dd className="font-bold text-ink">{formatPrice(order.subtotal)}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-mute">Shipping</dt><dd className="font-bold text-ink">{order.shippingTotal === 0 ? "Not calculated" : formatPrice(order.shippingTotal)}</dd></div>
-                {order.discountTotal > 0 && <div className="flex justify-between gap-3"><dt className="text-mute">Discount</dt><dd className="font-bold text-ink">−{formatPrice(order.discountTotal)}</dd></div>}
-                <div className="flex justify-between gap-3 border-t border-line pt-3 text-base"><dt className="font-bold text-ink">Order total</dt><dd className="font-head font-bold text-ink">{formatPrice(order.grandTotal)}</dd></div>
+                {order.discountTotal > 0 && <div className="flex justify-between gap-3"><dt className="text-mute">{order.couponCode ? `Coupon · ${order.couponCode}` : "Discount"}</dt><dd className="font-bold text-sale-strong">−{formatPrice(order.discountTotal)}</dd></div>}
+                <div className="flex justify-between gap-3 border-t border-line pt-3 text-base"><dt className="font-bold text-ink">Final demo total</dt><dd className="font-head font-bold text-ink">{formatPrice(order.grandTotal)}</dd></div>
               </dl>
             </aside>
           </div>

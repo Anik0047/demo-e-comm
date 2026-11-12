@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
 import { ProductCardCartButton } from "@/components/shared/product-card-cart-button";
+import { ProductCompareButton } from "@/components/shared/product-compare-button";
 import { ProductCardImage } from "@/components/shared/product-card-image";
 import { calcDiscountPercent, cn, formatPrice } from "@/lib/utils";
 import type { CategoryTone } from "@/types/category";
@@ -89,6 +90,9 @@ export function ProductCard({ product, deal, showAvailability = false, eagerImag
               {formatPrice(product.compareAtPrice)}
             </span>
           )}
+          <div className="mt-2">
+            <ProductCompareButton product={product} compact />
+          </div>
         </div>
         <div className="mt-auto pt-3">
           {deal && (

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProductImageGallery } from "@/components/products/product-image-gallery";
 import { ProductInformation } from "@/components/products/product-information";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { addCartItem } from "@/services/demo-cart";
+import { recordRecentlyViewedProduct } from "@/services/recently-viewed";
 import { demoStateStore, selectActiveAccount, selectHydrationReady } from "@/services/demo-state-store";
 import type { GalleryImage } from "@/services/product-gallery";
 import { getCompleteVariants, matchesVariantOptions } from "@/services/product-variant-selection";
@@ -52,6 +53,10 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
     ? selectedVariant !== null && maximumQuantity >= product.minOrderQty
     : (!product.trackInventory || product.stock >= product.minOrderQty) && maximumQuantity >= product.minOrderQty;
   const isCustomerAccount = hydrationReady && activeAccount?.role === "customer" && activeAccount.customerId !== null;
+  useEffect(() => {
+    if (!hydrationReady || activeAccount?.role !== "customer" || !activeAccount.customerId) return;
+    void recordRecentlyViewedProduct(demoStateStore, product.id);
+  }, [activeAccount?.customerId, activeAccount?.role, hydrationReady, product.id]);
   const quantityIsValid = Number.isSafeInteger(quantity)
     && quantity >= product.minOrderQty
     && quantity <= maximumQuantity;

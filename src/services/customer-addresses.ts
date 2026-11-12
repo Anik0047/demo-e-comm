@@ -11,7 +11,7 @@ export type CustomerAddressValidation =
 
 export type CustomerAddressMutationResult =
   | { ok: true; persisted: boolean; customer: DemoCustomer; address?: DemoAddress }
-  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "customer_required" | "customer_missing" | "address_missing" | "invalid_input"; errors?: CustomerAddressFieldErrors };
+  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" | "customer_required" | "customer_missing" | "address_missing" | "invalid_input"; errors?: CustomerAddressFieldErrors };
 
 type AddressTransactionResult =
   | { ok: false; reason: "customer_required" | "customer_missing" | "address_missing" }

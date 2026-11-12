@@ -10,7 +10,7 @@ export type CustomerPreferencesValidation =
 
 export type CustomerPreferencesSaveResult =
   | { ok: true; persisted: boolean; customer: DemoCustomer }
-  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "customer_required" | "customer_missing" | "invalid_input"; errors?: CustomerPreferencesErrors };
+  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" | "customer_required" | "customer_missing" | "invalid_input"; errors?: CustomerPreferencesErrors };
 
 type PreferencesTransactionResult =
   | { ok: false; reason: "customer_required" | "customer_missing" }

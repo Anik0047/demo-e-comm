@@ -17,7 +17,7 @@ export type CustomerProfileValidation = {
 
 export type CustomerProfileUpdateResult =
   | { ok: true; persisted: boolean; customer: DemoCustomer }
-  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "customer_required" | "customer_missing" | "invalid_input"; errors?: Partial<Record<keyof CustomerProfileInput, string>> };
+  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" | "customer_required" | "customer_missing" | "invalid_input"; errors?: Partial<Record<keyof CustomerProfileInput, string>> };
 
 type ProfileTransactionResult =
   | { ok: false; reason: "customer_required" | "customer_missing" }
@@ -59,7 +59,12 @@ export async function updateCustomerProfile(
     if (!customer) return { snapshot: null, result: { ok: false as const, reason: "customer_missing" as const } };
 
     const updatedAt = new Date().toISOString();
-    const nextCustomer = { ...customer, ...validation.value, updatedAt };
+    const nextCustomer = {
+      ...customer,
+      resetProfile: customer.resetProfile ?? { fullName: customer.fullName, phone: customer.phone },
+      ...validation.value,
+      updatedAt,
+    };
     snapshot.data.customers = snapshot.data.customers.map((entry) => entry.id === customer.id ? nextCustomer : entry);
     snapshot.data.accounts = snapshot.data.accounts.map((entry) => entry.id === account.id
       ? { ...entry, displayName: validation.value.fullName }

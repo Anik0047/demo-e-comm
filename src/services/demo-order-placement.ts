@@ -1,5 +1,5 @@
 import { DEMO_SEED_CATALOG } from "@/services/demo-state-seed";
-import { createShippingAddressSnapshot, getCheckoutEligibility, resolveCheckoutShippingSelection } from "@/services/checkout";
+import { calculateDemoCoupon, createShippingAddressSnapshot, getCheckoutCartKey, getCheckoutEligibility, resolveCheckoutShippingSelection } from "@/services/checkout";
 import type { DemoCartCatalog } from "@/services/demo-cart";
 import { flashDeals } from "@/data/flash-deals";
 import { demoStateStore, type DemoStateStoreApi } from "@/services/demo-state-store";
@@ -12,16 +12,22 @@ export type DemoOrderPlacementIssue =
   | "cart_unavailable"
   | "address_required"
   | "address_unavailable"
+  | "coupon_invalid"
+  | "coupon_ineligible"
+  | "coupon_already_redeemed"
+  | "coupon_stale"
   | "id_generation_failed";
 
 export type DemoOrderPlacementResult =
   | { ok: true; persisted: boolean; order: DemoOrder }
-  | { ok: false; reason: DemoOrderPlacementIssue | "not_hydrated" | "invalid_snapshot" };
+  | { ok: false; reason: DemoOrderPlacementIssue | "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" };
 
 export interface DemoOrderPlacementOptions {
   catalog?: DemoCartCatalog;
   now?: number;
   createId?: () => string;
+  couponCode?: string | null;
+  couponCartKey?: string | null;
 }
 
 const defaultCatalog: DemoCartCatalog = { ...DEMO_SEED_CATALOG, deals: flashDeals };
@@ -60,6 +66,8 @@ function placeInSnapshot(
   catalog: DemoCartCatalog,
   now: number,
   createId: () => string,
+  couponCode: string | null,
+  couponCartKey: string | null,
 ): { snapshot: DemoStateSnapshot | null; result: { ok: true; order: DemoOrder } | { ok: false; reason: DemoOrderPlacementIssue } } {
   const account = snapshot.data.accounts.find(({ id }) => id === activeAccountId);
   if (account?.role !== "customer" || !account.customerId) return { snapshot: null, result: { ok: false, reason: "customer_required" } };
@@ -72,6 +80,23 @@ function placeInSnapshot(
   const eligibility = getCheckoutEligibility(snapshot, activeAccountId, catalog, now);
   if (eligibility.status === "empty") return { snapshot: null, result: { ok: false, reason: "cart_empty" } };
   if (eligibility.status !== "ready") return { snapshot: null, result: { ok: false, reason: eligibility.status === "customer_required" ? "customer_required" : "cart_unavailable" } };
+  let discountTotal = 0;
+  let capturedCouponCode: string | null = null;
+  if (couponCode !== null) {
+    const coupon = calculateDemoCoupon(snapshot, activeAccountId, couponCode, catalog, now);
+    if (!coupon.ok) {
+      const reason = coupon.reason === "invalid_code" ? "coupon_invalid"
+        : coupon.reason === "minimum_not_met" || coupon.reason === "cart_unavailable" ? "coupon_ineligible"
+          : coupon.reason === "already_redeemed" ? "coupon_already_redeemed" : "customer_required";
+      return { snapshot: null, result: { ok: false, reason } };
+    }
+    if (coupon.customerId !== shipping.customer.id || coupon.cartKey !== getCheckoutCartKey(eligibility)
+      || couponCartKey !== coupon.cartKey) {
+      return { snapshot: null, result: { ok: false, reason: "coupon_stale" } };
+    }
+    discountTotal = coupon.discount;
+    capturedCouponCode = coupon.code;
+  }
   const cart = snapshot.data.carts.find(({ customerId }) => customerId === account.customerId);
   if (!cart || !cart.items.length) return { snapshot: null, result: { ok: false, reason: "cart_empty" } };
 
@@ -144,8 +169,9 @@ function placeInSnapshot(
     status: "placed",
     subtotal,
     shippingTotal: 0,
-    discountTotal: 0,
-    grandTotal: subtotal,
+    discountTotal,
+    grandTotal: Math.max(0, subtotal - discountTotal),
+    couponCode: capturedCouponCode,
     placedAt: new Date(now).toISOString(),
     updatedAt: new Date(now).toISOString(),
   };
@@ -174,6 +200,8 @@ export async function placeDemoOrder(
     catalog,
     options.now ?? Date.now(),
     createId,
+    options.couponCode ?? null,
+    options.couponCartKey ?? null,
   ), { requirePersistence: true });
   if (!transaction.ok) return { ok: false, reason: transaction.reason };
   if (!transaction.result.ok) return transaction.result;

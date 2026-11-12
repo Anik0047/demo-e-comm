@@ -14,6 +14,7 @@ import { getMainCategories } from "@/services/categories";
 import { TrustStrip } from "@/components/shared/trust-strip";
 import { getTrustPoints } from "@/services/trust-points";
 import { getPricingTime } from "@/services/effective-price";
+import { RecentlyViewedSection } from "@/components/home/recently-viewed-section";
 
 export default async function HomePage() {
   const vendors = await getTopVendors();
@@ -28,6 +29,7 @@ export default async function HomePage() {
       <CategoriesSection categories={categories} />
       <Suspense fallback={null}><RuntimeFlashDeals /></Suspense>
       <Suspense fallback={null}><TrendingSection /></Suspense>
+      <RecentlyViewedSection />
       <PromoBannersSection />
       <TopVendorsSection vendors={vendors} />
       <section

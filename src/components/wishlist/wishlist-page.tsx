@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useDemoState } from "@/hooks/use-demo-state";
+import { ProductCardCartButton } from "@/components/shared/product-card-cart-button";
 import { demoStateStore, selectActiveAccount, selectActiveAccountId, selectDemoSnapshot } from "@/services/demo-state-store";
 import { removeWishlistProduct, selectWishlistSummary } from "@/services/demo-wishlist";
 
@@ -98,6 +99,12 @@ export function WishlistPage() {
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       {product && <Link href={`/products/${product.slug}`} className="btn btn-outline btn-sm">View product details</Link>}
+                      {product && availability === "available" && <ProductCardCartButton
+                        productId={product.id}
+                        productName={product.name}
+                        productSlug={product.slug}
+                        className="btn btn-primary btn-sm w-full sm:w-auto"
+                      />}
                       <button
                         type="button"
                         className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-sale-strong hover:bg-blush focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60"

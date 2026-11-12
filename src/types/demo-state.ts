@@ -21,9 +21,11 @@ export interface DemoCustomer {
   accountId: DemoId;
   fullName: string;
   phone: string;
+  resetProfile?: { fullName: string; phone: string };
   addresses: DemoAddress[];
   preferences: DemoCustomerPreferences;
   hiddenOrderIds: DemoId[];
+  recentlyViewedProductIds: Product["id"][];
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
 }
@@ -37,6 +39,7 @@ export const DEFAULT_DEMO_CUSTOMER_PREFERENCES: DemoCustomerPreferences = {
   promotionalUpdates: false,
   productGridDensity: "standard",
 };
+export const DEMO_RECENTLY_VIEWED_LIMIT = 20;
 export interface DemoAddress {
   id: DemoId;
   label: string;
@@ -70,6 +73,17 @@ export interface DemoWishlist {
   updatedAt: ISODateTime;
 }
 
+/** One customer-owned review for a canonical active catalog product. */
+export interface DemoProductReview {
+  id: DemoId;
+  customerId: DemoCustomer["id"];
+  productId: Product["id"];
+  rating: number;
+  body: string;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
+}
+
 export type DemoOrderStatus = "placed" | "processing" | "shipped" | "delivered" | "cancelled" | "returned";
 export type DemoPaymentMethod = "cash_on_delivery" | "bkash" | "nagad" | "card";
 export type DemoPaymentStatus = "pending" | "paid" | "failed" | "refunded";
@@ -82,10 +96,12 @@ export interface DemoOrder {
   paymentMethod: DemoPaymentMethod;
   paymentStatus: DemoPaymentStatus;
   status: DemoOrderStatus;
-  subtotal: number;
-  shippingTotal: number;
-  discountTotal: number;
-  grandTotal: number;
+  readonly subtotal: number;
+  readonly shippingTotal: number;
+  readonly discountTotal: number;
+  readonly grandTotal: number;
+  /** Optional for schema-v7 legacy orders; new orders capture the applied demo code or null. */
+  readonly couponCode?: string | null;
   placedAt: ISODateTime;
   updatedAt: ISODateTime;
 }
@@ -198,6 +214,7 @@ export interface DemoStateData {
   customers: DemoCustomer[];
   carts: DemoCart[];
   wishlists: DemoWishlist[];
+  productReviews: DemoProductReview[];
   orders: DemoOrder[];
   orderItems: DemoOrderItem[];
   fulfillmentGroups: DemoVendorFulfillmentGroup[];
@@ -205,7 +222,7 @@ export interface DemoStateData {
   managedBanners: ManagedBanner[];
 }
 
-export const DEMO_STATE_SCHEMA_VERSION = 4;
+export const DEMO_STATE_SCHEMA_VERSION = 7;
 export const DEMO_SEED_VERSION = 1;
 export interface DemoStateSnapshot {
   schemaVersion: number;
@@ -255,7 +272,7 @@ export function classifyDemoSnapshot(snapshot: Pick<DemoStateSnapshot, "schemaVe
 }
 
 export interface DemoStateValidationIssue {
-  code: "duplicate_id" | "missing_reference" | "invalid_quantity" | "invalid_order_record";
+  code: "duplicate_id" | "duplicate_product_review" | "missing_reference" | "invalid_quantity" | "invalid_order_record" | "invalid_customer_record" | "invalid_product_review";
   entity: string;
   id: string;
   reference?: string;
@@ -276,11 +293,15 @@ export function validateDemoState(data: DemoStateData): DemoStateValidation {
   };
   unique("account", data.accounts); unique("customer", data.customers); unique("cart", data.carts);
   unique("wishlist", data.wishlists); unique("order", data.orders); unique("orderItem", data.orderItems);
-  unique("fulfillmentGroup", data.fulfillmentGroups); unique("notification", data.notifications); unique("banner", data.managedBanners);
+  unique("productReview", data.productReviews); unique("fulfillmentGroup", data.fulfillmentGroups); unique("notification", data.notifications); unique("banner", data.managedBanners);
   const has = (entity: string, id: string) => ids.get(entity)?.has(id) ?? false;
   const ref = (entity: string, id: string, target: string) => { if (!has(target, id)) issues.push({ code: "missing_reference", entity, id, reference: `${target}:${id}` }); };
   for (const customer of data.customers) ref("customer", customer.accountId, "account");
   for (const customer of data.customers) {
+    if (customer.recentlyViewedProductIds.length > DEMO_RECENTLY_VIEWED_LIMIT
+      || new Set(customer.recentlyViewedProductIds).size !== customer.recentlyViewedProductIds.length) {
+      issues.push({ code: "invalid_customer_record", entity: "customer", id: customer.id, reference: "recentlyViewedProductIds" });
+    }
     for (const orderId of customer.hiddenOrderIds) {
       if (!data.orders.some(({ id, customerId }) => id === orderId && customerId === customer.id)) {
         issues.push({ code: "invalid_order_record", entity: "customer", id: customer.id, reference: `order:${orderId}` });
@@ -295,12 +316,31 @@ export function validateDemoState(data: DemoStateData): DemoStateValidation {
     for (const item of cart.items) if (!Number.isSafeInteger(item.quantity) || item.quantity < 1) issues.push({ code: "invalid_quantity", entity: "cartItem", id: item.id });
   }
   for (const wishlist of data.wishlists) ref("wishlist", wishlist.customerId, "customer");
+  const reviewedProducts = new Set<string>();
+  for (const review of data.productReviews) {
+    ref("productReview", review.customerId, "customer");
+    if (!review.productId || !Number.isSafeInteger(review.rating) || review.rating < 1 || review.rating > 5
+      || typeof review.body !== "string" || review.body.trim().length < 10 || review.body.trim().length > 1000
+      || typeof review.createdAt !== "string" || typeof review.updatedAt !== "string"
+      || !isIsoDateTime(review.createdAt) || !isIsoDateTime(review.updatedAt)) {
+      issues.push({ code: "invalid_product_review", entity: "productReview", id: review.id });
+    }
+    const ownershipKey = `${review.customerId}\u0000${review.productId}`;
+    if (reviewedProducts.has(ownershipKey)) issues.push({ code: "duplicate_product_review", entity: "productReview", id: review.id, reference: ownershipKey });
+    reviewedProducts.add(ownershipKey);
+  }
   for (const order of data.orders) {
     ref("order", order.customerId, "customer");
     for (const groupId of order.fulfillmentGroupIds) ref("order", groupId, "fulfillmentGroup");
     const groups = data.fulfillmentGroups.filter(({ id, orderId }) => orderId === order.id && order.fulfillmentGroupIds.includes(id));
     if (groups.reduce((total, group) => total + group.subtotal, 0) !== order.subtotal
-      || order.grandTotal !== order.subtotal + order.shippingTotal - order.discountTotal) {
+      || !Number.isSafeInteger(order.subtotal) || !Number.isSafeInteger(order.shippingTotal)
+      || !Number.isSafeInteger(order.discountTotal) || !Number.isSafeInteger(order.grandTotal)
+      || order.subtotal < 0 || order.shippingTotal < 0 || order.discountTotal < 0
+      || order.discountTotal > order.subtotal + order.shippingTotal
+      || order.grandTotal !== order.subtotal + order.shippingTotal - order.discountTotal
+      || (order.couponCode !== undefined && order.couponCode !== null && order.couponCode !== "WELCOME200")
+      || (order.couponCode === "WELCOME200" && (order.subtotal < 1000 || order.discountTotal !== 200))) {
       issues.push({ code: "invalid_order_record", entity: "order", id: order.id });
     }
   }
@@ -326,4 +366,9 @@ export function validateDemoState(data: DemoStateData): DemoStateValidation {
   }
   for (const notification of data.notifications) ref("notification", notification.recipientAccountId, "account");
   return { valid: issues.length === 0, issues };
+}
+
+function isIsoDateTime(value: string): boolean {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) && date.toISOString() === value;
 }

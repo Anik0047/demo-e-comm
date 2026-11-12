@@ -29,7 +29,7 @@ test("cart opens checkout with the selected variant, quantity, effective prices,
   await expect(items.getByText("Quantity: 1", { exact: true })).toBeVisible();
   await expect(items.getByText("৳1,200 each", { exact: true })).toBeVisible();
   await expect(items.getByText("৳1,200", { exact: true })).toBeVisible();
-  await expect(page.getByRole("complementary", { name: "Order summary" }).getByText("৳1,200", { exact: true })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Order summary" }).getByText("Final demo total").locator("..")).toContainText("৳1,200");
 });
 
 test("empty and invalid carts show safe checkout guidance", async ({ page }) => {
@@ -77,6 +77,65 @@ test("unknown order confirmation IDs never expose order details", async ({ page 
   await expect(page.getByRole("heading", { name: "Order not available" })).toBeVisible();
   await expect(page.getByText("Cotton Panjabi", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Samira Khan", { exact: true })).toHaveCount(0);
+});
+
+test("WELCOME200 validates, recalculates, persists, and remains customer-scoped across checkout history", async ({ page }) => {
+  await addPanjabi(page);
+  await page.goto("/checkout");
+  const summary = page.getByRole("complementary", { name: "Order summary" });
+  await expect(summary.getByText("Final demo total").locator(".." )).toContainText("৳1,200");
+  await page.getByLabel("Coupon code").fill("NOPE");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await expect(page.locator("#coupon-feedback")).toContainText("That code isn’t recognized");
+
+  await page.getByLabel("Coupon code").fill("welcome200");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await expect(page.locator("#coupon-feedback")).toContainText("WELCOME200 is applied");
+  await expect(summary.getByText("Subtotal").locator(".." )).toContainText("৳1,200");
+  await expect(summary.getByText("Discount · WELCOME200").locator(".." )).toContainText("−৳200");
+  await expect(summary.getByText("Final demo total").locator(".." )).toContainText("৳1,000");
+  await page.getByRole("button", { name: "Remove" }).click();
+  await expect(summary.getByText("Final demo total").locator(".." )).toContainText("৳1,200");
+  await page.getByRole("link", { name: "Add shipping address" }).click();
+  await page.getByRole("button", { name: "Add an address" }).click();
+  await fillAddress(page);
+  await page.getByRole("button", { name: "Add address", exact: true }).click();
+  await expect(page).toHaveURL(/\/checkout$/);
+  await page.getByLabel("Coupon code").fill("WELCOME200");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await page.reload();
+  await expect(summary.getByText("Final demo total").locator("..")).toContainText("৳1,200");
+  await page.getByLabel("Coupon code").fill("WELCOME200");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await page.getByRole("button", { name: "Place demo order" }).click();
+  await expect(page).toHaveURL(/\/order-confirmation\//);
+  await expect(page.getByText("Coupon · WELCOME200").locator(".." )).toContainText("−৳200");
+  await expect(page.getByText("Final demo total").locator(".." )).toContainText("৳1,000");
+
+  const orderId = new URL(page.url()).pathname.split("/").at(-1) ?? "";
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("kenakata:demo-state") ?? "null") as {
+    data: { orders: Array<{ id: string; customerId: string; subtotal: number; shippingTotal: number; discountTotal: number; grandTotal: number; couponCode?: string | null }>; fulfillmentGroups: Array<{ id: string; orderId: string; subtotal: number; vendorId: string }>; orderItems: Array<{ fulfillmentGroupId: string; vendorId: string; unitPrice: number; lineTotal: number }> };
+  });
+  const order = saved.data.orders.find(({ id }) => id === decodeURIComponent(orderId));
+  expect(order).toMatchObject({ customerId: "customer-demo", subtotal: 1200, shippingTotal: 0, discountTotal: 200, grandTotal: 1000, couponCode: "WELCOME200" });
+  const groups = saved.data.fulfillmentGroups.filter(({ orderId: id }) => id === order?.id);
+  const items = saved.data.orderItems.filter(({ fulfillmentGroupId }) => groups.some(({ id }) => id === fulfillmentGroupId));
+  expect(groups.map(({ subtotal }) => subtotal)).toEqual([1200]);
+  expect(items.map(({ unitPrice, lineTotal }) => ({ unitPrice, lineTotal }))).toEqual([{ unitPrice: 1200, lineTotal: 1200 }]);
+
+  await page.goto("/account/orders");
+  await expect(page.getByText("WELCOME200 · −৳200")).toBeVisible();
+  await expect(page.getByText("Final demo total").locator(".." )).toContainText("৳1,000");
+  await page.getByRole("link", { name: "View details" }).click();
+  const capturedTotals = page.getByRole("complementary", { name: "Captured order totals" });
+  await expect(capturedTotals.getByText("Coupon · WELCOME200").locator(".." )).toContainText("−৳200");
+  await expect(capturedTotals.getByText("Final demo total").locator(".." )).toContainText("৳1,000");
+  await page.goto("/cart");
+  await addPanjabi(page);
+  await page.goto("/checkout");
+  await page.getByLabel("Coupon code").fill("WELCOME200");
+  await page.getByRole("button", { name: "Apply" }).click();
+  await expect(page.locator("#coupon-feedback")).toContainText("already been used");
 });
 
 test("customer can add and edit an address from checkout and return to the same checkout", async ({ page }) => {
@@ -192,7 +251,7 @@ test("COD placement groups vendors, clears the purchased cart atomically, and re
   await expect(page.getByText("Placed on", { exact: true })).toBeVisible();
   await expect(page.getByText(orderId ?? "", { exact: true })).toBeVisible();
   await expect(page.getByText("Items subtotal").locator("..")).toContainText("৳3,650");
-  await expect(page.getByText("Order total").locator("..")).toContainText("৳3,650");
+  await expect(page.getByText("Final demo total").locator("..")).toContainText("৳3,650");
   await expect(page.getByRole("region", { name: /Items from/ })).toHaveCount(2);
   await expect(page.getByText("Cotton Panjabi", { exact: true })).toBeVisible();
   await expect(page.getByText("Wireless Earbuds Pro", { exact: true })).toBeVisible();

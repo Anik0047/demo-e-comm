@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ShoppingBag } from "lucide-react";
-import { getCheckoutEligibility, readCheckoutAddressId, resolveCheckoutShippingSelection, subscribeCheckoutAddressSelection, writeCheckoutAddressId } from "@/services/checkout";
+import { calculateDemoCoupon, getCheckoutCartKey, getCheckoutEligibility, readCheckoutAddressId, resolveCheckoutShippingSelection, subscribeCheckoutAddressSelection, writeCheckoutAddressId } from "@/services/checkout";
 import { getPricingTime } from "@/services/effective-price";
 import { placeDemoOrder } from "@/services/demo-order-placement";
 import { selectActiveAccountId, selectDemoSnapshot } from "@/services/demo-state-store";
@@ -28,11 +28,28 @@ const issueMessages = {
   insufficient_stock: "There isn’t enough stock for this quantity.",
 } as const;
 
+const couponMessages = {
+  customer_required: "Switch to a customer demo account to apply this code.",
+  cart_unavailable: "Update your cart before applying a code.",
+  invalid_code: "That code isn’t recognized. Check the code and try again.",
+  minimum_not_met: "Add eligible items until your subtotal reaches ৳1,000.",
+  already_redeemed: "This demo code has already been used by this customer account.",
+} as const;
+
+interface AppliedCoupon {
+  code: string;
+  customerId: string;
+  cartKey: string;
+}
+
 export function CheckoutPage({ trustPoints }: CheckoutPageProps) {
   const router = useRouter();
   const placementInFlight = useRef(false);
   const [placing, setPlacing] = useState(false);
   const [placementMessage, setPlacementMessage] = useState<{ kind: "error" | "status"; text: string } | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponFeedback, setCouponFeedback] = useState<{ kind: "error" | "status"; text: string } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const snapshot = useDemoState(selectDemoSnapshot);
   const activeAccountId = useDemoState(selectActiveAccountId);
   const eligibility = useMemo(
@@ -54,6 +71,38 @@ export function CheckoutPage({ trustPoints }: CheckoutPageProps) {
       : { customer: null, addresses: [], address: null },
     [snapshot, activeAccountId, selectedAddressId],
   );
+  const appliedCouponState = useMemo(() => {
+    if (!appliedCoupon || !snapshot || !activeAccountId || eligibility?.status !== "ready") return null;
+    const cartKey = getCheckoutCartKey(eligibility);
+    if (appliedCoupon.customerId !== checkoutCustomer?.id || appliedCoupon.cartKey !== cartKey) {
+      return { status: "stale" as const, discount: 0 };
+    }
+    const result = calculateDemoCoupon(snapshot, activeAccountId, appliedCoupon.code, undefined, getPricingTime());
+    return result.ok
+      ? { status: "valid" as const, discount: result.discount }
+      : { status: "stale" as const, discount: 0 };
+  }, [activeAccountId, appliedCoupon, checkoutCustomer?.id, eligibility, snapshot]);
+
+  function applyCoupon() {
+    if (!snapshot || !activeAccountId) return;
+    const result = calculateDemoCoupon(snapshot, activeAccountId, couponInput, undefined, getPricingTime());
+    if (!result.ok) {
+      setAppliedCoupon(null);
+      setCouponFeedback({ kind: "error", text: couponMessages[result.reason] });
+      return;
+    }
+    setAppliedCoupon({ code: result.code, customerId: result.customerId, cartKey: result.cartKey });
+    setCouponInput(result.code);
+    setCouponFeedback({ kind: "status", text: "WELCOME200 is applied to this checkout." });
+    setPlacementMessage(null);
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponFeedback({ kind: "status", text: "Coupon removed." });
+    setPlacementMessage(null);
+  }
 
   function selectAddress(customerId: string, addressId: string) {
     writeCheckoutAddressId(customerId, addressId);
@@ -66,7 +115,10 @@ export function CheckoutPage({ trustPoints }: CheckoutPageProps) {
     setPlacing(true);
     setPlacementMessage(null);
     try {
-      const result = await placeDemoOrder(shipping.address.id);
+      const result = await placeDemoOrder(shipping.address.id, undefined, {
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        couponCartKey: appliedCoupon?.cartKey ?? null,
+      });
       if (!result.ok) {
         const messages = {
           customer_required: "Switch to a customer account before placing this order.",
@@ -77,6 +129,11 @@ export function CheckoutPage({ trustPoints }: CheckoutPageProps) {
           id_generation_failed: "An order number couldn’t be prepared. Your cart is unchanged; please try again.",
           not_hydrated: "Checkout is still loading. Please try again in a moment.",
           invalid_snapshot: "The order couldn’t be saved. Your cart is unchanged; check browser storage and try again.",
+          persistence_unavailable: "The order couldn’t be saved because browser storage is unavailable. Your cart is unchanged; try again when storage is available.",
+          coupon_invalid: "The coupon code isn’t valid. Your cart is unchanged; check the code and try again.",
+          coupon_ineligible: "The coupon no longer qualifies for this cart. Your cart is unchanged; review the subtotal and try again.",
+          coupon_already_redeemed: "This code has already been used by this customer account. Your cart is unchanged.",
+          coupon_stale: "Your cart changed after the coupon was applied. Review the cart and apply the code again.",
         } as const;
         setPlacementMessage({ kind: "error", text: messages[result.reason] });
         return;
@@ -205,7 +262,23 @@ export function CheckoutPage({ trustPoints }: CheckoutPageProps) {
             <aside aria-label="Order summary" className="card h-fit p-5">
               <h2 className="text-xl">Order summary</h2>
               <div className="mt-4 flex justify-between gap-3 text-sm"><span className="text-mute">Subtotal</span><strong>{formatPrice(eligibility.summary.subtotal)}</strong></div>
-              <p className="mt-3 text-xs text-mute">Shipping charges, if any, aren’t calculated in this phase.</p>
+              <section aria-labelledby="coupon-title" className="mt-5 border-t border-line pt-4">
+                <h3 id="coupon-title" className="text-base font-bold">Demo coupon</h3>
+                <p id="coupon-help" className="mt-1 text-xs text-mute">WELCOME200 takes ৳200 off orders of ৳1,000 or more, once per customer account. Demo only; no voucher is purchased.</p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <label htmlFor="checkout-coupon" className="sr-only">Coupon code</label>
+                  <input id="checkout-coupon" className="input min-w-0 flex-1" value={couponInput} readOnly={Boolean(appliedCoupon)} onChange={(event) => { setCouponInput(event.target.value); setCouponFeedback(null); }} aria-describedby={`coupon-help${couponFeedback ? " coupon-feedback" : ""}`} autoComplete="off" placeholder="Enter coupon code" />
+                  {appliedCoupon
+                    ? <button type="button" className="btn btn-outline btn-md shrink-0" onClick={removeCoupon}>Remove</button>
+                    : <button type="button" className="btn btn-outline btn-md shrink-0" onClick={applyCoupon}>Apply</button>}
+                </div>
+                {couponFeedback && <p id="coupon-feedback" role={couponFeedback.kind === "error" ? "alert" : "status"} className={`mt-2 text-sm ${couponFeedback.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{couponFeedback.text}</p>}
+                {appliedCouponState?.status === "stale" && <p role="status" className="mt-2 text-sm text-sale-strong">Your cart changed or this code is no longer eligible. Remove it, review your cart, then apply again.</p>}
+              </section>
+              {appliedCouponState?.discount ? <div className="mt-3 flex justify-between gap-3 text-sm"><span className="text-mute">Discount · {appliedCoupon?.code}</span><strong className="text-sale-strong">−{formatPrice(appliedCouponState.discount)}</strong></div> : null}
+              <div className="mt-3 flex justify-between gap-3 text-sm"><span className="text-mute">Shipping</span><span className="text-right text-mute">Not calculated</span></div>
+              <div className="mt-3 flex justify-between gap-3 border-t border-line pt-3 text-base"><span className="font-bold text-ink">Final demo total</span><strong className="font-head text-ink">{formatPrice(Math.max(0, eligibility.summary.subtotal - (appliedCouponState?.discount ?? 0)))}</strong></div>
+              <p className="mt-2 text-xs text-mute">Shipping charges, if any, aren’t calculated in this phase.</p>
               {placementMessage && <p role={placementMessage.kind === "error" ? "alert" : "status"} className={`mt-4 text-sm ${placementMessage.kind === "error" ? "text-sale-strong" : "text-brand-strong"}`}>{placementMessage.text}</p>}
               {shipping.address
                 ? <button type="button" className="btn btn-primary btn-md mt-4 w-full" disabled={placing} onClick={() => void submitOrder()}>{placing ? "Placing demo order…" : "Place demo order"}</button>

@@ -78,8 +78,8 @@ export function ProductInformation({
           {product.ratingCount > 0 ? <>
             <Star aria-hidden="true" className="size-4 shrink-0 fill-accent text-accent" />
             <span className="font-bold text-ink">{product.ratingAverage.toFixed(1)}<span className="sr-only"> out of 5</span></span>
-            <span>({product.ratingCount.toLocaleString("en-US")} {product.ratingCount === 1 ? "rating" : "ratings"})</span>
-          </> : "No ratings yet"}
+            <span>catalog sample ({product.ratingCount.toLocaleString("en-US")} {product.ratingCount === 1 ? "rating" : "ratings"})</span>
+          </> : "No catalog sample rating"}
         </p>
       </div>
 

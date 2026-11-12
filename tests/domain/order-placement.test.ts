@@ -7,8 +7,10 @@ import { placeDemoOrder } from "@/services/demo-order-placement";
 import { addDemoOrderPlacementNotification } from "@/services/customer-order-actions";
 import { products } from "@/data/products";
 import { getVendorOrderItems } from "@/types/order";
-import { getCustomerOrderConfirmation } from "@/services/checkout";
+import { calculateDemoCoupon, getCheckoutCartKey, getCheckoutEligibility, getCustomerOrderConfirmation } from "@/services/checkout";
+import { cancelCustomerDemoOrder } from "@/services/customer-order-actions";
 import { migrateDemoSnapshot, validateDemoSnapshot } from "@/services/demo-state-persistence";
+import { resetActiveCustomerDemoData } from "@/services/customer-demo-reset";
 
 const NOW = Date.parse("2026-11-10T12:00:00.000Z");
 const address = {
@@ -42,7 +44,7 @@ async function customerOrderStore() {
       { id: "cart-earbuds", productId: "prod-wireless-earbuds-pro", variantId: null, quantity: 1, addedAt: snapshot.savedAt },
     ];
     snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second Customer", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
-    snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "01712345679", addresses: [], preferences: { promotionalUpdates: true, productGridDensity: "compact" }, hiddenOrderIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+    snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second Customer", phone: "01712345679", addresses: [], preferences: { promotionalUpdates: true, productGridDensity: "compact" }, hiddenOrderIds: [], recentlyViewedProductIds: [], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
     snapshot.data.carts.push({ id: "cart-customer-second", customerId: "customer-second", items: [{ id: "second-cart-item", productId: "prod-smart-watch-series-5", variantId: null, quantity: 1, addedAt: snapshot.savedAt }], updatedAt: snapshot.savedAt });
     snapshot.data.wishlists.push({ id: "wishlist-customer-second", customerId: "customer-second", productIds: ["prod-wireless-earbuds-pro"], updatedAt: snapshot.savedAt });
     return snapshot;
@@ -66,7 +68,7 @@ test("placement persists one COD parent order with canonical vendor groups and c
 
   const state = store.getState().snapshot;
   assert.equal(result.persisted, true);
-  assert.equal(state.schemaVersion, 4);
+  assert.equal(state.schemaVersion, 7);
   assert.equal(state.data.notifications.filter(({ kind }) => kind === "order").length, 1);
   assert.equal(state.data.orders.length, 1);
   const order = state.data.orders[0];
@@ -172,7 +174,7 @@ test("persistence failure keeps the order and cart unchanged", async () => {
   const before = structuredClone(store.getState().snapshot.data);
   storage.setItem = () => { throw new Error("storage unavailable"); };
   const result = await placeDemoOrder(address.id, store, { now: NOW, createId: sequenceIds() });
-  assert.deepEqual(result, { ok: false, reason: "invalid_snapshot" });
+  assert.deepEqual(result, { ok: false, reason: "persistence_unavailable" });
   assert.deepEqual(store.getState().snapshot.data.orders, before.orders);
   assert.deepEqual(store.getState().snapshot.data.orderItems, before.orderItems);
   assert.deepEqual(store.getState().snapshot.data.fulfillmentGroups, before.fulfillmentGroups);
@@ -189,6 +191,91 @@ test("parallel repeated placement submits create at most one order", async () =>
   assert.equal(results.filter(({ ok }) => ok).length, 1);
   assert.equal(store.getState().snapshot.data.orders.length, 1);
   assert.equal(store.getState().snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items.length, 0);
+});
+
+test("coupon placement captures immutable parent discount totals and safely rejects stale and repeated redemption", async () => {
+  const { store, storage } = await customerOrderStore();
+  await store.getState().applySnapshotUpdate((snapshot) => {
+    const cart = snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo");
+    assert.ok(cart);
+    cart.items = [{ id: "coupon-line", productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", quantity: 1, addedAt: snapshot.savedAt }];
+    return snapshot;
+  });
+  const checkout = getCheckoutEligibility(store.getState().snapshot, "account-customer-demo", undefined, NOW);
+  assert.equal(checkout.status, "ready");
+  if (checkout.status !== "ready") return;
+  const cartKey = getCheckoutCartKey(checkout);
+  const before = structuredClone(store.getState().snapshot.data);
+  const stale = await placeDemoOrder(address.id, store, { now: NOW, createId: sequenceIds(), couponCode: "WELCOME200", couponCartKey: "stale-cart" });
+  assert.deepEqual(stale, { ok: false, reason: "coupon_stale" });
+  assert.deepEqual(store.getState().snapshot.data.orders, before.orders);
+  assert.equal(store.getState().snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items.length, 1);
+
+  const setItem = storage.setItem;
+  storage.setItem = () => { throw new Error("storage unavailable"); };
+  const persistenceFailure = await placeDemoOrder(address.id, store, {
+    now: NOW, createId: sequenceIds(), couponCode: "WELCOME200", couponCartKey: cartKey,
+  });
+  assert.deepEqual(persistenceFailure, { ok: false, reason: "persistence_unavailable" });
+  assert.deepEqual(store.getState().snapshot.data.orders, before.orders);
+  assert.equal(store.getState().snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items.length, 1);
+  storage.setItem = setItem;
+
+  const coupon = calculateDemoCoupon(store.getState().snapshot, "account-customer-demo", "WELCOME200", undefined, NOW);
+  assert.equal(coupon.ok, true);
+  const result = await placeDemoOrder(address.id, store, {
+    now: NOW, createId: sequenceIds(), couponCode: "WELCOME200", couponCartKey: cartKey,
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const order = result.order;
+  assert.equal(order.subtotal, 1200);
+  assert.equal(order.shippingTotal, 0);
+  assert.equal(order.couponCode, "WELCOME200");
+  assert.equal(order.discountTotal, 200);
+  assert.equal(order.grandTotal, 1000);
+  const saved = store.getState().snapshot;
+  const group = saved.data.fulfillmentGroups.find(({ orderId }) => orderId === order.id);
+  const item = saved.data.orderItems.find(({ fulfillmentGroupId }) => fulfillmentGroupId === group?.id);
+  assert.equal(group?.subtotal, 1200);
+  assert.deepEqual(item && { vendorId: item.vendorId, unitPrice: item.unitPrice, lineTotal: item.lineTotal }, {
+    vendorId: products.find(({ id }) => id === "prod-cotton-panjabi")?.vendorId, unitPrice: 1200, lineTotal: 1200,
+  });
+  assert.equal(getCustomerOrderConfirmation(saved, "customer-demo", order.id)?.order.grandTotal, 1000);
+  assert.equal(getCustomerOrderConfirmation(saved, "customer-second", order.id), null);
+  const cancellation = await cancelCustomerDemoOrder(order.id, store, { now: NOW + 1000 });
+  assert.equal(cancellation.ok, true);
+  const cancelledOrder = store.getState().snapshot.data.orders.find(({ id }) => id === order.id);
+  assert.deepEqual(cancelledOrder && {
+    status: cancelledOrder.status, couponCode: cancelledOrder.couponCode, discountTotal: cancelledOrder.discountTotal,
+    subtotal: cancelledOrder.subtotal, grandTotal: cancelledOrder.grandTotal,
+  }, { status: "cancelled", couponCode: "WELCOME200", discountTotal: 200, subtotal: 1200, grandTotal: 1000 });
+
+  await store.getState().applySnapshotUpdate((snapshot) => {
+    const cart = snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo");
+    assert.ok(cart);
+    cart.items = [{ id: "coupon-line-retry", productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", quantity: 1, addedAt: snapshot.savedAt }];
+    return snapshot;
+  });
+  const retryCheckout = getCheckoutEligibility(store.getState().snapshot, "account-customer-demo", undefined, NOW);
+  assert.equal(retryCheckout.status, "ready");
+  if (retryCheckout.status !== "ready") return;
+  const retry = await placeDemoOrder(address.id, store, {
+    now: NOW, createId: sequenceIds(), couponCode: "WELCOME200", couponCartKey: getCheckoutCartKey(retryCheckout),
+  });
+  assert.deepEqual(retry, { ok: false, reason: "coupon_already_redeemed" });
+  assert.equal(store.getState().snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items.length, 1);
+
+  assert.deepEqual(await resetActiveCustomerDemoData(store), { ok: true, persisted: true, deletedOrders: 1 });
+  await store.getState().applySnapshotUpdate((snapshot) => {
+    const customer = snapshot.data.customers.find(({ id }) => id === "customer-demo");
+    const cart = snapshot.data.carts.find(({ customerId }) => customerId === "customer-demo");
+    assert.ok(customer && cart);
+    customer.addresses = [{ ...address }];
+    cart.items = [{ id: "coupon-after-reset", productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", quantity: 1, addedAt: snapshot.savedAt }];
+    return snapshot;
+  });
+  assert.equal(calculateDemoCoupon(store.getState().snapshot, "account-customer-demo", "WELCOME200", undefined, NOW).ok, true);
 });
 
 test("schema-v1, v2, and v3 records migrate without losing customer data", async () => {
@@ -215,7 +302,7 @@ test("schema-v1, v2, and v3 records migrate without losing customer data", async
 
   const migrated = migrateDemoSnapshot(snapshot);
   assert.ok(migrated);
-  assert.equal(migrated.schemaVersion, 4);
+  assert.equal(migrated.schemaVersion, 7);
   assert.equal(validateDemoSnapshot(migrated), true);
   assert.equal(migrated.data.customers[0]?.fullName, "Saved name");
   assert.deepEqual(migrated.data.customers[0]?.addresses, [address]);
@@ -226,4 +313,23 @@ test("schema-v1, v2, and v3 records migrate without losing customer data", async
   assert.equal(migrated.data.orderItems[0]?.vendorId, "vendor-urban-fit");
   assert.deepEqual(migrated.data.orderItems[0]?.selectedVariant, { id: "var-panjabi-m", optionValues: { Size: "M" } });
  }
+});
+
+test("schema-v7 legacy orders and customer reviews remain intact without a coupon migration", () => {
+  const current = createDemoSeedSnapshot();
+  current.data.productReviews.push({
+    id: "review-schema-v7", customerId: "customer-demo", productId: "prod-wireless-earbuds-pro", rating: 5,
+    body: "This schema seven review remains in the saved snapshot.", createdAt: current.savedAt, updatedAt: current.savedAt,
+  });
+  current.data.orders.push({
+    id: "legacy-v7-order", orderNumber: "KN-LEGACY-V7", customerId: "customer-demo", fulfillmentGroupIds: [],
+    shippingAddress: { ...address }, paymentMethod: "cash_on_delivery", paymentStatus: "pending", status: "placed",
+    subtotal: 0, shippingTotal: 0, discountTotal: 0, grandTotal: 0, placedAt: current.savedAt, updatedAt: current.savedAt,
+  });
+  const migrated = migrateDemoSnapshot(current);
+  assert.equal(migrated, current);
+  assert.equal(migrated?.schemaVersion, 7);
+  assert.equal(migrated?.data.orders[0]?.couponCode, undefined);
+  assert.deepEqual(migrated?.data.productReviews, current.data.productReviews);
+  assert.equal(validateDemoSnapshot(migrated), true);
 });

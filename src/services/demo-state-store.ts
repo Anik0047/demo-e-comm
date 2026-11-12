@@ -11,7 +11,7 @@ export type DemoUpdateResult =
   | { ok: false; reason: "not_hydrated" | "invalid_snapshot" };
 export type DemoTransactionResult<T> =
   | { ok: true; persisted: boolean; result: T }
-  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" };
+  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" };
 export type DemoSnapshotTransaction<T> = (current: DemoStateSnapshot) => { snapshot: DemoStateSnapshot | null; result: T };
 
 export interface DemoStateStore {
@@ -143,7 +143,10 @@ export function createDemoStateStore(
         if (!validateDemoSnapshot(outcome.snapshot)) return { ok: false, reason: "invalid_snapshot" } as const;
         if (options?.requirePersistence) {
           const persisted = await persist(outcome.snapshot);
-          if (!persisted) return { ok: false, reason: "invalid_snapshot" } as const;
+          if (!persisted) {
+            try { await adapter?.write(current.snapshot); } catch { /* The storage adapter may remain unavailable. */ }
+            return { ok: false, reason: "persistence_unavailable" } as const;
+          }
           const latestActiveAccountId = get().activeAccountId;
           const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === latestActiveAccountId)
             ? latestActiveAccountId

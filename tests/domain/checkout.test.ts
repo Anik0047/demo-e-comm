@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "@playwright/test";
 import { createDemoSeedSnapshot } from "@/services/demo-state-seed";
-import { createShippingAddressSnapshot, getCheckoutEligibility, resolveCheckoutShippingSelection } from "@/services/checkout";
+import { calculateDemoCoupon, createShippingAddressSnapshot, getCheckoutEligibility, resolveCheckoutShippingSelection } from "@/services/checkout";
 import { products } from "@/data/products";
 import { vendors } from "@/data/vendors";
 import { flashDeals } from "@/data/flash-deals";
@@ -62,6 +62,34 @@ test("checkout safely rejects non-customer, empty, invalid variant, inactive pro
 test("checkout rejects a cart quantity that no longer fits inventory", () => {
   const result = getCheckoutEligibility(snapshotWithCart([{ productId: "prod-cotton-panjabi", variantId: "var-panjabi-m", quantity: 21 }]), accountId, catalog, NOW);
   assert.equal(result.status, "unavailable");
+});
+
+test("WELCOME200 applies a fixed discount to canonical eligible subtotal and rejects invalid, low, and redeemed uses", () => {
+  const eligible = snapshotWithCart([{ productId: "prod-cotton-panjabi", variantId: "var-panjabi-m" }]);
+  assert.deepEqual(calculateDemoCoupon(eligible, accountId, " welcome200 ", catalog, NOW), {
+    ok: true,
+    code: "WELCOME200",
+    discount: 200,
+    subtotal: 1200,
+    cartKey: JSON.stringify([{ itemId: "cart-line-0", productId: "prod-cotton-panjabi", vendorId: "vendor-urban-fit", variantId: "var-panjabi-m", quantity: 1, unitPrice: 1200, lineTotal: 1200 }]),
+    customerId: "customer-demo",
+  });
+  assert.deepEqual(calculateDemoCoupon(eligible, accountId, "NOTREAL", catalog, NOW), { ok: false, reason: "invalid_code" });
+  const belowMinimum = snapshotWithCart([{ productId: "prod-wireless-earbuds-pro" }]);
+  const lowPriceCatalog = {
+    ...catalog,
+    deals: [],
+    products: products.map((product) => product.id === "prod-wireless-earbuds-pro" ? { ...product, price: 800 } : product),
+  };
+  assert.deepEqual(calculateDemoCoupon(belowMinimum, accountId, "WELCOME200", lowPriceCatalog, NOW), { ok: false, reason: "minimum_not_met" });
+  eligible.data.orders.push({
+    id: "used-coupon-order", orderNumber: "KN-USED", customerId: "customer-demo", fulfillmentGroupIds: [],
+    shippingAddress: { id: "address", label: "Home", recipientName: "Demo", phone: "01712345678", division: "Dhaka", district: "Dhaka", area: "Area", streetAddress: "Road", postalCode: null, isDefault: true },
+    paymentMethod: "cash_on_delivery", paymentStatus: "pending", status: "placed", subtotal: 1200, shippingTotal: 0,
+    discountTotal: 200, grandTotal: 1000, couponCode: "WELCOME200", placedAt: eligible.savedAt, updatedAt: eligible.savedAt,
+  });
+  assert.deepEqual(calculateDemoCoupon(eligible, accountId, "WELCOME200", catalog, NOW), { ok: false, reason: "already_redeemed" });
+  assert.deepEqual(calculateDemoCoupon(eligible, "account-admin-demo", "WELCOME200", catalog, NOW), { ok: false, reason: "customer_required" });
 });
 
 test("shipping selection defaults to this customer's valid default and rejects stale or foreign addresses", () => {
