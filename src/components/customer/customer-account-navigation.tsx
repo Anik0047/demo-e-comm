@@ -8,6 +8,7 @@ export function CustomerAccountNavigation() {
   const links = [
     { href: "/account", label: "Overview" },
     { href: "/account/orders", label: "My Orders" },
+    { href: "/account/recently-viewed", label: "Recently viewed" },
     { href: "/account/profile", label: "Profile" },
     { href: "/account/addresses", label: "Saved addresses" },
     { href: "/account/preferences", label: "Preferences" },

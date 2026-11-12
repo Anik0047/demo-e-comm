@@ -17,7 +17,7 @@ const catalog: RecentlyViewedCatalog = DEMO_SEED_CATALOG;
 
 export type RecentlyViewedMutation =
   | { ok: true; changed: boolean }
-  | { ok: false; reason: "customer_required" | "product_not_found" | "product_unavailable" };
+  | { ok: false; reason: "customer_required" | "product_not_found" | "product_unavailable" | "product_not_viewed" };
 export type RecentlyViewedActionResult = DemoTransactionResult<RecentlyViewedMutation>;
 
 function activeCustomer(snapshot: DemoStateSnapshot, accountId: string) {
@@ -59,9 +59,57 @@ export function recordRecentlyViewedProduct(
   });
 }
 
+/** Remove a history entry only while the same customer account still owns the active session. */
+export function removeRecentlyViewedProduct(
+  store: DemoStateStoreApi,
+  productId: string,
+  expectedAccountId: string,
+  expectedCustomerId: string,
+): Promise<RecentlyViewedActionResult> {
+  return store.getState().transactSnapshot<RecentlyViewedMutation>((snapshot) => {
+    if (store.getState().activeAccountId !== expectedAccountId) {
+      return { snapshot: null, result: { ok: false, reason: "customer_required" } };
+    }
+    const customer = activeCustomer(snapshot, expectedAccountId);
+    if (!customer || customer.id !== expectedCustomerId) {
+      return { snapshot: null, result: { ok: false, reason: "customer_required" } };
+    }
+    const nextIds = customer.recentlyViewedProductIds.filter((id) => id !== productId);
+    if (nextIds.length === customer.recentlyViewedProductIds.length) {
+      return { snapshot: null, result: { ok: false, reason: "product_not_viewed" } };
+    }
+    customer.recentlyViewedProductIds = nextIds;
+    customer.updatedAt = new Date().toISOString();
+    return { snapshot, result: { ok: true, changed: true } };
+  }, { requirePersistence: true });
+}
+
+/** Clear only the expected active customer’s history and require a successful storage write. */
+export function clearRecentlyViewedProducts(
+  store: DemoStateStoreApi,
+  expectedAccountId: string,
+  expectedCustomerId: string,
+): Promise<RecentlyViewedActionResult> {
+  return store.getState().transactSnapshot<RecentlyViewedMutation>((snapshot) => {
+    if (store.getState().activeAccountId !== expectedAccountId) {
+      return { snapshot: null, result: { ok: false, reason: "customer_required" } };
+    }
+    const customer = activeCustomer(snapshot, expectedAccountId);
+    if (!customer || customer.id !== expectedCustomerId) {
+      return { snapshot: null, result: { ok: false, reason: "customer_required" } };
+    }
+    if (customer.recentlyViewedProductIds.length === 0) {
+      return { snapshot: null, result: { ok: true, changed: false } };
+    }
+    customer.recentlyViewedProductIds = [];
+    customer.updatedAt = new Date().toISOString();
+    return { snapshot, result: { ok: true, changed: true } };
+  }, { requirePersistence: true });
+}
+
 /** Resolves saved IDs against the current canonical product, vendor, category and price data. */
 export async function resolveRecentlyViewedProducts(productIds: readonly string[], now = Date.now()): Promise<ProductCardData[]> {
-  const products = await Promise.all(productIds.map(async (id) => {
+  const products = await Promise.all(productIds.slice(0, RECENTLY_VIEWED_LIMIT).map(async (id) => {
     const product = catalog.products.find(({ id: productId }) => productId === id);
     if (!product) return null;
     const details = await getProductDetails(product.slug);

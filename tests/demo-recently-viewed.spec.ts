@@ -4,7 +4,7 @@ import { vendors } from "@/data/vendors";
 import { createDemoStateStore } from "@/services/demo-state-store";
 import { createLocalStorageDemoStateAdapter, migrateDemoSnapshot } from "@/services/demo-state-persistence";
 import { createDemoSeedSnapshot } from "@/services/demo-state-seed";
-import { RECENTLY_VIEWED_LIMIT, recordRecentlyViewedProduct, resolveRecentlyViewedProducts, selectRecentlyViewedProductIds } from "@/services/recently-viewed";
+import { clearRecentlyViewedProducts, RECENTLY_VIEWED_LIMIT, recordRecentlyViewedProduct, removeRecentlyViewedProduct, resolveRecentlyViewedProducts, selectRecentlyViewedProductIds } from "@/services/recently-viewed";
 import type { DemoStatePersistenceAdapter } from "@/types/demo-state";
 
 function memoryStorage() {
@@ -61,6 +61,27 @@ test("blocks non-customer access and isolates history between customers", async 
   await recordRecentlyViewedProduct(store, "prod-cotton-panjabi");
   store.getState().setActiveAccount("account-customer-demo");
   expect(selectRecentlyViewedProductIds(store.getState().snapshot, "account-customer-demo")).toEqual(["prod-wireless-earbuds-pro"]);
+});
+
+test("removes and clears only the expected active customer history and reports storage failures", async () => {
+  const snapshot = createDemoSeedSnapshot();
+  snapshot.data.accounts.push({ id: "account-customer-second", email: "second@example.test", displayName: "Second", role: "customer", customerId: "customer-second", vendorId: null, createdAt: snapshot.savedAt });
+  snapshot.data.customers.push({ id: "customer-second", accountId: "account-customer-second", fullName: "Second", phone: "0", addresses: [], preferences: { promotionalUpdates: false, productGridDensity: "standard" }, hiddenOrderIds: [], recentlyViewedProductIds: ["prod-cotton-panjabi"], createdAt: snapshot.savedAt, updatedAt: snapshot.savedAt });
+  const store = await customerStore({ read: async () => snapshot, write: async () => undefined, clear: async () => undefined });
+  await recordRecentlyViewedProduct(store, "prod-wireless-earbuds-pro");
+  expect(await removeRecentlyViewedProduct(store, "prod-wireless-earbuds-pro", "account-customer-demo", "customer-demo")).toMatchObject({ ok: true, persisted: true, result: { ok: true, changed: true } });
+  expect(selectRecentlyViewedProductIds(store.getState().snapshot, "account-customer-demo")).toEqual([]);
+  expect(selectRecentlyViewedProductIds(store.getState().snapshot, "account-customer-second")).toEqual(["prod-cotton-panjabi"]);
+  expect(await clearRecentlyViewedProducts(store, "account-customer-demo", "customer-demo")).toMatchObject({ ok: true, result: { ok: true, changed: false } });
+  store.getState().setActiveAccount("account-customer-second");
+  expect(await clearRecentlyViewedProducts(store, "account-customer-demo", "customer-demo")).toMatchObject({ ok: true, result: { ok: false, reason: "customer_required" } });
+  expect(await clearRecentlyViewedProducts(store, "account-customer-second", "customer-second")).toMatchObject({ ok: true, persisted: true, result: { ok: true, changed: true } });
+  expect(selectRecentlyViewedProductIds(store.getState().snapshot, "account-customer-second")).toEqual([]);
+
+  const failing = await customerStore({ read: async () => null, write: async () => { throw new Error("storage blocked"); }, clear: async () => undefined });
+  await recordRecentlyViewedProduct(failing, "prod-wireless-earbuds-pro");
+  expect(await removeRecentlyViewedProduct(failing, "prod-wireless-earbuds-pro", "account-customer-demo", "customer-demo")).toMatchObject({ ok: false, reason: "persistence_unavailable" });
+  expect(selectRecentlyViewedProductIds(failing.getState().snapshot, "account-customer-demo")).toEqual(["prod-wireless-earbuds-pro"]);
 });
 
 test("persists history and safely migrates schema-v5 snapshots without dropping customer data", async () => {

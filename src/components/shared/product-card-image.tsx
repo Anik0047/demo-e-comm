@@ -31,7 +31,7 @@ export function ProductCardImage({
       fill
       sizes="(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw"
       loading={eager ? "eager" : "lazy"}
-      className="bg-canvas object-cover object-center"
+      className="bg-white object-contain object-center"
       onError={() => setFailed(true)}
     />
   );

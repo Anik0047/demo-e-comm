@@ -65,7 +65,7 @@ test("variant recommendations keep variant selection required for purchase", asy
   await expect(page.getByRole("button", { name: "Add to cart" })).toBeDisabled();
 });
 
-test("wishlist and cart controls on related cards remain functional", async ({ page }) => {
+test("related cards retain wishlist access and move comparison to product details", async ({ page }) => {
   await page.goto("/products/wireless-earbuds-pro");
   await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
   const section = relatedSection(page);
@@ -81,11 +81,11 @@ test("wishlist and cart controls on related cards remain functional", async ({ p
   await expect(card.getByRole("button", { name: `Remove ${productName} from wishlist`, exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(card.getByRole("status").getByText(`${productName} added to your wishlist.`, { exact: true })).toBeVisible();
 
-  const addToCart = card.getByRole("button", { name: `Add ${productName} to cart`, exact: true });
-  await expect(addToCart).toBeEnabled();
-  await addToCart.click();
-  await expect(card.getByRole("status").getByText(`${productName} added to your cart.`, { exact: true })).toBeVisible();
-  await expect(page.locator("header").getByRole("link", { name: /Cart, 1 item/ })).toBeVisible();
+  await expect(card.getByRole("button", { name: `Add ${productName} to cart`, exact: true })).toHaveCount(0);
+  await expect(card.getByRole("button", { name: `Compare ${productName}`, exact: true })).toHaveCount(0);
+  await productLink.click();
+  await expect(page).toHaveURL(/\/products\//);
+  await expect(page.getByRole("button", { name: `Compare ${productName}`, exact: true })).toBeVisible();
 });
 
 test("related product grids remain usable on mobile and desktop", async ({ page }) => {

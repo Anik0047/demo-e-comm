@@ -1,37 +1,38 @@
 import Link from "next/link";
+import { X } from "lucide-react";
 import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
-import { ProductCardCartButton } from "@/components/shared/product-card-cart-button";
-import { ProductCompareButton } from "@/components/shared/product-compare-button";
 import { ProductCardImage } from "@/components/shared/product-card-image";
-import { calcDiscountPercent, cn, formatPrice } from "@/lib/utils";
-import type { CategoryTone } from "@/types/category";
+import { formatPrice } from "@/lib/utils";
 import type { ProductCardData } from "@/types/product";
 
-const toneClasses: Record<CategoryTone, string> = {
-  info: "bg-info text-info-ink",
-  blush: "bg-blush text-blush-ink",
-  mint: "bg-brand-soft text-brand-deep",
-  gray: "bg-soft text-ink",
-};
 interface ProductCardProps {
   product: ProductCardData;
-  deal?: { soldCount: number; stockLimit: number };
-  showAvailability?: boolean;
+  variant?: "standard" | "recently-viewed";
+  onRemove?: () => void;
+  removeDisabled?: boolean;
   eagerImage?: boolean;
 }
-export function ProductCard({ product, deal, showAvailability = false, eagerImage = false }: ProductCardProps) {
-  const productHref = `/products/${product.slug}`;
+
+export function ProductCard({
+  product,
+  variant = "standard",
+  onRemove,
+  removeDisabled = false,
+  eagerImage = false,
+}: ProductCardProps) {
+  const originalPrice = product.compareAtPrice !== null && product.compareAtPrice > product.price
+    ? product.compareAtPrice
+    : null;
+  const isHistoryCard = variant === "recently-viewed";
+
   return (
-    <article className="flex flex-col h-full rounded-2xl border border-line bg-white overflow-hidden hover:border-brand transition-colors">
-      <div className="relative">
-        <Link
-          href={productHref}
-          className={cn(
-            "relative grid place-items-center aspect-[4/3] md:aspect-square",
-            toneClasses[product.placeholder?.tone ?? "gray"],
-          )}
-          aria-label={`View ${product.name}`}
-        >
+    <article className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-line bg-white transition-colors hover:border-brand">
+      <Link
+        href={`/products/${product.slug}`}
+        aria-label={`View ${product.name}`}
+        className="flex h-full min-w-0 flex-col rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-brand"
+      >
+        <div className="relative grid aspect-square w-full place-items-center overflow-hidden rounded-t-2xl bg-soft">
           <ProductCardImage
             key={product.mainImage.url}
             image={product.mainImage}
@@ -39,91 +40,42 @@ export function ProductCard({ product, deal, showAvailability = false, eagerImag
             placeholder={product.placeholder}
             eager={eagerImage}
           />
-        </Link>
-        {product.compareAtPrice !== null && (
-          <span className="absolute top-2 left-2 rounded-full bg-sale text-white text-xs font-bold px-2 py-0.5">
-            -{calcDiscountPercent(product.price, product.compareAtPrice)}%
-          </span>
-        )}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-2 p-3">
+          <h3 className="min-h-10 line-clamp-2 text-sm font-medium leading-5 text-ink group-hover:text-brand-strong">
+            {product.name}
+          </h3>
+          <div className="mt-auto flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="font-head text-base font-extrabold text-ink">
+              {formatPrice(product.price)}
+            </span>
+            {originalPrice !== null && (
+              <s className="text-xs text-mute">
+                {formatPrice(originalPrice)}
+              </s>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      {isHistoryCard ? (
+        <button
+          type="button"
+          className="absolute right-2 top-2 z-10 grid size-10 place-items-center rounded-full border border-line bg-white text-ink transition-colors hover:border-sale hover:text-sale focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-wait disabled:text-mute"
+          aria-label={`Remove ${product.name} from recently viewed`}
+          disabled={removeDisabled}
+          onClick={onRemove}
+        >
+          <X aria-hidden="true" className="size-5" />
+        </button>
+      ) : (
         <ProductWishlistButton
           productId={product.id}
           productName={product.name}
           className="absolute right-2 top-2 z-10"
           compact
         />
-      </div>
-      <div className="flex flex-col flex-1 p-2 md:p-3">
-        <Link
-          href={`/vendor/${product.vendor.slug}`}
-          aria-label={`Shop products from ${product.vendor.name}`}
-          className="text-xs text-mute truncate hover:text-brand-strong"
-        >
-          {product.vendor.name}
-        </Link>
-        <h3 className="mt-1 text-sm font-medium line-clamp-2 min-h-[2.5rem]">
-          <Link href={productHref} className="hover:text-brand-strong">
-            {product.name}
-          </Link>
-        </h3>
-        <div className="mt-1 flex items-center gap-1 text-xs text-mute">
-          <svg
-            className="w-3.5 h-3.5 text-accent-strong"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            stroke="currentColor"
-            strokeWidth={1}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          <span className="font-medium text-ink">{product.ratingAverage}</span>
-          <span>({product.ratingCount})</span>
-        </div>
-        <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
-          <span className="font-head font-extrabold text-base">
-            {formatPrice(product.price)}
-          </span>
-          {product.compareAtPrice !== null && (
-            <span className="text-xs text-mute line-through">
-              {formatPrice(product.compareAtPrice)}
-            </span>
-          )}
-          <div className="mt-2">
-            <ProductCompareButton product={product} compact />
-          </div>
-        </div>
-        <div className="mt-auto pt-3">
-          {deal && (
-            <>
-              <div
-                className="h-1.5 rounded-full bg-soft overflow-hidden"
-                role="img"
-                aria-label={`${deal.soldCount} of ${deal.stockLimit} deal units sold`}
-              >
-                <div className="h-full rounded-full bg-sale" style={{ width: `${Math.min(100, (deal.soldCount / deal.stockLimit) * 100)}%` }} />
-              </div>
-              <p className="mt-1 text-xs text-mute">
-                Sold {deal.soldCount} of {deal.stockLimit}
-              </p>
-            </>
-          )}
-          {product.inStock || !showAvailability ? (
-            <ProductCardCartButton
-              productId={product.id}
-              productName={product.name}
-              productSlug={product.slug}
-              className={cn(
-                deal && "mt-3",
-                "relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:rounded-full w-full h-9 rounded-full border border-brand text-brand-strong hover:bg-brand-tint inline-flex items-center justify-center gap-2 text-sm font-bold transition-colors",
-              )}
-            />
-          ) : (
-            <p className="inline-flex min-h-9 items-center text-sm font-medium text-mute" role="status">Out of stock</p>
-          )}
-        </div>
-      </div>
+      )}
     </article>
   );
 }

@@ -32,7 +32,7 @@ test("public TechHaven store shows only its active catalog and opens canonical p
     "prod-gaming-laptop-15",
   ]);
   const earbudsCard = productCards(page).filter({ has: page.getByRole("link", { name: "View Wireless Earbuds Pro" }) });
-  await expect(earbudsCard.getByRole("link", { name: "Shop products from TechHaven" })).toHaveAttribute("href", "/vendor/tech-haven");
+  await expect(earbudsCard.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" })).toBeVisible();
   await productCards(page).getByRole("link", { name: "View Wireless Earbuds Pro" }).click();
   await expect(page).toHaveURL(/\/products\/wireless-earbuds-pro$/);
   await expect(page.getByRole("link", { name: "TechHaven", exact: true })).toHaveAttribute("href", "/vendor/tech-haven");
@@ -76,7 +76,7 @@ test("out-of-stock products remain visible in the owning public store", async ({
   await page.goto("/vendor/dhaka-bazaar?availability=out-of-stock");
   expect(await productIds(page)).toEqual(["prod-double-door-refrigerator"]);
   await expect(productCards(page).getByText("Out of stock", { exact: true })).toBeVisible();
-  await expect(productCards(page).getByRole("link", { name: "Shop products from Dhaka Bazaar" })).toHaveAttribute("href", "/vendor/dhaka-bazaar");
+  await expect(productCards(page).getByRole("link", { name: "View 255L Frost-free Double-door Refrigerator" })).toHaveAttribute("href", "/products/double-door-refrigerator");
 });
 
 test("vendor store empty search can be reset without leaving the store", async ({ page }) => {
@@ -109,7 +109,7 @@ test("store navigation supports Back, Forward, refresh, and keeps the dashboard 
   await expect(page.getByRole("heading", { level: 1, name: "TechHaven", exact: true })).toHaveCount(0);
 });
 
-test("unknown stores return not found and product-card cart and wishlist controls work", async ({ page }) => {
+test("vendor storefront cards retain wishlist access and canonical product navigation", async ({ page }) => {
   const missing = await page.goto("/vendor/this-store-does-not-exist");
   expect([200, 404]).toContain(missing?.status());
   await expect(page.getByRole("heading", { name: "Store not found" })).toBeVisible();
@@ -117,11 +117,15 @@ test("unknown stores return not found and product-card cart and wishlist control
   await page.goto("/vendor/tech-haven");
   await expect(productCards(page)).toHaveCount(5);
   const earbuds = productCards(page).filter({ has: page.getByRole("link", { name: "View Wireless Earbuds Pro" }) });
-  await earbuds.getByRole("button", { name: "Add Wireless Earbuds Pro to cart" }).click();
-  await expect(earbuds.getByRole("status")).toHaveText("Wireless Earbuds Pro added to your cart.");
+  await expect(earbuds.getByRole("button", { name: "Add Wireless Earbuds Pro to cart" })).toHaveCount(0);
+  await expect(earbuds.getByRole("button", { name: "Compare Wireless Earbuds Pro" })).toHaveCount(0);
   const wishlist = earbuds.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
   await wishlist.click();
   await expect(earbuds.getByRole("button", { name: "Remove Wireless Earbuds Pro from wishlist" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/\/vendor\/tech-haven$/);
+  await earbuds.getByRole("link", { name: "View Wireless Earbuds Pro" }).click();
+  await expect(page).toHaveURL(/\/products\/wireless-earbuds-pro$/);
+  await expect(page.getByRole("button", { name: "Compare Wireless Earbuds Pro" })).toBeVisible();
 });
 
 test("public store has no horizontal overflow at the active desktop or mobile viewport", async ({ page }) => {

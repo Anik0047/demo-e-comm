@@ -1,36 +1,39 @@
 import { expect, test } from "@playwright/test";
 
-function cardFor(page: import("@playwright/test").Page, name: string) {
-  return page.locator("article").filter({ has: page.getByRole("link", { name: `View ${name}` }) }).first();
+async function compareFromDetails(page: import("@playwright/test").Page, slug: string, name: string) {
+  await page.goto(`/products/${slug}`);
+  await page.getByRole("button", { name: `Compare ${name}` }).click();
 }
 
 test("comparison keeps three unique products through navigation and refresh, then supports removal and clear", async ({ page }) => {
-  await page.goto("/products");
-  const names = ["Wireless Earbuds Pro", "Smart Watch Series 5", "Cotton Panjabi", "Non-stick Cookware Set"];
-  for (const name of names.slice(0, 3)) await cardFor(page, name).getByRole("button", { name: `Compare ${name}` }).click();
-  await expect(page.getByRole("link", { name: "View comparison (3)" }).first()).toBeVisible();
-  const fourth = cardFor(page, names[3]);
-  await fourth.getByRole("button", { name: `Compare ${names[3]}` }).click();
-  await expect(fourth.getByRole("status").getByText("You can compare up to three products. Remove one to add another.")).toBeVisible();
+  const products = [
+    ["wireless-earbuds-pro", "Wireless Earbuds Pro"],
+    ["smart-watch-series-5", "Smart Watch Series 5"],
+    ["cotton-panjabi", "Cotton Panjabi"],
+    ["nonstick-cookware-set", "Non-stick Cookware Set"],
+  ] as const;
+  for (const [slug, name] of products.slice(0, 3)) await compareFromDetails(page, slug, name);
+  await expect(page.getByRole("link", { name: "View comparison (3)" })).toBeVisible();
+  const [fourthSlug, fourthName] = products[3];
+  await page.goto(`/products/${fourthSlug}`);
+  await page.getByRole("button", { name: `Compare ${fourthName}` }).click();
+  await expect(page.getByRole("status").getByText("You can compare up to three products. Remove one to add another.")).toBeVisible();
 
-  await page.goto("/");
+  await page.goto("/products/wireless-earbuds-pro");
   await page.reload();
-  await page.goto("/products");
-  await cardFor(page, names[0]).getByRole("link", { name: "View comparison (3)" }).click();
+  await page.getByRole("link", { name: "View comparison (3)" }).click();
   await expect(page).toHaveURL(/\/compare$/);
   const comparison = page.getByRole("region", { name: "Product comparison table" });
-  for (const name of names.slice(0, 3)) await expect(comparison.getByRole("link", { name })).toBeVisible();
-  await comparison.getByRole("button", { name: `Remove ${names[0]} from comparison` }).click();
+  for (const [, name] of products.slice(0, 3)) await expect(comparison.getByRole("link", { name })).toBeVisible();
+  await comparison.getByRole("button", { name: "Remove Wireless Earbuds Pro from comparison" }).click();
   await expect(page.getByRole("status").getByText("2 of 3 products selected.")).toBeVisible();
   await page.getByRole("button", { name: "Clear all" }).click();
   await expect(page.getByRole("heading", { name: "Start comparing products" })).toBeVisible();
 });
 
 test("comparison is side by side on desktop and scrolls within its table on mobile", async ({ page }) => {
-  await page.goto("/products");
-  for (const name of ["Wireless Earbuds Pro", "Smart Watch Series 5"]) {
-    await cardFor(page, name).getByRole("button", { name: `Compare ${name}` }).click();
-  }
+  await compareFromDetails(page, "wireless-earbuds-pro", "Wireless Earbuds Pro");
+  await compareFromDetails(page, "smart-watch-series-5", "Smart Watch Series 5");
   await page.goto("/compare");
 
   await page.setViewportSize({ width: 1280, height: 900 });

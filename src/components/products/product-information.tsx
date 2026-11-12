@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BadgeCheck, ShoppingCart, Star } from "lucide-react";
 import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
+import { ProductCompareButton } from "@/components/shared/product-compare-button";
 import { calcDiscountPercent, formatPrice } from "@/lib/utils";
 import { getAvailableVariantOptionValues } from "@/services/product-variant-selection";
 import type { Product, ProductVariant } from "@/types/product";
@@ -133,6 +134,7 @@ export function ProductInformation({
       </div>
       <div className="space-y-2">
         <ProductWishlistButton productId={product.id} productName={product.name} showText showAccountGuidance />
+        <ProductCompareButton product={product} />
         <button
           type="button"
           className="btn btn-primary btn-lg w-full"
