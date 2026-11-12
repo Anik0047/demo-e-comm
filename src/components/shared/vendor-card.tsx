@@ -37,7 +37,7 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
         </div>
         <div className="mt-2 flex items-center gap-1 min-w-0">
           <h3 className="min-w-0 font-head font-bold text-base">
-            <Link href="#" className="relative block truncate py-3 -my-3 hover:text-brand-strong" title={vendor.name}>
+            <Link href={`/vendor/${vendor.slug}`} className="relative block truncate py-3 -my-3 hover:text-brand-strong" title={vendor.name}>
               {vendor.name}
             </Link>
           </h3>
@@ -55,7 +55,7 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
           <span className="truncate" title={`${vendor.location} · ${vendor.productCount} products`}>{vendor.location} · {vendor.productCount} products</span>
         </div>
         <div className="mt-auto pt-4">
-          <Link href="#" data-slug={vendor.slug} aria-label={`Visit ${vendor.name} store`} className="btn btn-outline btn-sm w-full relative after:absolute after:-inset-y-1 after:inset-x-0 after:rounded-full">
+          <Link href={`/vendor/${vendor.slug}`} data-slug={vendor.slug} aria-label={`Visit ${vendor.name} store`} className="btn btn-outline btn-sm w-full relative after:absolute after:-inset-y-1 after:inset-x-0 after:rounded-full">
             Visit store
           </Link>
         </div>

@@ -14,7 +14,7 @@ export function TopVendorsSection({ vendors }: TopVendorsSectionProps) {
           <h2 id="vendors-title" className="font-head font-bold text-xl sm:text-2xl">Top vendors</h2>
           <p className="hidden sm:block text-sm text-mute mt-1">Trusted sellers with great ratings</p>
         </div>
-        <Link href="#" className="inline-flex min-h-11 items-end shrink-0 text-sm font-bold text-brand-strong hover:underline">View all →</Link>
+        <Link href="/products" className="inline-flex min-h-11 items-end shrink-0 text-sm font-bold text-brand-strong hover:underline">Browse products →</Link>
       </div>
       {vendors.length ? (
         <ul data-scroll-row className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-4 -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:mx-0 md:px-0 md:pb-0 xl:grid-cols-6">
@@ -25,7 +25,7 @@ export function TopVendorsSection({ vendors }: TopVendorsSectionProps) {
           ))}
         </ul>
       ) : (
-        <p className="card p-6 text-sm text-mute">Discover more sellers with the View all link above.</p>
+        <p className="card p-6 text-sm text-mute">Browse products from approved sellers.</p>
       )}
     </section>
   );

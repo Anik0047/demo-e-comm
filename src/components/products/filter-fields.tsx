@@ -11,9 +11,10 @@ interface FilterFieldsProps {
   onApplyPrice?: () => void;
   categoryLabel?: string;
   subcategoryScope?: string;
+  showVendorFilter?: boolean;
 }
 
-export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice, categoryLabel = "Category", subcategoryScope }: FilterFieldsProps) {
+export function FilterFields({ values, options, minPrice, maxPrice, onChange, onPriceChange, onApplyPrice, categoryLabel = "Category", subcategoryScope, showVendorFilter = true }: FilterFieldsProps) {
   const id = useId();
   const categories = options.subcategories ?? [];
   const children = options.children ?? [];
@@ -25,7 +26,7 @@ export function FilterFields({ values, options, minPrice, maxPrice, onChange, on
     ...(showMainCategory || (!hasHierarchy && options.categories.length > 0) ? (["category"] as const) : []),
     ...(showSubcategory ? (["subcategory"] as const) : []),
     ...(children.some((option) => option.parentSlug === selectedSubcategory) ? (["child"] as const) : []),
-    "vendor" as const,
+    ...(showVendorFilter ? (["vendor"] as const) : []),
   ];
   return (
     <fieldset className="min-w-0 space-y-5">

@@ -14,6 +14,7 @@ import { getMainCategories } from "@/services/categories";
 import { TrustStrip } from "@/components/shared/trust-strip";
 import { getTrustPoints } from "@/services/trust-points";
 import { getPricingTime } from "@/services/effective-price";
+import { RecentlyViewedSection } from "@/components/home/recently-viewed-section";
 
 export default async function HomePage() {
   const vendors = await getTopVendors();
@@ -25,14 +26,19 @@ export default async function HomePage() {
   return (
     <>
       <Banner slides={slides} />
+      <RecentlyViewedSection />
       <CategoriesSection categories={categories} />
-      <Suspense fallback={null}><RuntimeFlashDeals /></Suspense>
-      <Suspense fallback={null}><TrendingSection /></Suspense>
+      <Suspense fallback={null}>
+        <RuntimeFlashDeals />
+      </Suspense>
+      <Suspense fallback={null}>
+        <TrendingSection />
+      </Suspense>
       <PromoBannersSection />
       <TopVendorsSection vendors={vendors} />
       <section
         aria-label="Why shop with Kenakata"
-        className="mx-auto max-w-[1280px] px-4 py-6 font-body md:py-8"
+        className="mx-auto max-w-7xl px-4 py-6 font-body md:py-8"
       >
         <TrustStrip points={trustPoints} />
       </section>
@@ -43,5 +49,10 @@ export default async function HomePage() {
 async function RuntimeFlashDeals() {
   await connection();
   const flashDeals = await getFlashDeals(getPricingTime());
-  return <FlashDealsSection items={flashDeals.items} endsInSeconds={flashDeals.endsInSeconds} />;
+  return (
+    <FlashDealsSection
+      items={flashDeals.items}
+      endsInSeconds={flashDeals.endsInSeconds}
+    />
+  );
 }

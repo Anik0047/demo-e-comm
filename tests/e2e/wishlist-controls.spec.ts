@@ -13,7 +13,7 @@ async function readSavedWishlist(page: Page) {
 }
 
 async function waitForCustomerAccount(page: Page) {
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
 }
 
 function navbarWishlist(page: Page, count: number | null) {
@@ -190,6 +190,25 @@ test("empty wishlist offers product browsing and remains empty after refresh", a
   await expect(navbarWishlist(page, 0)).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: "Your wishlist is empty" })).toBeVisible();
+});
+
+test("wishlist adds available simple products to cart and routes variant products to their options", async ({ page }) => {
+  await page.goto("/products/bluetooth-speaker");
+  await page.getByRole("button", { name: "Add Bluetooth Speaker to wishlist" }).click();
+  await page.goto("/wishlist");
+  await page.getByRole("button", { name: "Add Bluetooth Speaker to cart" }).click();
+  await expect(page.getByRole("status").getByText("Bluetooth Speaker added to your cart.", { exact: true })).toBeVisible();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("kenakata:demo-state") ?? "null") as {
+    data: { carts: Array<{ customerId: string; items: Array<{ productId: string }> }> };
+  });
+  expect(saved.data.carts.find(({ customerId }) => customerId === "customer-demo")?.items).toContainEqual(expect.objectContaining({ productId: "prod-bluetooth-speaker" }));
+
+  await page.goto("/products/cotton-panjabi");
+  await page.getByRole("button", { name: "Add Cotton Panjabi to wishlist" }).click();
+  await page.goto("/wishlist");
+  await page.getByRole("button", { name: "Add Cotton Panjabi to cart" }).click();
+  await expect(page).toHaveURL("/products/cotton-panjabi");
+  await expect(page.getByLabel("Size")).toBeVisible();
 });
 
 test("admin and vendor accounts cannot view customer wishlist contents", async ({ page }) => {

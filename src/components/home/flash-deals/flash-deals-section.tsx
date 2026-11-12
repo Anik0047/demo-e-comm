@@ -11,6 +11,7 @@ export function FlashDealsSection({
   items,
   endsInSeconds,
 }: FlashDealsSectionProps) {
+  if (!items.length) return null;
   return (
     <section
       aria-labelledby="fd-title"
@@ -47,13 +48,7 @@ export function FlashDealsSection({
       <ul className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
         {items.map((product) => (
           <li className="min-w-0" key={product.id}>
-            <ProductCard
-              product={product}
-              deal={{
-                soldCount: product.soldCount,
-                stockLimit: product.stockLimit,
-              }}
-            />
+            <ProductCard product={product} />
           </li>
         ))}
       </ul>

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProductImageGallery } from "@/components/products/product-image-gallery";
 import { ProductInformation } from "@/components/products/product-information";
 import { useDemoState } from "@/hooks/use-demo-state";
 import { addCartItem } from "@/services/demo-cart";
+import { recordRecentlyViewedProduct } from "@/services/recently-viewed";
 import { demoStateStore, selectActiveAccount, selectHydrationReady } from "@/services/demo-state-store";
 import type { GalleryImage } from "@/services/product-gallery";
 import { getCompleteVariants, matchesVariantOptions } from "@/services/product-variant-selection";
@@ -12,6 +13,7 @@ import type { Product } from "@/types/product";
 import type { Vendor } from "@/types/vendor";
 import type { FlashDeal } from "@/types/product";
 import { resolveEffectivePrice, maximumOrderQuantity as getMaximumOrderQuantity } from "@/services/effective-price";
+import { showToast } from "@/services/toast";
 
 interface ProductDetailsInteractiveProps {
   product: Product;
@@ -25,7 +27,6 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(product.minOrderQty);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [cartFeedback, setCartFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const activeAccount = useDemoState(selectActiveAccount);
   const hydrationReady = useDemoState(selectHydrationReady);
   const variants = getCompleteVariants(product);
@@ -52,6 +53,10 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
     ? selectedVariant !== null && maximumQuantity >= product.minOrderQty
     : (!product.trackInventory || product.stock >= product.minOrderQty) && maximumQuantity >= product.minOrderQty;
   const isCustomerAccount = hydrationReady && activeAccount?.role === "customer" && activeAccount.customerId !== null;
+  useEffect(() => {
+    if (!hydrationReady || activeAccount?.role !== "customer" || !activeAccount.customerId) return;
+    void recordRecentlyViewedProduct(demoStateStore, product.id);
+  }, [activeAccount?.customerId, activeAccount?.role, hydrationReady, product.id]);
   const quantityIsValid = Number.isSafeInteger(quantity)
     && quantity >= product.minOrderQty
     && quantity <= maximumQuantity;
@@ -83,7 +88,6 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
   async function handleAddToCart() {
     if (!canAddToCart) return;
     setIsAddingToCart(true);
-    setCartFeedback(null);
     try {
       const result = await addCartItem(demoStateStore, {
         productId: product.id,
@@ -91,19 +95,19 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
         quantity,
       });
       if (!result.ok) {
-        setCartFeedback({ kind: "error", message: "Your cart is not ready. Please try again." });
+        showToast("error", "Your cart is not ready. Please try again.");
       } else if (!result.result.ok) {
         const message = result.result.reason === "customer_required"
           ? "Switch to a customer demo account to add items to your cart."
           : "This item is no longer available in the selected quantity. Review your options and try again.";
-        setCartFeedback({ kind: "error", message });
+        showToast("error", message);
       } else if (!result.persisted) {
-        setCartFeedback({ kind: "error", message: "Your cart could not be saved. Please try again." });
+        showToast("error", "Your cart could not be saved. Please try again.");
       } else {
-        setCartFeedback({ kind: "success", message: `${product.name} added to your cart.` });
+        showToast("success", `${product.name} added to your cart.`);
       }
     } catch {
-      setCartFeedback({ kind: "error", message: "Your cart could not be updated. Please try again." });
+      showToast("error", "Your cart could not be updated. Please try again.");
     } finally {
       setIsAddingToCart(false);
     }
@@ -131,7 +135,6 @@ export function ProductDetailsInteractive({ product, vendor, deals, images, pric
         isCustomerAccount={isCustomerAccount}
         isAccountReady={hydrationReady}
         isAddingToCart={isAddingToCart}
-        cartFeedback={cartFeedback}
         onAddToCart={handleAddToCart}
         onOptionChange={changeOption}
         onQuantityChange={setQuantity}

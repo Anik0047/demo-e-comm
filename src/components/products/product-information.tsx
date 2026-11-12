@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { BadgeCheck, ShoppingCart, Star } from "lucide-react";
 import { ProductWishlistButton } from "@/components/shared/product-wishlist-button";
+import { ProductCompareButton } from "@/components/shared/product-compare-button";
 import { calcDiscountPercent, formatPrice } from "@/lib/utils";
 import { getAvailableVariantOptionValues } from "@/services/product-variant-selection";
 import type { Product, ProductVariant } from "@/types/product";
@@ -24,7 +26,6 @@ interface ProductInformationProps {
   isCustomerAccount: boolean;
   isAccountReady: boolean;
   isAddingToCart: boolean;
-  cartFeedback: { kind: "success" | "error"; message: string } | null;
   onAddToCart: () => void;
   onOptionChange: (name: string, value: string) => void;
   onQuantityChange: (quantity: number) => void;
@@ -34,7 +35,7 @@ export function ProductInformation({
   product, vendor, selectedVariant, selectedOptions, variants, minimumPrice, maximumPrice,
   minimumCompareAtPrice, maximumCompareAtPrice, quantity, maximumQuantity, canSetQuantity,
   selectedEffectivePrice, selectedEffectiveCompareAtPrice,
-  canAddToCart, isCustomerAccount, isAccountReady, isAddingToCart, cartFeedback, onAddToCart,
+  canAddToCart, isCustomerAccount, isAccountReady, isAddingToCart, onAddToCart,
   onOptionChange, onQuantityChange,
 }: ProductInformationProps) {
   const currentPrice = selectedVariant ? selectedEffectivePrice : product.hasVariants ? null : minimumPrice;
@@ -70,16 +71,22 @@ export function ProductInformation({
 
   return (
     <section aria-labelledby="product-name" className="min-w-0 space-y-6 break-words lg:col-span-5">
-      <div>
-        {product.brand?.trim() && <p className="mb-2 text-sm font-medium text-mute">{product.brand}</p>}
-        <h1 id="product-name" className="font-head text-3xl font-extrabold sm:text-4xl lg:text-3xl">{product.name}</h1>
-        <p className="mt-3 flex flex-wrap items-center gap-1.5 text-sm text-mute">
-          {product.ratingCount > 0 ? <>
-            <Star aria-hidden="true" className="size-4 shrink-0 fill-accent text-accent" />
-            <span className="font-bold text-ink">{product.ratingAverage.toFixed(1)}<span className="sr-only"> out of 5</span></span>
-            <span>({product.ratingCount.toLocaleString("en-US")} {product.ratingCount === 1 ? "rating" : "ratings"})</span>
-          </> : "No ratings yet"}
-        </p>
+      <div className="min-w-0">
+        <div className="min-w-0">
+          {product.brand?.trim() && <p className="mb-2 text-sm font-medium text-mute">{product.brand}</p>}
+          <h1 id="product-name" className="font-head text-3xl font-extrabold sm:text-4xl lg:text-3xl">{product.name}</h1>
+          <p className="mt-3 flex flex-wrap items-center gap-1.5 text-sm text-mute">
+            {product.ratingCount > 0 ? <>
+              <Star aria-hidden="true" className="size-4 shrink-0 fill-accent text-accent" />
+              <span className="font-bold text-ink">{product.ratingAverage.toFixed(1)}<span className="sr-only"> out of 5</span></span>
+              <span>catalog sample ({product.ratingCount.toLocaleString("en-US")} {product.ratingCount === 1 ? "rating" : "ratings"})</span>
+            </> : "No catalog sample rating"}
+          </p>
+        </div>
+        <div role="group" aria-label="Product actions" className="mt-3 flex items-center gap-2">
+          <ProductWishlistButton productId={product.id} productName={product.name} compact showAccountGuidance />
+          <ProductCompareButton product={product} compact />
+        </div>
       </div>
 
       <div className="border-y border-line py-6">
@@ -131,7 +138,6 @@ export function ProductInformation({
         {!product.hasVariants && product.trackInventory && product.stock === 0 && <p role="status" className="text-sm font-medium text-sale-strong">This item is currently out of stock.</p>}
       </div>
       <div className="space-y-2">
-        <ProductWishlistButton productId={product.id} productName={product.name} showText showAccountGuidance />
         <button
           type="button"
           className="btn btn-primary btn-lg w-full"
@@ -146,15 +152,12 @@ export function ProductInformation({
           Switch to a customer demo account before adding items to your cart.
         </p>}
         {!isAccountReady && <p id="cart-account-guidance" className="text-sm text-mute">Loading your demo account…</p>}
-        {cartFeedback && <p role={cartFeedback.kind === "error" ? "alert" : "status"} className={`text-sm font-medium ${cartFeedback.kind === "success" ? "text-brand-strong" : "text-sale-strong"}`}>
-          {cartFeedback.message}
-        </p>}
       </div>
       <p className="text-xs text-mute">SKU: {selectedVariant?.sku ?? product.sku}</p>
 
       <div className="rounded-2xl border border-line p-4">
         <p className="text-xs text-mute">Sold by</p>
-        <p className="mt-1 flex items-center gap-2 font-bold text-ink"><span className="min-w-0">{vendor.name}</span>{vendor.verified && <BadgeCheck role="img" aria-label="Verified vendor" className="size-5 shrink-0 text-brand-strong" />}</p>
+        <p className="mt-1 flex items-center gap-2 font-bold text-ink"><Link href={`/vendor/${vendor.slug}`} className="min-w-0 rounded-sm hover:text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand">{vendor.name}</Link>{vendor.verified && <BadgeCheck role="img" aria-label="Verified vendor" className="size-5 shrink-0 text-brand-strong" />}</p>
         {vendor.location.trim() && <p className="mt-1 text-sm text-mute">{vendor.location}</p>}
       </div>
 

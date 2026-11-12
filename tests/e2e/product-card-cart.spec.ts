@@ -4,53 +4,69 @@ function cardFor(page: import("@playwright/test").Page, name: string) {
   return page.locator("article").filter({ has: page.getByRole("link", { name: `View ${name}` }) }).first();
 }
 
-test("wishlist success feedback dismisses after three seconds and repeated actions restart it", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
-  const heart = cardFor(page, "Wireless Earbuds Pro").getByRole("button", { name: /Wireless Earbuds Pro.*wishlist/ });
-  await heart.click();
-  const feedback = page.getByRole("status").getByText("Wireless Earbuds Pro added to your wishlist.", { exact: true });
-  await expect(feedback).toBeVisible();
-  await page.waitForTimeout(2200);
-  await heart.click();
-  await expect(page.getByRole("status").getByText("Wireless Earbuds Pro removed from your wishlist.", { exact: true })).toBeVisible();
-  await page.waitForTimeout(1200);
-  await expect(page.getByRole("status").getByText("Wireless Earbuds Pro removed from your wishlist.", { exact: true })).toBeVisible();
-  await expect(page.getByRole("status").getByText("Wireless Earbuds Pro removed from your wishlist.", { exact: true })).toHaveCount(0, { timeout: 2500 });
+test("standard product cards show a minimal image, title, and price with wishlist access", async ({ page }) => {
+  await page.goto("/products");
+  await expect(page.getByRole("link", { name: /My account: Demo Customer/ })).toBeVisible();
+  const card = cardFor(page, "10000mAh Power Bank");
+  await expect(card.getByRole("heading", { name: "10000mAh Power Bank" })).toBeVisible();
+  await expect(card.getByText("৳1,590", { exact: true })).toBeVisible();
+  await expect(card.locator("s")).toHaveCount(0);
+  await expect(card.getByRole("button", { name: "Add 10000mAh Power Bank to cart" })).toHaveCount(0);
+  await expect(card.getByRole("button", { name: "Compare 10000mAh Power Bank" })).toHaveCount(0);
+
+  const wishlist = card.getByRole("button", { name: "Add 10000mAh Power Bank to wishlist" });
+  await wishlist.click();
+  await expect(card.getByRole("button", { name: "Remove 10000mAh Power Bank from wishlist" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/\/products$/);
 });
 
-test("product cards add eligible products and synchronize navbar and cart", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
+test("wishlist heart stays at the image top-right with responsive image proportions", async ({ page }) => {
+  await page.goto("/products");
   const card = cardFor(page, "Wireless Earbuds Pro");
-  await card.getByRole("button", { name: "Add Wireless Earbuds Pro to cart" }).click();
-  await expect(card.getByRole("status").getByText("Wireless Earbuds Pro added to your cart.", { exact: true })).toBeVisible();
-  await expect(page.locator("header").getByRole("link", { name: /Cart, 1 item/ })).toBeVisible();
-  await page.goto("/cart");
-  await expect(page.getByRole("heading", { name: "Your cart" })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Cart items" }).getByText("Wireless Earbuds Pro", { exact: true })).toBeVisible();
+  const image = card.locator("a > div").first();
+  const wishlist = card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" });
+  for (const [width, square] of [[360, false], [768, true], [1280, true]] as const) {
+    await page.setViewportSize({ width, height: 900 });
+    const imageBox = await image.boundingBox();
+    const heartBox = await wishlist.boundingBox();
+    expect(imageBox).not.toBeNull();
+    expect(heartBox).not.toBeNull();
+    if (square) expect(Math.abs((imageBox?.width ?? 0) - (imageBox?.height ?? 0))).toBeLessThanOrEqual(1);
+    else expect(Math.abs((imageBox?.width ?? 0) / (imageBox?.height ?? 1) - 4 / 3)).toBeLessThan(0.02);
+    expect((heartBox?.x ?? 0) + (heartBox?.width ?? 0)).toBeLessThanOrEqual((imageBox?.x ?? 0) + (imageBox?.width ?? 0) - 4);
+    expect((heartBox?.y ?? 0)).toBeGreaterThanOrEqual(imageBox?.y ?? 0);
+    expect((heartBox?.y ?? 0)).toBeLessThan((imageBox?.y ?? 0) + 8);
+    const dimensions = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth }));
+    expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.viewport);
+  }
 });
 
-test("variant products route to PDP and unavailable products report an error", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
-  const variantCard = cardFor(page, "Cotton Panjabi");
-  await variantCard.getByRole("button", { name: "Add Cotton Panjabi to cart" }).click();
-  await expect(page).toHaveURL(/\/products\/cotton-panjabi$/);
-  await expect(page.getByLabel("Size")).toBeVisible();
-
-  await page.goto("/products?availability=out-of-stock");
-  const unavailableCard = cardFor(page, "255L Frost-free Double-door Refrigerator");
-  await unavailableCard.getByRole("button", { name: "Add 255L Frost-free Double-door Refrigerator to cart" }).click();
-  await expect(unavailableCard.getByRole("alert").getByText("This product is currently unavailable for purchase.", { exact: true })).toBeVisible();
-});
-
-test("non-customer accounts cannot add card products", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.getByRole("link", { name: /Account: Demo Customer/ })).toBeVisible();
-  await page.goto("/login");
-  await page.getByRole("button", { name: "Demo Admin Admin demo account" }).click();
-  await page.goto("/");
+test("card toast feedback is announced without changing card layout", async ({ page }) => {
+  await page.goto("/products");
   const card = cardFor(page, "Wireless Earbuds Pro");
-  await expect(card.getByRole("button", { name: "Add Wireless Earbuds Pro to cart" })).toBeDisabled();
+  const title = card.getByRole("heading", { name: "Wireless Earbuds Pro" });
+  const titleBefore = await title.boundingBox();
+  await card.getByRole("button", { name: "Add Wireless Earbuds Pro to wishlist" }).click();
+  await expect(page.getByRole("status").getByText("Wireless Earbuds Pro added to your wishlist.")).toBeVisible();
+  const titleAfter = await title.boundingBox();
+  expect(titleAfter?.y).toBe(titleBefore?.y);
+  await expect(page.getByRole("button", { name: "Dismiss notification" })).toBeVisible();
+});
+
+test("product card opens its canonical PDP", async ({ page }) => {
+  await page.goto("/products");
+  const card = cardFor(page, "Wireless Earbuds Pro");
+  await card.getByRole("link", { name: "View Wireless Earbuds Pro" }).click();
+  await expect(page).toHaveURL(/\/products\/wireless-earbuds-pro$/);
+  await expect(page.getByRole("button", { name: "Compare Wireless Earbuds Pro" })).toBeVisible();
+});
+
+test("genuine discounts show the original price and comparison is available on the PDP", async ({ page }) => {
+  await page.goto("/");
+  const discounted = cardFor(page, "Bluetooth Speaker");
+  await expect(discounted.getByText("৳1,799", { exact: true })).toBeVisible();
+  await expect(discounted.locator("s")).toBeVisible();
+  await discounted.getByRole("link", { name: "View Bluetooth Speaker" }).click();
+  await page.getByRole("button", { name: "Compare Bluetooth Speaker" }).click();
+  await expect(page.getByRole("link", { name: "View comparison with 1 product" })).toBeVisible();
 });

@@ -1,11 +1,13 @@
 import { ListingEmpty, ListingUnavailableState } from "@/components/products/listing-states";
 import { io } from "next/cache";
+import { notFound } from "next/navigation";
 import { ListingControls } from "@/components/products/listing-controls";
 import { Pagination } from "@/components/products/pagination";
 import { ProductGrid } from "@/components/products/product-grid";
-import { getProductListing } from "@/services/catalog";
+import { getProductListing, getPublicVendorListing } from "@/services/catalog";
 import { getPricingTime } from "@/services/effective-price";
 import type { CatalogSort, ListingResult, RawListingQuery } from "@/types/catalog";
+import type { Vendor } from "@/types/vendor";
 
 const sortHeadings: Record<CatalogSort, string> = {
   catalog: "All products",
@@ -32,18 +34,17 @@ interface ProductListingProps {
   basePath?: string;
   showHeading?: boolean;
   categoryLabel?: string;
+  vendor?: Vendor;
 }
 
-export async function ProductListing({ searchParams, categoryScope, filterCategoryScope = categoryScope, subcategoryScope, basePath = "/products", showHeading = true, categoryLabel }: ProductListingProps) {
+export async function ProductListing({ searchParams, categoryScope, filterCategoryScope = categoryScope, subcategoryScope, basePath = "/products", showHeading = true, categoryLabel, vendor }: ProductListingProps) {
   const raw = await searchParams;
   await io();
   const pricingTime = getPricingTime();
-  const result = await getProductListing(raw, {
-    now: pricingTime,
-    categoryScope,
-    basePath,
-    filterCategoryScope,
-  });
+  const result = vendor
+    ? await getPublicVendorListing(vendor, raw, { now: pricingTime, basePath })
+    : await getProductListing(raw, { now: pricingTime, categoryScope, basePath, filterCategoryScope });
+  if (!result) notFound();
   const query = new URLSearchParams();
   if (raw instanceof URLSearchParams) raw.forEach((value, key) => query.append(key, value));
   else for (const [key, value] of Object.entries(raw)) {
@@ -58,9 +59,9 @@ export async function ProductListing({ searchParams, categoryScope, filterCatego
         {result.state.promotion && <p className="mt-3 text-sm text-mute">Flash deal prices are shown below, alongside regular prices.</p>}
         {result.state.promotion && result.state.search && <p className="mt-2 text-sm text-mute break-words">Search results for “{result.state.search}”</p>}
       </header>}
-      <ListingControls state={result.state} options={result.options} href={result.href} rawQuery={query.toString()} notices={result.notices} count={count} basePath={basePath} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope}>
+      <ListingControls state={result.state} options={result.options} href={result.href} rawQuery={query.toString()} notices={result.notices} count={count} basePath={basePath} categoryLabel={categoryLabel} subcategoryScope={subcategoryScope} showVendorFilter={!vendor}>
         {result.status === "unavailable" ? <ListingUnavailableState result={result} /> : <>
-          {result.items.length > 0 ? <ProductGrid items={result.items} /> : <ListingEmpty state={result.state} basePath={basePath} />}
+          {result.items.length > 0 ? <ProductGrid items={result.items} /> : <ListingEmpty state={result.state} basePath={basePath} emptyStore={!!vendor && result.totalResults === 0 && !result.state.search && !result.state.category && !result.state.subcategory && !result.state.child && result.state.minPrice === undefined && result.state.maxPrice === undefined && !result.state.availability && !result.state.promotion && !result.state.freeShipping} />}
           <Pagination state={result.state} totalPages={result.totalPages} basePath={basePath} />
         </>}
       </ListingControls>

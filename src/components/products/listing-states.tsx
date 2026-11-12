@@ -31,13 +31,14 @@ export function ListingSkeleton() {
   );
 }
 
-export function ListingEmpty({ state, basePath = "/products" }: { state: ListingState; basePath?: string }) {
+export function ListingEmpty({ state, basePath = "/products", emptyStore = false }: { state: ListingState; basePath?: string; emptyStore?: boolean }) {
   const retained = new URLSearchParams(serializeListingState({ ...state, search: undefined, page: 1 }));
   return (
     <div className="rounded-2xl border border-line bg-canvas p-6 sm:p-8">
       <SearchX className="mb-4 size-6 text-mute" aria-hidden="true" />
-      <h2 className="text-xl font-bold">No products found</h2>
-      <p className="mt-2 text-sm text-mute">Try another search or clear your filters to browse more products.</p>
+      <h2 className="text-xl font-bold">{emptyStore ? "No products in this store yet" : "No products found"}</h2>
+      <p className="mt-2 text-sm text-mute">{emptyStore ? "Browse the marketplace while this store adds to its catalog." : "Try another search or clear your filters to browse more products."}</p>
+      {emptyStore && <Link href="/products" className={`${actionClass} mt-4`}>Browse all products</Link>}
       <form action={basePath} method="get" className="mt-6 max-w-lg">
         {Array.from(retained.entries()).map(([key, value]) => <input key={key} type="hidden" name={key} value={value} />)}
         <label htmlFor="empty-search" className="mb-2 block text-sm font-bold">Edit search</label>

@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
 import { ChevronDown, Menu } from "lucide-react";
 import type { Category } from "@/types/category";
 import { MegaMenu } from "./mega-menu";
@@ -8,17 +12,39 @@ interface CategoryNavProps {
 }
 
 export function CategoryNav({ categories }: CategoryNavProps) {
+  return <Suspense fallback={<nav aria-label="Primary navigation" className="hidden lg:block h-12 border-b border-line bg-white" />}><CategoryNavContent categories={categories} /></Suspense>;
+}
+
+function CategoryNavContent({ categories }: CategoryNavProps) {
+  const pathname = usePathname();
+  const [menuOpenPath, setMenuOpenPath] = useState<string | null>(null);
+  const suppressFocusOpen = useRef(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuOpen = menuOpenPath === pathname;
+  const activeCategory = categories.find((category) => category.level === 1 && pathname.startsWith(`/category/${category.slug}`));
+
+  function onMenuKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape" && menuOpen) {
+      setMenuOpenPath(null);
+      suppressFocusOpen.current = true;
+      triggerRef.current?.focus();
+    }
+  }
+
   return (
-    <nav className="hidden lg:block relative z-20 bg-white border-b border-line font-body">
-      <div className="max-w-[1280px] mx-auto px-4 h-12 flex items-center gap-7 text-sm font-medium">
-        <div className="relative group">
-          <button className="flex items-center gap-2 h-9 px-4 rounded-lg bg-brand-tint text-brand-strong border border-brand-border">
+    <nav aria-label="Primary navigation" className="hidden lg:block relative z-20 bg-white border-b border-line font-body" onKeyDown={onMenuKeyDown}>
+      <div className="max-w-[1280px] mx-auto px-4 h-12 flex items-center gap-3 text-sm font-medium xl:gap-7">
+        <div className="relative group" onMouseEnter={() => setMenuOpenPath(pathname)} onMouseLeave={() => { if (!triggerRef.current?.parentElement?.contains(document.activeElement)) setMenuOpenPath(null); }}>
+          <button ref={triggerRef} type="button" aria-expanded={menuOpen} aria-controls="category-mega-menu" onClick={() => setMenuOpenPath(pathname)} onFocus={() => { if (suppressFocusOpen.current) suppressFocusOpen.current = false; else setMenuOpenPath(pathname); }} className="flex items-center gap-2 h-9 px-4 rounded-lg bg-brand-tint text-brand-strong border border-brand-border">
             <Menu className="w-5 h-5" />
             All categories
             <ChevronDown className="w-4 h-4" />
           </button>
-          <MegaMenu categories={categories} />
+          <MegaMenu categories={categories} activeCategoryId={activeCategory?.id} isOpen={menuOpen} onClose={() => setMenuOpenPath(null)} />
         </div>
+        <Link href="/products" aria-current={pathname === "/products" ? "page" : undefined} className={`hover:text-brand ${pathname === "/products" ? "text-brand-strong" : ""}`}>
+          Products
+        </Link>
         <Link
           href="/products?promotion=flash-deals"
           className="flex items-center gap-2 text-sale font-bold"
@@ -26,7 +52,7 @@ export function CategoryNav({ categories }: CategoryNavProps) {
           <span className="w-1.5 h-1.5 rounded-full bg-sale" />
           Flash deals
         </Link>
-        <Link href="/" className="hover:text-brand">
+        <Link href="/products" className="hover:text-brand">
           Vouchers
         </Link>
         <Link href="/products?sort=newest" className="hover:text-brand">
@@ -35,14 +61,10 @@ export function CategoryNav({ categories }: CategoryNavProps) {
         <Link href="/products?sort=best-selling" className="hover:text-brand">
           Best sellers
         </Link>
-        <Link href="#" className="hover:text-brand">
-          Top vendors
-        </Link>
-        <Link href="#" className="hover:text-brand">
-          Gift cards
-        </Link>
+        <Link href="/#vendors-title" className="hover:text-brand">Top vendors</Link>
+        <Link href="/products" className="hover:text-brand">Gift cards</Link>
         <Link
-          href="#"
+          href="/login"
           className="ml-auto h-9 px-4 rounded-lg border border-brand text-brand-strong hover:bg-brand-tint inline-flex items-center font-bold"
         >
           Become a vendor

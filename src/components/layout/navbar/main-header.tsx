@@ -7,6 +7,7 @@ import { MiniCart } from "./mini-cart";
 
 interface MainHeaderProps {
   onOpenDrawer: () => void;
+  isDrawerOpen: boolean;
   wishlistCount: number | null;
   categories: import("@/types/category").Category[];
   searchProducts: SearchProduct[];
@@ -15,6 +16,7 @@ interface MainHeaderProps {
 
 export function MainHeader({
   onOpenDrawer,
+  isDrawerOpen,
   wishlistCount,
   categories,
   searchProducts,
@@ -25,25 +27,28 @@ export function MainHeader({
       className="sticky z-30 bg-white border-b border-line font-body"
       style={{ top: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8 max-[359px]:gap-2">
+      <div className="max-w-[1280px] mx-auto px-4 py-3 flex items-center gap-3 lg:gap-8 max-[389px]:gap-1 max-[359px]:gap-0">
         <button
           id="open-drawer"
+          type="button"
           onClick={onOpenDrawer}
-          className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-soft"
+          className="lg:hidden min-h-11 min-w-11 p-2 -ml-2 rounded-lg hover:bg-soft"
           aria-label="Open menu"
+          aria-expanded={isDrawerOpen}
+          aria-controls="drawer"
         >
           <Menu className="w-6 h-6" />
         </button>
 
         <Link
           href="/"
-          className="flex items-center gap-2 max-[359px]:gap-1.5 shrink-0"
+          className="flex items-center gap-2 max-[359px]:gap-1 shrink-0"
           aria-label="Kenakata home"
         >
           <span className="w-10 h-10 max-[359px]:w-9 max-[359px]:h-9 rounded-xl bg-brand text-white grid place-items-center">
             <ShoppingBag className="w-5 h-5" />
           </span>
-          <span className="font-head font-extrabold text-2xl max-[359px]:text-xl tracking-tight">
+          <span className="font-head font-extrabold text-2xl max-[359px]:text-lg tracking-tight">
             Kena<span className="text-brand">kata</span>
           </span>
         </Link>

@@ -199,7 +199,7 @@ export function SearchForm({ mobile = false, categories, searchProducts, popular
         />
         <button
           type="submit"
-          className={`${mobile ? "size-8" : "size-9"} grid shrink-0 place-items-center rounded-full bg-brand text-white hover:bg-brand-strong`}
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-white hover:bg-brand-strong"
           aria-label="Search"
         >
           <Search className={mobile ? "size-4" : "size-5"} />

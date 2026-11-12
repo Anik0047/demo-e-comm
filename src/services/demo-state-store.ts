@@ -1,7 +1,7 @@
 import { createStore } from "zustand/vanilla";
 import { createDemoSeedSnapshot, resetDemoStateToSeed } from "@/services/demo-state-seed";
 import { clearDemoAccountPreference, readDemoAccountPreference, writeDemoAccountPreference } from "@/services/demo-account-preference";
-import { createBrowserDemoStateAdapter, validateDemoSnapshot } from "@/services/demo-state-persistence";
+import { createBrowserDemoStateAdapter, migrateDemoSnapshot, validateDemoSnapshot } from "@/services/demo-state-persistence";
 import type { DemoStatePersistenceAdapter, DemoStateSnapshot } from "@/types/demo-state";
 
 export type DemoHydrationStatus = "pending" | "ready";
@@ -11,7 +11,7 @@ export type DemoUpdateResult =
   | { ok: false; reason: "not_hydrated" | "invalid_snapshot" };
 export type DemoTransactionResult<T> =
   | { ok: true; persisted: boolean; result: T }
-  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" };
+  | { ok: false; reason: "not_hydrated" | "invalid_snapshot" | "persistence_unavailable" };
 export type DemoSnapshotTransaction<T> = (current: DemoStateSnapshot) => { snapshot: DemoStateSnapshot | null; result: T };
 
 export interface DemoStateStore {
@@ -23,7 +23,7 @@ export interface DemoStateStore {
   getCurrentSnapshot(): DemoStateSnapshot | null;
   setActiveAccount(accountId: string): boolean;
   applySnapshotUpdate(update: (current: DemoStateSnapshot) => DemoStateSnapshot): Promise<DemoUpdateResult>;
-  transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>): Promise<DemoTransactionResult<T>>;
+  transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>, options?: { requirePersistence?: boolean }): Promise<DemoTransactionResult<T>>;
   resetToSeed(): Promise<DemoUpdateResult>;
 }
 
@@ -63,7 +63,7 @@ export function createDemoStateStore(
         try {
           adapter = adapterFactory();
           const persisted = await adapter?.read() ?? null;
-          const snapshot = persisted && validateDemoSnapshot(persisted) ? persisted : createDemoSeedSnapshot();
+          const snapshot = persisted ? migrateDemoSnapshot(persisted) ?? createDemoSeedSnapshot() : createDemoSeedSnapshot();
           const preferredAccountId = readDemoAccountPreference();
           const activeAccountId = snapshot.data.accounts.some(({ id }) => id === preferredAccountId)
             ? preferredAccountId ?? initialActiveAccountId(snapshot)
@@ -75,7 +75,7 @@ export function createDemoStateStore(
             hydrationStatus: "ready",
             persistenceStatus: adapter ? "available" : "unavailable",
           });
-          if (!persisted && adapter) {
+          if (adapter && (!persisted || snapshot !== persisted)) {
             try {
               await adapter.write(snapshot);
             } catch {
@@ -128,7 +128,7 @@ export function createDemoStateStore(
       });
     },
 
-    transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>): Promise<DemoTransactionResult<T>> {
+    transactSnapshot<T>(transaction: DemoSnapshotTransaction<T>, options?: { requirePersistence?: boolean }): Promise<DemoTransactionResult<T>> {
       return enqueue(async () => {
         const current = get();
         if (current.hydrationStatus !== "ready") return { ok: false, reason: "not_hydrated" } as const;
@@ -141,8 +141,22 @@ export function createDemoStateStore(
           return { ok: false, reason: "invalid_snapshot" } as const;
         }
         if (!validateDemoSnapshot(outcome.snapshot)) return { ok: false, reason: "invalid_snapshot" } as const;
-        const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === current.activeAccountId)
-          ? current.activeAccountId
+        if (options?.requirePersistence) {
+          const persisted = await persist(outcome.snapshot);
+          if (!persisted) {
+            try { await adapter?.write(current.snapshot); } catch { /* The storage adapter may remain unavailable. */ }
+            return { ok: false, reason: "persistence_unavailable" } as const;
+          }
+          const latestActiveAccountId = get().activeAccountId;
+          const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === latestActiveAccountId)
+            ? latestActiveAccountId
+            : initialActiveAccountId(outcome.snapshot);
+          set({ snapshot: outcome.snapshot, activeAccountId });
+          return { ok: true, persisted: true, result: outcome.result } as const;
+        }
+        const latestActiveAccountId = get().activeAccountId;
+        const activeAccountId = outcome.snapshot.data.accounts.some(({ id }) => id === latestActiveAccountId)
+          ? latestActiveAccountId
           : initialActiveAccountId(outcome.snapshot);
         set({ snapshot: outcome.snapshot, activeAccountId });
         const persisted = await persist(outcome.snapshot);
@@ -198,6 +212,15 @@ export const selectActiveAccountId = (state: DemoStateStore): string | null =>
 export const selectActiveAccount = (state: DemoStateStore) => state.hydrationStatus === "ready"
   ? state.snapshot.data.accounts.find(({ id }) => id === state.activeAccountId) ?? null
   : null;
+/** Returns a customer ID only when it is linked back to the active customer account. */
+export const selectActiveCustomerId = (state: DemoStateStore): string | null => {
+  if (state.hydrationStatus !== "ready") return null;
+  const account = state.snapshot.data.accounts.find(({ id }) => id === state.activeAccountId);
+  if (account?.role !== "customer" || !account.customerId) return null;
+  return state.snapshot.data.customers.some(({ id, accountId }) => id === account.customerId && accountId === account.id)
+    ? account.customerId
+    : null;
+};
 export const selectDemoCarts = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.carts : null;
 export const selectDemoWishlists = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.wishlists : null;
 export const selectDemoOrders = (state: DemoStateStore) => state.hydrationStatus === "ready" ? state.snapshot.data.orders : null;

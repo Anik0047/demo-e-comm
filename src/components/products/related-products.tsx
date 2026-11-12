@@ -14,7 +14,7 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
       <div className="grid min-w-0 grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {products.map((product) => (
           <div key={product.id} className="min-w-0">
-            <ProductCard product={product} showAvailability />
+            <ProductCard product={product} />
           </div>
         ))}
       </div>

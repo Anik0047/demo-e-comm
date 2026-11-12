@@ -118,7 +118,7 @@ export function TrendingTabs({ products }: TrendingTabsProps) {
               key={product.id}
               className={cn("min-w-0", index >= 8 && "hidden xl:block")}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} eagerImage={product.id === "prod-power-bank-10000"} />
             </li>
           ))}
         </ul>

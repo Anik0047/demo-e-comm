@@ -1,7 +1,7 @@
 import { categories } from "@/data/categories";
 import { products } from "@/data/products";
 import { vendors } from "@/data/vendors";
-import { DEMO_SEED_VERSION, DEMO_STATE_SCHEMA_VERSION } from "@/types/demo-state";
+import { DEFAULT_DEMO_CUSTOMER_PREFERENCES, DEMO_SEED_VERSION, DEMO_STATE_SCHEMA_VERSION } from "@/types/demo-state";
 import type { DemoStateData, DemoStateSnapshot } from "@/types/demo-state";
 
 const SEEDED_AT = "2026-01-01T00:00:00.000Z";
@@ -21,10 +21,11 @@ const seedData: DemoStateData = {
     { id: "account-customer-demo", email: "customer@kenakata.test", displayName: "Demo Customer", role: "customer", customerId: "customer-demo", vendorId: null, createdAt: SEEDED_AT },
   ],
   customers: [{
-    id: "customer-demo", accountId: "account-customer-demo", fullName: "Demo Customer", phone: "00000000000", addresses: [], createdAt: SEEDED_AT, updatedAt: SEEDED_AT,
+    id: "customer-demo", accountId: "account-customer-demo", fullName: "Demo Customer", phone: "00000000000", resetProfile: { fullName: "Demo Customer", phone: "00000000000" }, addresses: [], preferences: { ...DEFAULT_DEMO_CUSTOMER_PREFERENCES }, hiddenOrderIds: [], recentlyViewedProductIds: [], createdAt: SEEDED_AT, updatedAt: SEEDED_AT,
   }],
   carts: [{ id: "cart-customer-demo", customerId: "customer-demo", items: [], updatedAt: SEEDED_AT }],
   wishlists: [{ id: "wishlist-customer-demo", customerId: "customer-demo", productIds: [], updatedAt: SEEDED_AT }],
+  productReviews: [],
   orders: [],
   orderItems: [],
   fulfillmentGroups: [],

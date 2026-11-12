@@ -1,10 +1,15 @@
 import Link from "next/link";
-import type { Vendor } from "@/types/banner";
+import type { Vendor, VendorAvatarTone } from "@/types/vendor";
 import { CouponTile } from "./coupon-tile";
 
 interface PromoTilesProps {
   vendors: Vendor[];
 }
+
+const avatarClasses: Record<VendorAvatarTone, string> = {
+  brand: "bg-brand text-white", accent: "bg-accent text-ink", sky: "bg-sky text-white", ink: "bg-ink text-white",
+  "info-ink": "bg-info-ink text-white", sale: "bg-sale text-white", "brand-strong": "bg-brand-strong text-white", "accent-strong": "bg-accent-strong text-ink",
+};
 
 export function PromoTiles({ vendors }: PromoTilesProps) {
   return (
@@ -22,17 +27,17 @@ export function PromoTiles({ vendors }: PromoTilesProps) {
             {vendors.map((vendor) => (
               <span
                 key={vendor.id}
-                className={`w-9 h-9 rounded-full ${vendor.colorClasses} text-xs font-bold grid place-items-center border-2 border-soft`}
+                className={`w-9 h-9 rounded-full ${avatarClasses[vendor.avatarTone]} text-xs font-bold grid place-items-center border-2 border-soft`}
               >
                 {vendor.initials}
               </span>
             ))}
           </div>
           <Link
-            href="#"
+            href="/products"
             className="text-sm font-bold text-brand-strong hover:underline"
           >
-            View all →
+            Browse products →
           </Link>
         </div>
       </div>

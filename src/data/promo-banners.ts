@@ -1,31 +1,30 @@
-import { formatPrice } from "@/lib/utils";
 import type { PromoBanner } from "@/types/promo";
 
 export const promoBanners: PromoBanner[] = [
   {
     id: "promo-home",
     eyebrow: "Home & living",
-    title: "Mega home sale",
-    text: "Up to 50% off furniture, décor, and kitchen essentials.",
-    cta: { label: "Shop home", href: "#" },
+    title: "Make room for comfort",
+    text: "Furnish your space with practical picks for every room.",
+    cta: { label: "Shop home", href: "/category/home-living" },
     tone: "mint",
     icon: "house",
   },
   {
     id: "promo-grocery",
     eyebrow: "Groceries",
-    title: "Fresh and fast",
-    text: "Order before 2 pm for same-day delivery in Dhaka.",
-    cta: { label: "Order now", href: "#" },
+    title: "Everyday pantry picks",
+    text: "Browse pantry staples and everyday household essentials.",
+    cta: { label: "Shop groceries", href: "/category/groceries" },
     tone: "amber",
     icon: "basket",
   },
   {
     id: "promo-beauty",
-    eyebrow: "Beauty week",
-    title: "Glow for less",
-    text: `Skincare and makeup from top-rated vendors, from ${formatPrice(299)}.`,
-    cta: { label: "Explore beauty", href: "#" },
+    eyebrow: "Beauty & health",
+    title: "Your daily care routine",
+    text: "Explore skincare, makeup, and personal care essentials.",
+    cta: { label: "Explore beauty", href: "/category/beauty-health" },
     tone: "blush",
     icon: "sparkles",
   },

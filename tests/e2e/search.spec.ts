@@ -95,8 +95,9 @@ test("search URL is refreshable, history navigates, and sorting retains the quer
   await expect(page.getByRole("link", { name: "View Wireless Earbuds Pro" })).toBeVisible();
 
   await page.goto("/products");
-  await navbarSearch(page).fill("wireless earbuds");
-  await page.getByRole("button", { name: "Search", exact: true }).filter({ visible: true }).last().click();
+  const search = navbarSearch(page);
+  await search.fill("wireless earbuds");
+  await search.locator("xpath=ancestor::form").getByRole("button", { name: "Search", exact: true }).click();
   await expect(page).toHaveURL(/search=wireless\+earbuds/);
   await page.goBack();
   await expect(page).toHaveURL(/\/products$/);
